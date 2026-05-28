@@ -1,0 +1,286 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { ActivityIcon } from "@/components/detalhe/activity-icon";
+import { formatEventDate, formatPrice } from "@/lib/utils/date";
+
+export const revalidate = 60;
+
+type Params = { slug: string };
+
+export default async function EventDetailPage({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  const { slug } = await params;
+  const supabase = await createClient();
+
+  const { data: event } = await supabase
+    .from("events")
+    .select(
+      "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, duration, location_name, location_short, price_cents, capacity, going_count, image_url, tag, tag_style, host_summary, host_photo_url",
+    )
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (!event) notFound();
+
+  const [{ data: activities }, { data: hostLinks }] = await Promise.all([
+    supabase
+      .from("event_activities")
+      .select("icon, name, duration, sort_order")
+      .eq("event_id", event.id)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("event_hosts")
+      .select("role, hosts(name, bio, photo_url)")
+      .eq("event_id", event.id),
+  ]);
+
+  const hostNames = (hostLinks ?? [])
+    .map((l) => l.hosts?.name)
+    .filter(Boolean)
+    .join(" + ");
+
+  const isMultiHost = (hostLinks?.length ?? 0) > 1;
+  const singleHost = !isMultiHost ? hostLinks?.[0]?.hosts : null;
+  const hostBio = event.host_summary ?? singleHost?.bio ?? null;
+  const hostPhoto = event.host_photo_url ?? singleHost?.photo_url ?? null;
+
+  return (
+    <div className="movva-shell">
+      <div className="scroll-area with-cta">
+        <div
+          className="detail-hero"
+          style={
+            event.image_url
+              ? { backgroundImage: `url('${event.image_url}')` }
+              : undefined
+          }
+        >
+          <div className="hero-actions">
+            <Link href="/" className="hero-btn" aria-label="Voltar">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M19 12H5" />
+                <path d="M12 19l-7-7 7-7" />
+              </svg>
+            </Link>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="hero-btn" aria-label="Compartilhar">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                  <polyline points="16 6 12 2 8 6" />
+                  <line x1="12" y1="2" x2="12" y2="15" />
+                </svg>
+              </button>
+              <button className="hero-btn" aria-label="Salvar">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="detail-body">
+          {event.tag && (
+            <span
+              className={`detail-tag${event.tag_style === "primary" ? " primary" : ""}`}
+            >
+              ✦ {event.tag}
+            </span>
+          )}
+
+          <h1 className="detail-title">{event.title}</h1>
+          {event.subtitle && (
+            <div className="detail-subtitle">{event.subtitle}</div>
+          )}
+
+          <div className="detail-meta-block">
+            <div className="detail-meta-item">
+              <div className="meta-icon">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
+              <div>
+                <div className="meta-item-label">quando</div>
+                <div>
+                  {formatEventDate(event.event_date)}
+                  {event.event_time ? ` · ${event.event_time}` : ""}
+                </div>
+              </div>
+            </div>
+
+            <div className="detail-meta-item">
+              <div className="meta-icon">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
+              <div>
+                <div className="meta-item-label">onde</div>
+                <div>{event.location_name}</div>
+              </div>
+            </div>
+
+            <div className="detail-meta-item">
+              <div className="meta-icon">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+              </div>
+              <div>
+                <div className="meta-item-label">turma</div>
+                <div>
+                  {event.going_count ?? 0} de {event.capacity} vagas preenchidas
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {activities && activities.length > 0 && (
+            <div className="activities-section">
+              <div className="activities-title">O que tá incluso</div>
+              <div className="activities-grid">
+                {activities.map((a, idx) => (
+                  <div key={idx} className="activity-card">
+                    <div className="activity-icon">
+                      <ActivityIcon name={a.icon} />
+                    </div>
+                    <div className="activity-name">{a.name}</div>
+                    {a.duration && (
+                      <div className="activity-duration">{a.duration}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {event.description && (
+            <div className="detail-description">{event.description}</div>
+          )}
+
+          {hostNames && (
+            <div className="host-card">
+              <div
+                className="host-avatar"
+                style={
+                  hostPhoto
+                    ? { backgroundImage: `url('${hostPhoto}')` }
+                    : undefined
+                }
+              />
+              <div className="host-info">
+                <div className="host-label">
+                  {isMultiHost ? "Anfitriãs" : "Anfitriã"}
+                </div>
+                <div className="host-name">{hostNames}</div>
+                {hostBio && <div className="host-bio">{hostBio}</div>}
+              </div>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--accent)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="sticky-cta">
+        <div className="price-block">
+          <div className="price-label">por pessoa</div>
+          <div className="price-value">{formatPrice(event.price_cents)}</div>
+        </div>
+        <Link
+          href={`/reservar/${event.slug}`}
+          className="cta-btn"
+        >
+          Reservar minha vaga
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14M13 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
+    </div>
+  );
+}
