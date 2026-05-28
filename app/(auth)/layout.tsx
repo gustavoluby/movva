@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function AuthLayout({
   children,
 }: {
@@ -5,6 +7,9 @@ export default function AuthLayout({
 }) {
   return (
     <div className="auth-shell">
+      <Link href="/" className="auth-back">
+        ← Voltar pra Descobrir
+      </Link>
       <div className="auth-logo">Movva</div>
       <div className="auth-tagline">experiências pra florescer juntas</div>
       {children}

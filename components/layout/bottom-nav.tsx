@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { logoutAction } from "@/app/actions/logout";
 
 const ICON_SEARCH = (
   <svg
@@ -75,7 +76,6 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
     ? [
         { href: "/", label: "Descobrir", icon: ICON_SEARCH },
         { href: "/minhas", label: "Minhas", icon: ICON_BOOKMARK },
-        { href: "/sair", label: "Sair", icon: ICON_LOGOUT },
       ]
     : [
         { href: "/", label: "Descobrir", icon: ICON_SEARCH },
@@ -98,6 +98,17 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
           </Link>
         );
       })}
+
+      {/* Logout via POST (Server Action) — não como link, pra evitar que o
+          prefetch do <Link> deslogue a pessoa sem clique. */}
+      {loggedIn && (
+        <form action={logoutAction} className="nav-logout-form">
+          <button type="submit" className="nav-item">
+            {ICON_LOGOUT}
+            <span>Sair</span>
+          </button>
+        </form>
+      )}
     </nav>
   );
 }

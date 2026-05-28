@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { loginAction, type AuthState } from "./actions";
+import { PasswordField } from "../password-field";
 
 export function LoginForm({ next }: { next: string }) {
   const [state, formAction, isPending] = useActionState<AuthState, FormData>(
@@ -25,21 +26,15 @@ export function LoginForm({ next }: { next: string }) {
           type="email"
           name="email"
           autoComplete="email"
+          autoFocus
           required
         />
       </div>
 
-      <div className="auth-field">
-        <label htmlFor="login-password">Senha</label>
-        <input
-          id="login-password"
-          className="auth-input"
-          type="password"
-          name="password"
-          autoComplete="current-password"
-          required
-        />
-      </div>
+      <PasswordField
+        id="login-password"
+        autoComplete="current-password"
+      />
 
       {state?.error && <div className="auth-error">{state.error}</div>}
 

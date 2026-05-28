@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { safeNext } from "@/lib/utils/safe-next";
 
 export type AuthState = { error: string } | null;
 
@@ -11,7 +12,7 @@ export async function loginAction(
 ): Promise<AuthState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const next = String(formData.get("next") ?? "/");
+  const next = safeNext(formData.get("next")?.toString());
 
   if (!email || !password) {
     return { error: "Preenche email e senha" };

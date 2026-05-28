@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { signupAction } from "./actions";
 import type { AuthState } from "../login/actions";
+import { PasswordField } from "../password-field";
 
 export function SignupForm({ next }: { next: string }) {
   const [state, formAction, isPending] = useActionState<AuthState, FormData>(
@@ -28,6 +29,7 @@ export function SignupForm({ next }: { next: string }) {
           type="text"
           name="full_name"
           autoComplete="name"
+          autoFocus
           required
         />
       </div>
@@ -44,18 +46,11 @@ export function SignupForm({ next }: { next: string }) {
         />
       </div>
 
-      <div className="auth-field">
-        <label htmlFor="signup-password">Senha</label>
-        <input
-          id="signup-password"
-          className="auth-input"
-          type="password"
-          name="password"
-          autoComplete="new-password"
-          minLength={6}
-          required
-        />
-      </div>
+      <PasswordField
+        id="signup-password"
+        autoComplete="new-password"
+        minLength={6}
+      />
 
       {state?.error && <div className="auth-error">{state.error}</div>}
 

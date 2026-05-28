@@ -490,6 +490,14 @@
   transition: color 0.2s ease;
   flex: 1;
   min-width: 0;
+  /* reset pro <button> de logout ficar idêntico aos <a> */
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+/* o <form> não gera caixa: o <button> vira filho direto do flex do nav */
+.nav-logout-form {
+  display: contents;
 }
 .nav-item.active { color: var(--primary); font-weight: 600; }
 .nav-item.active::before {
@@ -843,6 +851,41 @@
   -webkit-appearance: none;
 }
 .auth-input:focus { border-color: var(--accent); }
+
+.auth-password-wrap {
+  position: relative;
+  display: flex;
+}
+.auth-password-wrap .auth-input {
+  flex: 1;
+  padding-right: 48px;
+}
+.auth-password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  transition: color 0.2s ease;
+}
+.auth-password-toggle:hover { color: var(--accent); }
+
+.auth-back {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: color 0.2s ease;
+}
+.auth-back:hover { color: var(--accent); }
 
 .auth-error {
   color: var(--destructive);

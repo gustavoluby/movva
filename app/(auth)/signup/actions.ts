@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { safeNext } from "@/lib/utils/safe-next";
 import type { AuthState } from "../login/actions";
 
 export async function signupAction(
@@ -11,7 +12,7 @@ export async function signupAction(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("full_name") ?? "").trim();
-  const next = String(formData.get("next") ?? "/");
+  const next = safeNext(formData.get("next")?.toString());
 
   if (!email || !password || !fullName) {
     return { error: "Preenche nome, email e senha" };
