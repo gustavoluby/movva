@@ -1,24 +1,26 @@
-// Sem filtro funcional ainda — só visual. Lógica entra quando tivermos
-// > 5 eventos publicados que justifiquem filtrar.
-const CATEGORIES = [
-  { label: "✦ Tudo", active: true },
-  { label: "Yoga" },
-  { label: "Pilates" },
-  { label: "Encontros" },
-  { label: "Bem-estar" },
-  { label: "Ao ar livre" },
-];
+import Link from "next/link";
 
-export function CategoryChips() {
+export type Chip = {
+  key: string;
+  label: string;
+  href: string;
+  active: boolean;
+};
+
+// Chips de filtro da home. Cada um é um link pra /?cat=<key> (e "/" pro Tudo).
+// A lista de chips é montada na page só com categorias que têm evento.
+export function CategoryChips({ chips }: { chips: Chip[] }) {
   return (
     <div className="categories">
-      {CATEGORIES.map((cat) => (
-        <div
-          key={cat.label}
-          className={`cat-chip${cat.active ? " active" : ""}`}
+      {chips.map((c) => (
+        <Link
+          key={c.key}
+          href={c.href}
+          scroll={false}
+          className={`cat-chip${c.active ? " active" : ""}`}
         >
-          {cat.label}
-        </div>
+          {c.label}
+        </Link>
       ))}
     </div>
   );

@@ -314,6 +314,7 @@
   border-radius: 100px;
   font-size: 13px;
   color: var(--text);
+  text-decoration: none;
   white-space: nowrap;
   display: flex;
   align-items: center;
