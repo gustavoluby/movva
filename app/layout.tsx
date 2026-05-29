@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
+import { SessionSync } from "@/components/auth/session-sync";
 
 const manrope = Manrope({
   variable: "--font-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${fraunces.variable} antialiased`}
       >
+        <SessionSync />
         {children}
       </body>
     </html>

@@ -19,8 +19,10 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // Called from a Server Component (read-only context). Safe to ignore
-            // when middleware refreshes the session.
+            // Chamado de um Server Component (contexto read-only) — não dá pra
+            // setar cookie aqui. OK ignorar: o refresh do token roda no browser
+            // client (ver components/auth/session-sync.tsx), que grava os
+            // cookies novos. Em Server Actions/Route Handlers o setAll funciona.
           }
         },
       },
