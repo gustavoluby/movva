@@ -1,6 +1,7 @@
 import { Payment } from "mercadopago";
 import { mpClient } from "@/lib/mercadopago";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendBookingConfirmationEmail } from "@/lib/email/notifications";
 
 export type ReconcileResult = {
   bookingId: string;
@@ -27,7 +28,7 @@ export async function reconcilePayment(
   if (paid) {
     const method = payment.payment_type_id?.includes("card") ? "card" : "pix";
     const supabase = createAdminClient();
-    await supabase
+    const { data: updated } = await supabase
       .from("bookings")
       .update({
         payment_status: "paid",
@@ -36,7 +37,14 @@ export async function reconcilePayment(
         paid_at: payment.date_approved ?? new Date().toISOString(),
       })
       .eq("id", bookingId)
-      .neq("payment_status", "paid");
+      .neq("payment_status", "paid")
+      .select("id");
+
+    // Só houve linha atualizada na transição REAL pending→paid. Isso dedup
+    // o email se o MP mandar o webhook 2x ou se o retorno reconciliar antes.
+    if (updated && updated.length > 0) {
+      await sendBookingConfirmationEmail(bookingId);
+    }
   }
 
   return { bookingId, status, paid };

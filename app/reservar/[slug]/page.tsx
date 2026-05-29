@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
 import { reconcilePayment } from "@/lib/payments/mercadopago-reconcile";
+import { WhatsAppButton } from "@/components/whatsapp-button";
 import { ConfirmReserva } from "./confirm-button";
 import { PagarButton } from "./pagar-button";
 
@@ -206,6 +207,14 @@ export default async function ReservarPage({
             <PagarButton slug={event.slug} />
           </>
         )}
+
+        <div style={{ marginTop: 18 }}>
+          <WhatsAppButton
+            context="post-purchase"
+            eventTitle={event.title}
+            label="Falar com a anfitriã"
+          />
+        </div>
 
         <Link href="/" className="reservar-back">
           ← Voltar pra Descobrir

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { safeNext } from "@/lib/utils/safe-next";
+import { sendWelcomeEmail } from "@/lib/email/notifications";
 import type { AuthState } from "../login/actions";
 
 export async function signupAction(
@@ -35,6 +36,9 @@ export async function signupAction(
     }
     return { error: error.message };
   }
+
+  // Boas-vindas (não quebra o signup — sendWelcomeEmail trata erro internamente).
+  await sendWelcomeEmail({ email, fullName });
 
   // Email confirmation está OFF → sessão já criada no signUp, redireciona.
   redirect(next);

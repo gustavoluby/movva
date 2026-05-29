@@ -45,3 +45,8 @@ export function eventStartTime(timeStr: string | null): string {
 export function formatPrice(cents: number): string {
   return `R$ ${Math.round(cents / 100)}`;
 }
+
+// Com centavos, formato pt-BR: 100 → "R$ 1,00", 17900 → "R$ 179,00"
+export function formatPriceFull(cents: number): string {
+  return `R$ ${(cents / 100).toFixed(2).replace(".", ",")}`;
+}

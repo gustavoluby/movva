@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ActivityIcon } from "@/components/detalhe/activity-icon";
+import { WhatsAppButton } from "@/components/whatsapp-button";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
 
 export const revalidate = 60;
@@ -254,6 +255,14 @@ export default async function EventDetailPage({
               </svg>
             </div>
           )}
+
+          <div style={{ marginTop: 18 }}>
+            <WhatsAppButton
+              context="event-question"
+              eventTitle={event.title}
+              label="Tirar dúvida no WhatsApp"
+            />
+          </div>
         </div>
       </div>
 

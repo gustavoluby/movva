@@ -85,6 +85,7 @@ export type Database = {
           payment_id: string | null
           payment_method: string | null
           payment_status: string | null
+          reminder_sent_at: string | null
           status: string | null
           updated_at: string | null
           user_id: string
@@ -101,6 +102,7 @@ export type Database = {
           payment_id?: string | null
           payment_method?: string | null
           payment_status?: string | null
+          reminder_sent_at?: string | null
           status?: string | null
           updated_at?: string | null
           user_id: string
@@ -117,6 +119,7 @@ export type Database = {
           payment_id?: string | null
           payment_method?: string | null
           payment_status?: string | null
+          reminder_sent_at?: string | null
           status?: string | null
           updated_at?: string | null
           user_id?: string
