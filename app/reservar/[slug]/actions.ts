@@ -132,11 +132,15 @@ export async function criarPagamento(
           pending: backUrl,
           failure: backUrl,
         },
-        auto_return: "approved",
-        // Webhook só é setado com HTTPS público (localhost não recebe; o
-        // retorno reconcilia nesse caso).
+        // auto_return e webhook só com HTTPS público: o MP rejeita auto_return
+        // com back_url http://localhost, e o webhook não alcança localhost.
+        // Em dev a volta é manual ("voltar ao site") e a reconferência no
+        // retorno (?payment_id) cobre a confirmação.
         ...(origin.startsWith("https://")
-          ? { notification_url: `${origin}/api/webhooks/mercadopago` }
+          ? {
+              auto_return: "approved",
+              notification_url: `${origin}/api/webhooks/mercadopago`,
+            }
           : {}),
       },
     });
