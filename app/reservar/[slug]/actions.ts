@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { Preference } from "mercadopago";
 import { createClient } from "@/lib/supabase/server";
+import { mpClient } from "@/lib/mercadopago";
 
 export type ReservaState = { error?: string } | null;
 
@@ -63,4 +67,89 @@ export async function confirmarReserva(
   revalidatePath(`/eventos/${slug}`);
   revalidatePath("/");
   return null;
+}
+
+// Cria uma preferência de Checkout Pro no Mercado Pago pra reserva pendente
+// e redireciona pra tela de pagamento do MP (Pix + cartão). A confirmação
+// volta via webhook + reconferência no retorno (ver page.tsx).
+export async function criarPagamento(
+  _prev: ReservaState,
+  formData: FormData,
+): Promise<ReservaState> {
+  const slug = String(formData.get("slug") ?? "");
+  if (!slug) return { error: "Evento inválido." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Você precisa entrar pra pagar." };
+
+  // Carrega evento + reserva (precisa existir e estar pendente).
+  const { data: event } = await supabase
+    .from("events")
+    .select("id, title, price_cents")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
+  if (!event) return { error: "Evento não encontrado." };
+
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("id, amount_cents, payment_status")
+    .eq("user_id", user.id)
+    .eq("event_id", event.id)
+    .maybeSingle();
+  if (!booking) return { error: "Reserva não encontrada. Reserve antes de pagar." };
+  if (booking.payment_status === "paid") {
+    return { error: "Essa reserva já está paga." };
+  }
+
+  // Origem dinâmica: funciona em localhost e em produção.
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
+  const origin = `${proto}://${host}`;
+  const backUrl = `${origin}/reservar/${slug}`;
+
+  let checkoutUrl: string | undefined;
+  try {
+    const pref = await new Preference(mpClient()).create({
+      body: {
+        items: [
+          {
+            id: event.id,
+            title: event.title,
+            quantity: 1,
+            unit_price: (booking.amount_cents ?? event.price_cents) / 100,
+            currency_id: "BRL",
+          },
+        ],
+        // Liga a cobrança à reserva — o webhook usa isso pra achar a booking.
+        external_reference: booking.id,
+        back_urls: {
+          success: backUrl,
+          pending: backUrl,
+          failure: backUrl,
+        },
+        auto_return: "approved",
+        // Webhook só é setado com HTTPS público (localhost não recebe; o
+        // retorno reconcilia nesse caso).
+        ...(origin.startsWith("https://")
+          ? { notification_url: `${origin}/api/webhooks/mercadopago` }
+          : {}),
+      },
+    });
+    checkoutUrl = pref.init_point ?? pref.sandbox_init_point ?? undefined;
+  } catch (err) {
+    console.error("[criarPagamento] erro criando preferência:", err);
+    return { error: "Não rolou iniciar o pagamento. Tenta de novo." };
+  }
+
+  if (!checkoutUrl) {
+    return { error: "Não rolou iniciar o pagamento. Tenta de novo." };
+  }
+
+  // redirect() lança por design — fica fora do try.
+  redirect(checkoutUrl);
 }

@@ -2,16 +2,22 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
+import { reconcilePayment } from "@/lib/payments/mercadopago-reconcile";
 import { ConfirmReserva } from "./confirm-button";
+import { PagarButton } from "./pagar-button";
 
 type Params = { slug: string };
+type Query = { payment_id?: string; status?: string; collection_status?: string };
 
 export default async function ReservarPage({
   params,
+  searchParams,
 }: {
   params: Promise<Params>;
+  searchParams: Promise<Query>;
 }) {
   const { slug } = await params;
+  const { payment_id, status, collection_status } = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -33,7 +39,19 @@ export default async function ReservarPage({
 
   if (!event) redirect("/");
 
-  // Só lê — não grava. A reserva nasce de um clique no botão (server action).
+  // Volta do checkout do MP com ?payment_id=... → reconcilia a reserva antes
+  // de renderizar (rede de segurança caso o webhook ainda não tenha chegado,
+  // ou em localhost onde ele não chega). Idempotente; só reflete o que o MP
+  // confirma. Os Links internos nunca carregam payment_id, então prefetch
+  // não dispara isso.
+  if (payment_id) {
+    try {
+      await reconcilePayment(String(payment_id));
+    } catch (err) {
+      console.error("[reservar] reconcile no retorno falhou:", err);
+    }
+  }
+
   const { data: booking } = await supabase
     .from("bookings")
     .select("id, payment_status, amount_cents, created_at")
@@ -100,6 +118,18 @@ export default async function ReservarPage({
   // ----- Já reservou: confirmação / status -----
   const isPaid = booking.payment_status === "paid";
 
+  // Status quando a pessoa volta do checkout do MP (back_urls trazem ?status=).
+  const mpStatus = status ?? collection_status;
+  const returnState: "pending" | "failure" | null = isPaid
+    ? null
+    : mpStatus === "pending" || mpStatus === "in_process"
+      ? "pending"
+      : mpStatus === "rejected" ||
+          mpStatus === "failure" ||
+          mpStatus === "cancelled"
+        ? "failure"
+        : null;
+
   return (
     <div className="movva-shell">
       <main className="reservar-page">
@@ -143,14 +173,38 @@ export default async function ReservarPage({
         </div>
 
         {!isPaid && (
-          <div className="reservar-pix-placeholder">
-            <div className="reservar-pix-label">aguardando pagamento</div>
-            <p className="reservar-pix-text">
-              O Pix aparece aqui em breve. A integração de pagamento tá em
-              construção — por enquanto, sua vaga fica registrada no sistema e a
-              gente confirma manualmente.
-            </p>
-          </div>
+          <>
+            {returnState === "pending" && (
+              <div className="reservar-pix-placeholder">
+                <div className="reservar-pix-label">pagamento em processamento</div>
+                <p className="reservar-pix-text">
+                  Estamos confirmando seu pagamento. Se foi Pix, pode levar uns
+                  segundos — atualize a página em instantes. Sua vaga já está
+                  segurada.
+                </p>
+              </div>
+            )}
+            {returnState === "failure" && (
+              <div className="reservar-pix-placeholder">
+                <div className="reservar-pix-label">pagamento não aprovado</div>
+                <p className="reservar-pix-text">
+                  O pagamento não foi concluído. Sua vaga continua reservada —
+                  é só tentar de novo abaixo.
+                </p>
+              </div>
+            )}
+            {!returnState && (
+              <div className="reservar-pix-placeholder">
+                <div className="reservar-pix-label">aguardando pagamento</div>
+                <p className="reservar-pix-text">
+                  Sua vaga está segurada. Finalize com Pix ou cartão pra
+                  garantir de vez.
+                </p>
+              </div>
+            )}
+
+            <PagarButton slug={event.slug} />
+          </>
         )}
 
         <Link href="/" className="reservar-back">
