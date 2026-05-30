@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 // Sparkles — estrela principal + estrelinhas, "descobrir novidades".
 const ICON_SEARCH = (
@@ -91,6 +92,16 @@ const ICON_PROFILE = (
 export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
   const pathname = usePathname();
 
+  // Destaque otimista: ao tocar numa aba, ela acende NA HORA, sem esperar a
+  // navegação terminar. Quando a rota nova chega, o pathname assume e o
+  // estado otimista é zerado.
+  const [pending, setPending] = useState<string | null>(null);
+  useEffect(() => {
+    setPending(null);
+  }, [pathname]);
+
+  const current = pending ?? pathname;
+
   const items = loggedIn
     ? [
         { href: "/", label: "Experiências", icon: ICON_SEARCH },
@@ -108,11 +119,15 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
     <nav className="bottom-nav">
       {items.map((item) => {
         const active =
-          item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          item.href === "/"
+            ? current === "/"
+            : current.startsWith(item.href);
         return (
           <Link
             key={item.href}
             href={item.href}
+            prefetch
+            onClick={() => setPending(item.href)}
             className={`nav-item${active ? " active" : ""}`}
           >
             {item.icon}
