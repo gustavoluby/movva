@@ -403,8 +403,10 @@ export type Database = {
           event_id: string | null
           id: string
           likes_count: number | null
+          location_name: string | null
           photo_url: string | null
           rating: number | null
+          status: string | null
           text: string | null
           tribe_id: string | null
           user_id: string
@@ -415,8 +417,10 @@ export type Database = {
           event_id?: string | null
           id?: string
           likes_count?: number | null
+          location_name?: string | null
           photo_url?: string | null
           rating?: number | null
+          status?: string | null
           text?: string | null
           tribe_id?: string | null
           user_id: string
@@ -427,8 +431,10 @@ export type Database = {
           event_id?: string | null
           id?: string
           likes_count?: number | null
+          location_name?: string | null
           photo_url?: string | null
           rating?: number | null
+          status?: string | null
           text?: string | null
           tribe_id?: string | null
           user_id?: string
