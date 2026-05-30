@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { logoutAction } from "@/app/actions/logout";
 
 const ICON_SEARCH = (
   <svg
@@ -32,23 +31,6 @@ const ICON_BOOKMARK = (
     strokeLinejoin="round"
   >
     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-  </svg>
-);
-
-const ICON_LOGOUT = (
-  <svg
-    width="22"
-    height="22"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-    <polyline points="16 17 21 12 16 7" />
-    <line x1="21" y1="12" x2="9" y2="12" />
   </svg>
 );
 
@@ -87,6 +69,22 @@ const ICON_COMMUNITY = (
   </svg>
 );
 
+const ICON_PROFILE = (
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
 export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
   const pathname = usePathname();
 
@@ -95,6 +93,7 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
         { href: "/", label: "Descobrir", icon: ICON_SEARCH },
         { href: "/comunidade", label: "Comunidade", icon: ICON_COMMUNITY },
         { href: "/minhas", label: "Minhas", icon: ICON_BOOKMARK },
+        { href: "/perfil", label: "Perfil", icon: ICON_PROFILE },
       ]
     : [
         { href: "/", label: "Descobrir", icon: ICON_SEARCH },
@@ -118,17 +117,6 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
           </Link>
         );
       })}
-
-      {/* Logout via POST (Server Action) — não como link, pra evitar que o
-          prefetch do <Link> deslogue a pessoa sem clique. */}
-      {loggedIn && (
-        <form action={logoutAction} className="nav-logout-form">
-          <button type="submit" className="nav-item">
-            {ICON_LOGOUT}
-            <span>Sair</span>
-          </button>
-        </form>
-      )}
     </nav>
   );
 }

@@ -6,7 +6,13 @@ import { createCheckin, type CheckinState } from "@/app/comunidade/novo/actions"
 
 type EventOption = { id: string; title: string };
 
-export function CheckinForm({ events }: { events: EventOption[] }) {
+export function CheckinForm({
+  events,
+  defaultEventId = "",
+}: {
+  events: EventOption[];
+  defaultEventId?: string;
+}) {
   const [state, formAction, isPending] = useActionState<CheckinState, FormData>(
     createCheckin,
     {},
@@ -93,7 +99,12 @@ export function CheckinForm({ events }: { events: EventOption[] }) {
       {events.length > 0 && (
         <div className="checkin-field">
           <label htmlFor="ci-event">Foi em algum evento Movva? (opcional)</label>
-          <select id="ci-event" name="event_id" className="auth-input">
+          <select
+            id="ci-event"
+            name="event_id"
+            className="auth-input"
+            defaultValue={defaultEventId}
+          >
             <option value="">Nenhum / experiência avulsa</option>
             {events.map((ev) => (
               <option key={ev.id} value={ev.id}>

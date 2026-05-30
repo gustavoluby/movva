@@ -4,7 +4,12 @@ import { CheckinForm } from "@/components/comunidade/checkin-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function NovoCheckinPage() {
+export default async function NovoCheckinPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ evento?: string }>;
+}) {
+  const { evento } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -27,10 +32,14 @@ export default async function NovoCheckinPage() {
     .filter((e): e is { id: string; title: string } => !!e)
     .filter((e) => (seen.has(e.id) ? false : (seen.add(e.id), true)));
 
+  const defaultEventId = evento && events.some((e) => e.id === evento)
+    ? evento
+    : "";
+
   return (
     <div className="movva-shell">
       <div className="scroll-area">
-        <CheckinForm events={events} />
+        <CheckinForm events={events} defaultEventId={defaultEventId} />
       </div>
     </div>
   );

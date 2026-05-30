@@ -111,7 +111,13 @@ export default async function ComunidadePage({
         ) : (
           <div className="feed-list">
             {feed.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCard
+                key={post.id}
+                post={post}
+                loggedIn={!!user}
+                currentUserId={user?.id ?? null}
+                isAdmin={isAdmin(user?.email)}
+              />
             ))}
           </div>
         )}

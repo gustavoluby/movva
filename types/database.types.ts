@@ -988,6 +988,7 @@ export type Database = {
           full_name: string
           handle: string | null
           id: string
+          instagram: string | null
           is_active: boolean | null
           is_verified: boolean | null
           neighborhood: string | null
@@ -1006,6 +1007,7 @@ export type Database = {
           full_name: string
           handle?: string | null
           id: string
+          instagram?: string | null
           is_active?: boolean | null
           is_verified?: boolean | null
           neighborhood?: string | null
@@ -1024,6 +1026,7 @@ export type Database = {
           full_name?: string
           handle?: string | null
           id?: string
+          instagram?: string | null
           is_active?: boolean | null
           is_verified?: boolean | null
           neighborhood?: string | null

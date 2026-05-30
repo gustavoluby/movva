@@ -1,8 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { timeAgo, shortDay } from "@/lib/utils/date";
-import { toggleLike } from "@/app/comunidade/actions";
+import {
+  toggleLike,
+  getComments,
+  addComment,
+  deleteComment,
+  type Comment,
+} from "@/app/comunidade/actions";
 
 export type FeedPost = {
   id: string;
@@ -30,10 +37,27 @@ function initials(name: string): string {
     .join("");
 }
 
-export function PostCard({ post }: { post: FeedPost }) {
+export function PostCard({
+  post,
+  loggedIn,
+  currentUserId,
+  isAdmin = false,
+}: {
+  post: FeedPost;
+  loggedIn: boolean;
+  currentUserId?: string | null;
+  isAdmin?: boolean;
+}) {
   const [liked, setLiked] = useState(post.liked);
   const [likes, setLikes] = useState(post.likesCount);
   const [pending, startTransition] = useTransition();
+
+  const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [count, setCount] = useState(post.commentsCount);
+  const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
 
   function onLike() {
     // Otimista — o servidor reconcilia via revalidate.
@@ -42,6 +66,43 @@ export function PostCard({ post }: { post: FeedPost }) {
     startTransition(async () => {
       await toggleLike(post.id);
     });
+  }
+
+  async function onToggleComments() {
+    const next = !open;
+    setOpen(next);
+    if (next && !loaded) {
+      setLoaded(true);
+      const list = await getComments(post.id);
+      setComments(list);
+      setCount(list.length);
+    }
+  }
+
+  async function onSubmitComment(e: React.FormEvent) {
+    e.preventDefault();
+    const text = draft.trim();
+    if (!text || sending) return;
+    setSending(true);
+    const res = await addComment(post.id, text);
+    setSending(false);
+    if (res.ok) {
+      setComments((c) => [...c, res.comment]);
+      setCount((n) => n + 1);
+      setDraft("");
+    }
+  }
+
+  async function onDeleteComment(id: string) {
+    // Otimista: tira da lista já; se falhar, não trava o feed.
+    const prev = comments;
+    setComments((c) => c.filter((x) => x.id !== id));
+    setCount((n) => Math.max(n - 1, 0));
+    const res = await deleteComment(id);
+    if (!res.ok) {
+      setComments(prev);
+      setCount((n) => n + 1);
+    }
   }
 
   const subtitle = post.event
@@ -125,7 +186,12 @@ export function PostCard({ post }: { post: FeedPost }) {
           </svg>
           {likes > 0 && likes}
         </button>
-        <span className="post-action">
+        <button
+          type="button"
+          onClick={onToggleComments}
+          className={`post-action${open ? " active" : ""}`}
+          aria-expanded={open}
+        >
           <svg
             width="20"
             height="20"
@@ -138,25 +204,90 @@ export function PostCard({ post }: { post: FeedPost }) {
           >
             <path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.5 8.5 0 0 1-.9-3.8 8.38 8.38 0 0 1 8.5-8.5 8.38 8.38 0 0 1 8.5 8.5z" />
           </svg>
-          {post.commentsCount > 0 && post.commentsCount}
-        </span>
-        <span className="post-action">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-            <polyline points="16 6 12 2 8 6" />
-            <line x1="12" y1="2" x2="12" y2="15" />
-          </svg>
-        </span>
+          {count > 0 && count}
+        </button>
       </div>
+
+      {open && (
+        <div className="post-comments">
+          {loaded ? (
+            comments.length > 0 ? (
+              <ul className="comment-list">
+                {comments.map((c) => (
+                  <li key={c.id} className="comment-item">
+                    <span className="comment-avatar">
+                      {c.author.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={c.author.avatarUrl} alt={c.author.name} />
+                      ) : (
+                        <span>{initials(c.author.name)}</span>
+                      )}
+                    </span>
+                    <div className="comment-body">
+                      <span className="comment-author">{c.author.name}</span>{" "}
+                      <span className="comment-text">{c.text}</span>
+                      <div className="comment-time">{timeAgo(c.createdAt)}</div>
+                    </div>
+                    {(isAdmin || (!!currentUserId && c.userId === currentUserId)) && (
+                      <button
+                        type="button"
+                        className="comment-delete"
+                        onClick={() => onDeleteComment(c.id)}
+                        aria-label="Apagar comentário"
+                      >
+                        <svg
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M3 6h18" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="comment-empty">Seja a primeira a comentar ✿</p>
+            )
+          ) : (
+            <p className="comment-empty">carregando...</p>
+          )}
+
+          {loggedIn ? (
+            <form onSubmit={onSubmitComment} className="comment-form">
+              <input
+                type="text"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="Escreve um comentário..."
+                className="comment-input"
+                maxLength={500}
+              />
+              <button
+                type="submit"
+                className="comment-send"
+                disabled={sending || !draft.trim()}
+              >
+                {sending ? "..." : "Enviar"}
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/login?next=/comunidade"
+              className="comment-login-cta"
+            >
+              Entre pra comentar →
+            </Link>
+          )}
+        </div>
+      )}
     </article>
   );
 }

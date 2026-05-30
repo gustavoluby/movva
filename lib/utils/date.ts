@@ -69,6 +69,28 @@ export function shortDay(iso: string | null): string {
   return `${day} ${mon}`;
 }
 
+// "MAIO" — nome do mês em maiúsculas, p/ o card da jornada.
+export function monthNameUpper(date: Date): string {
+  return MONTHS[date.getMonth()].toUpperCase();
+}
+
+// "2026-05-30" — data de hoje (local) em ISO curto, p/ comparar com event_date.
+export function todayISO(): string {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+// "mar/26" — mês abreviado + ano de 2 dígitos, p/ "membro desde".
+export function memberSince(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const mon = MONTHS[d.getMonth()].slice(0, 3);
+  const yy = String(d.getFullYear()).slice(-2);
+  return `${mon}/${yy}`;
+}
+
 export function formatPrice(cents: number): string {
   return `R$ ${Math.round(cents / 100)}`;
 }
