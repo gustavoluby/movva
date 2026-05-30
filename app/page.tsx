@@ -65,7 +65,7 @@ export default async function DescobrirPage({
       <div className="scroll-area with-nav">
         <header className="home-header">
           <div>
-            <div className="greeting-label">bem-vinda</div>
+            <div className="greeting-label">bem vinda ao</div>
             <div className="greeting-name">
               Movva
               <svg

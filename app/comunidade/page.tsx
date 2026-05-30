@@ -49,6 +49,8 @@ export default async function ComunidadePage({
     text: p.text,
     photoUrl: p.photo_url,
     locationName: p.location_name,
+    locationLat: null,
+    locationLng: null,
     createdAt: p.created_at,
     likesCount: p.likes_count ?? 0,
     commentsCount: p.comments_count ?? 0,
@@ -69,7 +71,7 @@ export default async function ComunidadePage({
         <header className="home-header">
           <div>
             <div className="greeting-label">o que rolou</div>
-            <div className="greeting-name">Comunidade</div>
+            <div className="greeting-name">Amigas</div>
           </div>
           <div className="comunidade-head-links">
             {isAdmin(user?.email) && (

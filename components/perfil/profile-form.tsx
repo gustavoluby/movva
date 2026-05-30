@@ -12,22 +12,14 @@ function initials(name: string): string {
     .join("");
 }
 
-type Stat = { n: number; label: string };
-
 export function ProfileForm({
   fullName,
   instagram,
   avatarUrl,
-  handle,
-  since,
-  stats,
 }: {
   fullName: string;
   instagram: string | null;
   avatarUrl: string | null;
-  handle: string | null;
-  since: string;
-  stats: Stat[];
 }) {
   const [state, formAction, isPending] = useActionState<ProfileState, FormData>(
     updateProfile,
@@ -44,7 +36,6 @@ export function ProfileForm({
 
   return (
     <form action={formAction} className="profile-form">
-      {/* Cabeçalho — espelha a tela de perfil */}
       <button
         type="button"
         className="profile-avatar-edit"
@@ -83,23 +74,7 @@ export function ProfileForm({
         hidden
         onChange={onPick}
       />
-
-      <h1 className="profile-name">{name || "Seu nome"}</h1>
-      <p className="profile-sub">
-        {handle ? `@${handle} · ` : ""}membro desde {since}
-      </p>
-
-      <div className="profile-stats">
-        {stats.map((s) => (
-          <div key={s.label} className="profile-stat">
-            <div className="profile-stat-n">{s.n}</div>
-            <div className="profile-stat-l">{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Edição */}
-      <div className="profile-section-label">Editar perfil</div>
+      <span className="profile-avatar-hint">toque pra trocar a foto</span>
 
       <div className="profile-field">
         <label htmlFor="pf-name">Nome</label>
@@ -135,7 +110,7 @@ export function ProfileForm({
       {state?.ok && <div className="profile-saved">Perfil salvo ✦</div>}
 
       <button type="submit" className="auth-submit" disabled={isPending}>
-        {isPending ? "Salvando..." : "Salvar perfil"}
+        {isPending ? "Salvando..." : "Salvar"}
       </button>
     </form>
   );

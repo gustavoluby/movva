@@ -16,6 +16,8 @@ export type FeedPost = {
   text: string | null;
   photoUrl: string | null;
   locationName: string | null;
+  locationLat: number | null;
+  locationLng: number | null;
   createdAt: string | null;
   likesCount: number;
   commentsCount: number;
@@ -35,6 +37,17 @@ function initials(name: string): string {
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase() ?? "")
     .join("");
+}
+
+// Link pro Google Maps: por coordenadas se houver (exato), senão pelo nome.
+function mapsUrl(post: FeedPost): string | null {
+  if (post.locationLat != null && post.locationLng != null) {
+    return `https://www.google.com/maps/search/?api=1&query=${post.locationLat},${post.locationLng}`;
+  }
+  if (post.locationName) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(post.locationName)}`;
+  }
+  return null;
 }
 
 export function PostCard({
@@ -110,6 +123,7 @@ export function PostCard({
     : post.locationName
       ? `em ${post.locationName}`
       : null;
+  const maps = mapsUrl(post);
 
   return (
     <article className="post-card">
@@ -154,10 +168,23 @@ export function PostCard({
         <div className="post-photo">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={post.photoUrl} alt="" />
-          {(post.locationName || post.createdAt) && (
-            <span className="post-pill">
-              {post.locationName ? post.locationName : shortDay(post.createdAt)}
-            </span>
+          {post.locationName && maps ? (
+            <a
+              className="post-pill post-pill-link"
+              href={maps}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {post.locationName}
+            </a>
+          ) : (
+            post.createdAt && (
+              <span className="post-pill">{shortDay(post.createdAt)}</span>
+            )
           )}
         </div>
       )}

@@ -38,6 +38,10 @@ export function LoginForm({ next }: { next: string }) {
 
       {state?.error && <div className="auth-error">{state.error}</div>}
 
+      <div className="auth-forgot">
+        <Link href="/recuperar-senha">Esqueci a senha</Link>
+      </div>
+
       <button type="submit" className="auth-submit" disabled={isPending}>
         {isPending ? "Entrando..." : "Entrar"}
       </button>

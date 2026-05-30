@@ -1997,3 +1997,240 @@
   white-space: nowrap;
 }
 .jornada-checkin:active { transform: scale(0.97); }
+
+/* ============================================================
+   PERFIL 2.0 — display, conta, meus dados
+   ============================================================ */
+
+/* Gradiente delicado do topo */
+.perfil-gradient {
+  background-image: linear-gradient(
+    180deg,
+    var(--blush-soft) 0%,
+    rgba(248, 232, 222, 0.5) 22%,
+    transparent 46%
+  );
+}
+
+.perfil-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 24px 8px;
+  text-align: center;
+}
+.perfil-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--blush);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  border: 3px solid white;
+}
+.perfil-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.perfil-name {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: 14px;
+  letter-spacing: -0.01em;
+}
+.perfil-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.perfil-stats {
+  display: flex;
+  margin-top: 18px;
+  width: 100%;
+  max-width: 280px;
+}
+.perfil-stat { flex: 1; }
+.perfil-stat + .perfil-stat { border-left: 1px solid var(--border-soft); }
+.perfil-stat-n {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+.perfil-stat-l {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+/* Sua conta — linhas */
+.account-section { padding: 22px 20px 0; }
+.account-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-subtle);
+  margin-bottom: 10px;
+}
+.account-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.account-row-form { display: contents; }
+.account-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: white;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  padding: 14px 16px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+}
+.account-row-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: var(--blush-soft);
+  color: var(--accent);
+}
+.account-row-label { flex: 1; }
+.row-chevron { color: var(--text-subtle); flex-shrink: 0; }
+.account-row.danger { color: var(--destructive); }
+.account-row.danger .account-row-icon {
+  background: var(--bg-warm);
+  color: var(--destructive);
+}
+
+/* Meus dados */
+.dados-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 4px;
+}
+.dados-back {
+  font-size: 22px;
+  color: var(--primary);
+  text-decoration: none;
+  line-height: 1;
+}
+.dados-title {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--primary);
+}
+.dados-section {
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.dados-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dados-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.dados-readonly {
+  font-size: 14px;
+  color: var(--text-muted);
+  background: var(--bg-warm);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.dados-link-btn {
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 2px 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.dados-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+.dados-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.dados-flow-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.dados-cancel {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px;
+}
+.dados-submit { flex: 1; margin: 0; }
+
+/* Pílula de localização como link */
+.post-pill-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+/* Login — esqueci a senha */
+.auth-forgot {
+  text-align: right;
+  margin: -6px 0 4px;
+}
+.auth-forgot a {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.auth-linkish {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  font: inherit;
+}
