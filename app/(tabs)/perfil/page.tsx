@@ -118,14 +118,9 @@ export default async function PerfilPage() {
           <section className="account-section">
             <div className="account-label">Admin</div>
             <div className="account-rows">
-              <Link href="/admin/posts" className="account-row">
+              <Link href="/admin/aprovar" className="account-row">
                 <span className="account-row-icon">{ICON_MOD}</span>
-                <span className="account-row-label">Aprovar check-ins</span>
-                {CHEVRON}
-              </Link>
-              <Link href="/admin/ideias" className="account-row">
-                <span className="account-row-icon">{ICON_MOD}</span>
-                <span className="account-row-label">Aprovar ideias</span>
+                <span className="account-row-label">Aprovar posts e ideias</span>
                 {CHEVRON}
               </Link>
             </div>

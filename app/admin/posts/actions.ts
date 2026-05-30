@@ -22,6 +22,7 @@ async function setStatus(postId: string, status: "approved" | "rejected") {
   if (error) return { ok: false as const, error: error.message };
 
   revalidatePath("/admin/posts");
+  revalidatePath("/admin/aprovar");
   revalidatePath("/comunidade");
   return { ok: true as const };
 }

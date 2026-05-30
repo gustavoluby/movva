@@ -13,7 +13,7 @@ export default async function IdeiasPage() {
 
   const { data: rows } = await supabase
     .from("ideas")
-    .select("id, text, is_anonymous, created_at, likes_count, user_id")
+    .select("id, text, is_anonymous, created_at, likes_count, comments_count, user_id")
     .eq("status", "approved")
     .order("created_at", { ascending: false })
     .limit(50);
@@ -60,6 +60,7 @@ export default async function IdeiasPage() {
       isAnonymous: i.is_anonymous ?? true,
       createdAt: i.created_at,
       likesCount: i.likes_count ?? 0,
+      commentsCount: i.comments_count ?? 0,
       liked: likedSet.has(i.id),
       isMine: !!user && i.user_id === user.id,
       author: {
@@ -105,7 +106,13 @@ export default async function IdeiasPage() {
       ) : (
         <div className="idea-list">
           {ideas.map((idea) => (
-            <IdeaCard key={idea.id} idea={idea} loggedIn={!!user} />
+            <IdeaCard
+              key={idea.id}
+              idea={idea}
+              loggedIn={!!user}
+              currentUserId={user?.id ?? null}
+              isAdmin={isAdmin(user?.email)}
+            />
           ))}
         </div>
       )}

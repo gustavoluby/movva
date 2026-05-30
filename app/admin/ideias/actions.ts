@@ -23,6 +23,7 @@ async function setStatus(ideaId: string, status: "approved" | "rejected") {
   if (error) return { ok: false as const, error: error.message };
 
   revalidatePath("/admin/ideias");
+  revalidatePath("/admin/aprovar");
   revalidatePath("/comunidade/ideias");
   return { ok: true as const };
 }

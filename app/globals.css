@@ -2731,3 +2731,10 @@
 @media (prefers-reduced-motion: reduce) {
   .idea-comments { animation: none; }
 }
+
+.aprovar-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 6px;
+}
