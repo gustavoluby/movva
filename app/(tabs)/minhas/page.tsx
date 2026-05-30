@@ -123,7 +123,15 @@ export default async function MinhasPage() {
             {monthNameUpper(new Date())} · ATÉ AGORA
           </div>
           <div className="jornada-card-big">
-            {past.length} <em>experiências</em>
+            {past.length > 0 ? (
+              <>
+                {past.length} <em>experiências</em>
+              </>
+            ) : (
+              <>
+                Sua primeira <em>experiência</em> te espera
+              </>
+            )}
           </div>
           <div className="jornada-card-stats">
             {stats.map((s) => (
