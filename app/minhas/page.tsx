@@ -35,6 +35,20 @@ type Booking = {
   } | null;
 };
 
+type Saved = {
+  id: string;
+  events: {
+    id: string;
+    slug: string;
+    title: string;
+    event_date: string;
+    event_time: string | null;
+    location_name: string;
+    image_url: string | null;
+    thumb_url: string | null;
+  } | null;
+};
+
 export default async function MinhasPage() {
   const supabase = await createClient();
   const {
@@ -43,23 +57,37 @@ export default async function MinhasPage() {
 
   if (!user) redirect("/login?next=/minhas");
 
-  const [{ data: bookings }, { count: checkins }] = await Promise.all([
-    supabase
-      .from("bookings")
-      .select(
-        `id,
+  const [{ data: bookings }, { count: checkins }, { data: savedRows }] =
+    await Promise.all([
+      supabase
+        .from("bookings")
+        .select(
+          `id,
          events(id, slug, title, event_date, event_time, duration, location_name, image_url, thumb_url)`,
-      )
-      .eq("user_id", user.id),
-    supabase
-      .from("feed_posts")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("status", "approved"),
-  ]);
+        )
+        .eq("user_id", user.id),
+      supabase
+        .from("feed_posts")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "approved"),
+      supabase
+        .from("saved_events")
+        .select(
+          `id, created_at,
+         events(id, slug, title, event_date, event_time, location_name, image_url, thumb_url)`,
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+    ]);
 
   const today = todayISO();
   const list = ((bookings ?? []) as Booking[]).filter((b) => b.events);
+  const bookedIds = new Set(list.map((b) => b.events!.id));
+  // Salvos que ainda não viraram reserva — não duplica o que já está em Próximos.
+  const saved = ((savedRows ?? []) as Saved[]).filter(
+    (s) => s.events && !bookedIds.has(s.events.id),
+  );
 
   const upcoming = list
     .filter((b) => b.events!.event_date >= today)
@@ -151,6 +179,46 @@ export default async function MinhasPage() {
           )}
         </section>
 
+        {saved.length > 0 && (
+          <section className="jornada-section">
+            <div className="jornada-section-head">
+              <h3>Salvos</h3>
+            </div>
+            <div className="jornada-list">
+              {saved.map((s) => {
+                const ev = s.events!;
+                return (
+                  <Link
+                    key={s.id}
+                    href={`/eventos/${ev.slug}`}
+                    className="jornada-item"
+                  >
+                    <div
+                      className="jornada-thumb"
+                      style={
+                        ev.thumb_url || ev.image_url
+                          ? {
+                              backgroundImage: `url('${ev.thumb_url ?? ev.image_url}')`,
+                            }
+                          : undefined
+                      }
+                    />
+                    <div className="jornada-item-body">
+                      <div className="jornada-item-title">{ev.title}</div>
+                      <div className="jornada-item-meta">
+                        {formatEventDate(ev.event_date)}
+                        {ev.event_time
+                          ? ` · ${eventStartTime(ev.event_time)}`
+                          : ""}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {past.length > 0 && (
           <section className="jornada-section">
             <div className="jornada-section-head">
@@ -193,7 +261,7 @@ export default async function MinhasPage() {
           </section>
         )}
 
-        {list.length === 0 && (
+        {list.length === 0 && saved.length === 0 && (
           <div className="minhas-empty">
             <Link href="/" className="minhas-empty-cta">
               Descobrir experiências →

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ActivityIcon } from "@/components/detalhe/activity-icon";
+import { EventHeroActions } from "@/components/detalhe/event-hero-actions";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
 
@@ -50,6 +51,21 @@ export default async function EventDetailPage({
   const hostBio = event.host_summary ?? singleHost?.bio ?? null;
   const hostPhoto = event.host_photo_url ?? singleHost?.photo_url ?? null;
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let saved = false;
+  if (user) {
+    const { data: savedRow } = await supabase
+      .from("saved_events")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("event_id", event.id)
+      .maybeSingle();
+    saved = !!savedRow;
+  }
+
   return (
     <div className="movva-shell">
       <div className="scroll-area with-cta">
@@ -77,38 +93,12 @@ export default async function EventDetailPage({
                 <path d="M12 19l-7-7 7-7" />
               </svg>
             </Link>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button className="hero-btn" aria-label="Compartilhar">
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                  <polyline points="16 6 12 2 8 6" />
-                  <line x1="12" y1="2" x2="12" y2="15" />
-                </svg>
-              </button>
-              <button className="hero-btn" aria-label="Salvar">
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                </svg>
-              </button>
-            </div>
+            <EventHeroActions
+              slug={event.slug}
+              title={event.title}
+              loggedIn={!!user}
+              initialSaved={saved}
+            />
           </div>
         </div>
 
