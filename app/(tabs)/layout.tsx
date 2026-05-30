@@ -6,8 +6,10 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 // re-renderizado — a BottomNav não remonta, então não há "flash" de recarga.
 export default async function TabsLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   const supabase = await createClient();
   const {
@@ -17,6 +19,7 @@ export default async function TabsLayout({
   return (
     <div className="movva-shell">
       {children}
+      {modal}
       <BottomNav loggedIn={!!user} />
     </div>
   );
