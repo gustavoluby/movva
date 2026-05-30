@@ -71,7 +71,7 @@ export default async function ComunidadePage({
         <header className="home-header">
           <div>
             <div className="greeting-label">o que rolou</div>
-            <div className="greeting-name">Amigas</div>
+            <div className="greeting-name">Checkins</div>
           </div>
           <div className="comunidade-head-links">
             {isAdmin(user?.email) && (

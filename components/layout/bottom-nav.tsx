@@ -55,13 +55,20 @@ const ICON_LOGIN = (
   </svg>
 );
 
-// Duas mulheres (silhueta flat com vestido) — aba "Amigas".
+// Pino de localização com check — aba "Checkins".
 const ICON_COMMUNITY = (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-    <circle cx="7.4" cy="5.3" r="2.3" />
-    <path d="M7.4 8.1 3.7 18h7.4z" />
-    <circle cx="16.6" cy="5.3" r="2.3" />
-    <path d="M16.6 8.1 12.9 18h7.4z" />
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+    <polyline points="8.5 9.8 11 12.3 15.5 7.8" />
   </svg>
 );
 
@@ -87,13 +94,13 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
   const items = loggedIn
     ? [
         { href: "/", label: "Descobrir", icon: ICON_SEARCH },
-        { href: "/comunidade", label: "Amigas", icon: ICON_COMMUNITY },
+        { href: "/comunidade", label: "Checkins", icon: ICON_COMMUNITY },
         { href: "/minhas", label: "Minhas", icon: ICON_BOOKMARK },
         { href: "/perfil", label: "Perfil", icon: ICON_PROFILE },
       ]
     : [
         { href: "/", label: "Descobrir", icon: ICON_SEARCH },
-        { href: "/comunidade", label: "Amigas", icon: ICON_COMMUNITY },
+        { href: "/comunidade", label: "Checkins", icon: ICON_COMMUNITY },
         { href: "/login", label: "Entrar", icon: ICON_LOGIN },
       ];
 
