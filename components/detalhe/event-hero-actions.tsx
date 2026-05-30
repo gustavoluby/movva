@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useOptimistic, useState } from "react";
 import { toggleSave, type SaveState } from "@/app/eventos/[slug]/actions";
 
 export function EventHeroActions({
@@ -17,7 +17,8 @@ export function EventHeroActions({
     toggleSave,
     { saved: initialSaved },
   );
-  const saved = state.saved;
+  // muda a cor na hora do clique; reconcilia com o servidor ao terminar.
+  const [saved, setOptimisticSaved] = useOptimistic(state.saved);
   const [copied, setCopied] = useState(false);
 
   async function share() {
@@ -83,9 +84,15 @@ export function EventHeroActions({
       </button>
 
       {loggedIn ? (
-        <form action={formAction}>
+        <form
+          action={(fd) => {
+            // usa o estado real (não o otimista) como base do toggle
+            fd.set("saved", state.saved ? "true" : "false");
+            setOptimisticSaved(!state.saved);
+            return formAction(fd);
+          }}
+        >
           <input type="hidden" name="slug" value={slug} />
-          <input type="hidden" name="saved" value={saved ? "true" : "false"} />
           <button
             type="submit"
             className="hero-btn"
