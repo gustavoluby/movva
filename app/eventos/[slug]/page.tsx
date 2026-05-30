@@ -95,7 +95,6 @@ export default async function EventDetailPage({
             </Link>
             <EventHeroActions
               slug={event.slug}
-              title={event.title}
               loggedIn={!!user}
               initialSaved={saved}
             />

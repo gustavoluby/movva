@@ -6,12 +6,10 @@ import { toggleSave, type SaveState } from "@/app/eventos/[slug]/actions";
 
 export function EventHeroActions({
   slug,
-  title,
   loggedIn,
   initialSaved,
 }: {
   slug: string;
-  title: string;
   loggedIn: boolean;
   initialSaved: boolean;
 }) {
@@ -28,7 +26,8 @@ export function EventHeroActions({
     // no desktop cai pra copiar o link.
     if (navigator.share) {
       try {
-        await navigator.share({ title, text: `Olha esse evento no Movva: ${title}`, url });
+        // só o link, sem texto/título junto.
+        await navigator.share({ url });
         return;
       } catch {
         // usuária cancelou ou share falhou — tenta copiar.
