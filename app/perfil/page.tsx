@@ -15,17 +15,24 @@ export default async function PerfilPage() {
 
   if (!user) redirect("/login?next=/perfil");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select(
-      "full_name, handle, instagram, avatar_url, created_at, total_experiences, total_friends, total_badges",
-    )
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: profile }, { count: checkins }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select(
+        "full_name, handle, instagram, avatar_url, created_at, total_experiences, total_badges",
+      )
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("feed_posts")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("status", "approved"),
+  ]);
 
   const stats = [
     { n: profile?.total_experiences ?? 0, label: "experiências" },
-    { n: profile?.total_friends ?? 0, label: "amigas" },
+    { n: checkins ?? 0, label: "check-ins" },
     { n: profile?.total_badges ?? 0, label: "selos" },
   ];
 
