@@ -21,6 +21,7 @@ function parseHours(...vals: (string | null | undefined)[]): number {
 
 type Booking = {
   id: string;
+  payment_status: string | null;
   events: {
     id: string;
     slug: string;
@@ -61,7 +62,7 @@ export default async function MinhasPage() {
       supabase
         .from("bookings")
         .select(
-          `id,
+          `id, payment_status,
          events(id, slug, title, event_date, event_time, duration, location_name, image_url, thumb_url)`,
         )
         .eq("user_id", user.id),
@@ -91,6 +92,9 @@ export default async function MinhasPage() {
   const upcoming = list
     .filter((b) => b.events!.event_date >= today)
     .sort((a, b) => a.events!.event_date.localeCompare(b.events!.event_date));
+  // Reservou mas ainda não pagou → "Aguardando pagamento". Pago → "Próximos".
+  const awaiting = upcoming.filter((b) => b.payment_status !== "paid");
+  const upcomingPaid = upcoming.filter((b) => b.payment_status === "paid");
   const past = list
     .filter((b) => b.events!.event_date < today)
     .sort((a, b) => b.events!.event_date.localeCompare(a.events!.event_date));
@@ -131,19 +135,54 @@ export default async function MinhasPage() {
           </div>
         </section>
 
-        <section className="jornada-section">
-          <div className="jornada-section-head">
-            <h3>Próximos</h3>
-          </div>
-          {upcoming.length === 0 ? (
-            <p className="jornada-empty">
-              Você ainda não tem experiências marcadas.{" "}
-              <Link href="/">Volta na aba Experiências</Link> pra ver o que tá
-              rolando.
-            </p>
-          ) : (
+        {awaiting.length > 0 && (
+          <section className="jornada-section">
+            <div className="jornada-section-head">
+              <h3>Aguardando pagamento</h3>
+            </div>
             <div className="jornada-list">
-              {upcoming.map((b) => {
+              {awaiting.map((b) => {
+                const ev = b.events!;
+                return (
+                  <Link
+                    key={b.id}
+                    href={`/reservar/${ev.slug}`}
+                    className="jornada-item jornada-item-pending"
+                  >
+                    <div
+                      className="jornada-thumb"
+                      style={
+                        ev.thumb_url || ev.image_url
+                          ? {
+                              backgroundImage: `url('${ev.thumb_url ?? ev.image_url}')`,
+                            }
+                          : undefined
+                      }
+                    />
+                    <div className="jornada-item-body">
+                      <div className="jornada-item-title">{ev.title}</div>
+                      <div className="jornada-item-meta">
+                        {formatEventDate(ev.event_date)}
+                        {ev.event_time
+                          ? ` · ${eventStartTime(ev.event_time)}`
+                          : ""}
+                      </div>
+                    </div>
+                    <span className="jornada-pay-cta">Pagar →</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {upcomingPaid.length > 0 && (
+          <section className="jornada-section">
+            <div className="jornada-section-head">
+              <h3>Próximos</h3>
+            </div>
+            <div className="jornada-list">
+              {upcomingPaid.map((b) => {
                 const ev = b.events!;
                 return (
                   <Link
@@ -174,8 +213,21 @@ export default async function MinhasPage() {
                 );
               })}
             </div>
-          )}
-        </section>
+          </section>
+        )}
+
+        {upcoming.length === 0 && (
+          <section className="jornada-section">
+            <div className="jornada-section-head">
+              <h3>Próximos</h3>
+            </div>
+            <p className="jornada-empty">
+              Você ainda não tem experiências marcadas.{" "}
+              <Link href="/">Volta na aba Experiências</Link> pra ver o que tá
+              rolando.
+            </p>
+          </section>
+        )}
 
         {saved.length > 0 && (
           <section className="jornada-section">

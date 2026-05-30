@@ -2320,3 +2320,24 @@
 @media (prefers-reduced-motion: reduce) {
   .detail-page .scroll-area { animation: none; }
 }
+
+/* Item "Aguardando pagamento" na aba Minhas — borda quente + CTA Pagar */
+.jornada-item-pending {
+  border-color: rgba(201, 123, 91, 0.4);
+  background: linear-gradient(white, white) padding-box,
+    var(--blush-soft);
+}
+.jornada-pay-cta {
+  flex-shrink: 0;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 9px 13px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
