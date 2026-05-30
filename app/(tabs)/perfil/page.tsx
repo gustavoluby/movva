@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { logoutAction } from "@/app/actions/logout";
 import { getWhatsAppLink } from "@/lib/whatsapp";
+import { isAdmin } from "@/lib/admin";
 import { memberSince } from "@/lib/utils/date";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +43,13 @@ const ICON_LOGOUT = (
 const CHEVRON = (
   <svg className="row-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="9 18 15 12 9 6" />
+  </svg>
+);
+
+const ICON_MOD = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+    <polyline points="9 12 11 14 15 10" />
   </svg>
 );
 
@@ -105,6 +113,24 @@ export default async function PerfilPage() {
             ))}
           </div>
         </section>
+
+        {isAdmin(user.email) && (
+          <section className="account-section">
+            <div className="account-label">Admin</div>
+            <div className="account-rows">
+              <Link href="/admin/posts" className="account-row">
+                <span className="account-row-icon">{ICON_MOD}</span>
+                <span className="account-row-label">Aprovar check-ins</span>
+                {CHEVRON}
+              </Link>
+              <Link href="/admin/ideias" className="account-row">
+                <span className="account-row-icon">{ICON_MOD}</span>
+                <span className="account-row-label">Aprovar ideias</span>
+                {CHEVRON}
+              </Link>
+            </div>
+          </section>
+        )}
 
         <section className="account-section">
           <div className="account-label">Sua conta</div>
