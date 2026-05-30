@@ -2529,3 +2529,205 @@
 }
 .rt-flower { color: var(--accent); font-size: 13px; }
 .ranking-foot { padding: 22px 24px 0; text-align: center; }
+
+/* ============================================================
+   Aba "Elas" — sub-abas + Ideias
+   ============================================================ */
+.elas-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+  padding: 12px 20px;
+  background: rgba(253, 248, 239, 0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-soft);
+}
+.elas-tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.elas-tab.active { background: var(--primary); color: var(--primary-foreground); }
+
+/* Intro da aba Ideias */
+.ideias-intro { padding: 20px 24px 6px; }
+.ideias-title {
+  font-family: var(--font-heading), serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+.ideias-title em { font-style: italic; color: var(--accent); }
+.ideias-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* Composer */
+.idea-composer {
+  margin: 12px 20px 8px;
+  background: white;
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+  padding: 14px;
+}
+.idea-composer-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: transparent;
+  line-height: 1.4;
+}
+.idea-composer-input::placeholder { color: var(--text-subtle); }
+.idea-composer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 10px;
+}
+.idea-anon-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.idea-anon-toggle input { width: 16px; height: 16px; accent-color: var(--primary); }
+.idea-post-btn {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 18px;
+  cursor: pointer;
+}
+.idea-post-btn:disabled { opacity: 0.5; cursor: default; }
+.idea-anon-hint {
+  font-size: 11.5px;
+  color: var(--text-subtle);
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+/* Lista + card de ideia */
+.idea-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 20px 0;
+}
+.idea-card {
+  background: white;
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+}
+.idea-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.idea-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid; place-items: center;
+  background: var(--blush);
+  color: var(--accent);
+  font-size: 14px; font-weight: 700;
+  flex-shrink: 0;
+}
+.idea-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.idea-author {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+.idea-time { font-size: 12px; color: var(--text-subtle); }
+.idea-text {
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--text);
+  margin-top: 12px;
+}
+.idea-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 14px;
+}
+.idea-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  font-family: inherit;
+}
+.idea-action.liked { color: var(--accent); }
+.idea-action.active { color: var(--primary); }
+.idea-action:disabled { cursor: default; opacity: 0.7; }
+.idea-hot {
+  margin-left: auto;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--blush-soft);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.idea-reveal {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.idea-reveal:disabled { opacity: 0.5; }
+/* quando há "Em alta" e "revelar" juntos, só o primeiro empurra pra direita */
+.idea-hot + .idea-reveal { margin-left: 8px; }
+
+.idea-comments {
+  border-top: 1px solid var(--border-soft);
+  margin-top: 14px;
+  padding-top: 12px;
+  animation: movva-comments-in 0.22s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .idea-comments { animation: none; }
+}

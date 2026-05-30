@@ -72,16 +72,13 @@ export default async function ComunidadePage({
             <div className="greeting-label">o que rolou</div>
             <div className="greeting-name">Checkins</div>
           </div>
-          <div className="comunidade-head-links">
-            {isAdmin(user?.email) && (
+          {isAdmin(user?.email) && (
+            <div className="comunidade-head-links">
               <Link href="/admin/posts" className="comunidade-rank-link admin">
                 Moderar
               </Link>
-            )}
-            <Link href="/comunidade/ranking" className="comunidade-rank-link">
-              Ranking ✦
-            </Link>
-          </div>
+            </div>
+          )}
         </header>
 
         {enviado && (
