@@ -43,26 +43,20 @@ export default async function MinhasPage() {
 
   if (!user) redirect("/login?next=/minhas");
 
-  const [{ data: bookings }, { data: profile }, { count: checkins }] =
-    await Promise.all([
-      supabase
-        .from("bookings")
-        .select(
-          `id,
+  const [{ data: bookings }, { count: checkins }] = await Promise.all([
+    supabase
+      .from("bookings")
+      .select(
+        `id,
          events(id, slug, title, event_date, event_time, duration, location_name, image_url, thumb_url)`,
-        )
-        .eq("user_id", user.id),
-      supabase
-        .from("profiles")
-        .select("total_badges")
-        .eq("id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("feed_posts")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("status", "approved"),
-    ]);
+      )
+      .eq("user_id", user.id),
+    supabase
+      .from("feed_posts")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("status", "approved"),
+  ]);
 
   const today = todayISO();
   const list = ((bookings ?? []) as Booking[]).filter((b) => b.events);
@@ -82,7 +76,6 @@ export default async function MinhasPage() {
   const stats = [
     { n: totalHours > 0 ? `${totalHours}h` : "—", label: "de movimento" },
     { n: checkins ?? 0, label: "check-ins" },
-    { n: profile?.total_badges ?? 0, label: "selos" },
   ];
 
   return (

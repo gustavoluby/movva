@@ -19,7 +19,7 @@ export default async function PerfilPage() {
     supabase
       .from("profiles")
       .select(
-        "full_name, handle, instagram, avatar_url, created_at, total_experiences, total_badges",
+        "full_name, handle, instagram, avatar_url, created_at, total_experiences",
       )
       .eq("id", user.id)
       .maybeSingle(),
@@ -33,7 +33,6 @@ export default async function PerfilPage() {
   const stats = [
     { n: profile?.total_experiences ?? 0, label: "experiências" },
     { n: checkins ?? 0, label: "check-ins" },
-    { n: profile?.total_badges ?? 0, label: "selos" },
   ];
 
   return (
