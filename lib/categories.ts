@@ -27,6 +27,14 @@ export const CATEGORY_DEFS: CategoryDef[] = [
     label: "Ao ar livre",
     keywords: ["piquenique", "vôlei", "futevôlei", "barigui", "trilha", "ar livre"],
   },
+  {
+    key: "rolezinhos",
+    label: "Rolezinhos",
+    // Pra sair com amigas, conhecer gente, barzinho. "vinho" fica de fora de
+    // propósito (colidiria com "Pilates, Autocuidado & Vinho") — casamos pelo
+    // "prudente"/"rolê"/"barzinho" no título.
+    keywords: ["rolê", "rolezinho", "barzinho", "boteco", "happy hour", "prudente"],
+  },
 ];
 
 // Chaves de categoria que um evento atende (pelo título).
