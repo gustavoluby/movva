@@ -217,7 +217,7 @@ export default async function ReservarPage({
         </div>
 
         <Link href="/" className="reservar-back">
-          ← Voltar pra Descobrir
+          ← Voltar pra Experiências
         </Link>
       </main>
     </div>

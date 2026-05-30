@@ -93,13 +93,13 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
 
   const items = loggedIn
     ? [
-        { href: "/", label: "Descobrir", icon: ICON_SEARCH },
+        { href: "/", label: "Experiências", icon: ICON_SEARCH },
         { href: "/comunidade", label: "Checkins", icon: ICON_COMMUNITY },
         { href: "/minhas", label: "Minhas", icon: ICON_BOOKMARK },
         { href: "/perfil", label: "Perfil", icon: ICON_PROFILE },
       ]
     : [
-        { href: "/", label: "Descobrir", icon: ICON_SEARCH },
+        { href: "/", label: "Experiências", icon: ICON_SEARCH },
         { href: "/comunidade", label: "Checkins", icon: ICON_COMMUNITY },
         { href: "/login", label: "Entrar", icon: ICON_LOGIN },
       ];

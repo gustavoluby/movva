@@ -54,7 +54,7 @@ export default function PoliticaCancelamentoPage() {
           </p>
 
           <Link href="/" className="reservar-back">
-            ← Voltar pra Descobrir
+            ← Voltar pra Experiências
           </Link>
         </main>
       </div>

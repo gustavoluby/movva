@@ -140,7 +140,7 @@ export default async function MinhasPage() {
           {upcoming.length === 0 ? (
             <p className="jornada-empty">
               Você ainda não tem experiências marcadas.{" "}
-              <Link href="/">Volta na aba Descobrir</Link> pra ver o que tá
+              <Link href="/">Volta na aba Experiências</Link> pra ver o que tá
               rolando.
             </p>
           ) : (
