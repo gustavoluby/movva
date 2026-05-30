@@ -2276,3 +2276,15 @@
 @media (prefers-reduced-motion: reduce) {
   .scroll-area { animation: none; }
 }
+
+/* Estado "Abrindo…" do CTA Reservar (feedback imediato ao toque) */
+@keyframes movva-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.cta-pending {
+  animation: movva-pulse 1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-pending { animation: none; }
+}

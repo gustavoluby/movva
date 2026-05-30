@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ActivityIcon } from "@/components/detalhe/activity-icon";
 import { EventHeroActions } from "@/components/detalhe/event-hero-actions";
+import { ReservarCta } from "@/components/detalhe/reservar-cta";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
 
@@ -260,24 +261,7 @@ export default async function EventDetailPage({
           <div className="price-label">por pessoa</div>
           <div className="price-value">{formatPrice(event.price_cents)}</div>
         </div>
-        <Link
-          href={`/reservar/${event.slug}`}
-          className="cta-btn"
-        >
-          Reservar minha vaga
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12h14M13 5l7 7-7 7" />
-          </svg>
-        </Link>
+        <ReservarCta slug={event.slug} />
       </div>
     </div>
   );

@@ -7,16 +7,25 @@ function Bar({
   h = 14,
   r = 8,
   mt = 0,
+  center = false,
 }: {
   w?: string | number;
   h?: number;
   r?: number;
   mt?: number;
+  center?: boolean;
 }) {
   return (
     <div
       className="sk"
-      style={{ width: w, height: h, borderRadius: r, marginTop: mt }}
+      style={{
+        width: w,
+        height: h,
+        borderRadius: r,
+        marginTop: mt,
+        marginLeft: center ? "auto" : undefined,
+        marginRight: center ? "auto" : undefined,
+      }}
     />
   );
 }
@@ -146,6 +155,23 @@ export function ProfileSkeleton() {
         ))}
       </div>
     </div>
+  );
+}
+
+/* ---------- Reserva / confirmação ---------- */
+export function ReservarSkeleton() {
+  return (
+    <main className="reservar-page" aria-hidden>
+      <div className="sk sk-circle" style={{ width: 48, height: 48, margin: "0 auto" }} />
+      <Bar w={180} h={24} mt={20} center />
+      <Bar w={240} h={14} mt={14} center />
+      <div className="sk" style={{ width: "100%", height: 88, borderRadius: 18, marginTop: 24 }} />
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 22 }}>
+        <Bar w={50} h={14} />
+        <Bar w={80} h={20} />
+      </div>
+      <div className="sk" style={{ width: "100%", height: 54, borderRadius: 16, marginTop: 24 }} />
+    </main>
   );
 }
 
