@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { logoutAction } from "@/app/actions/logout";
+import { getWhatsAppLink } from "@/lib/whatsapp";
 import { memberSince } from "@/lib/utils/date";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,14 @@ const ICON_DATA = (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
     <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+const ICON_HELP = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
   </svg>
 );
 
@@ -67,6 +76,11 @@ export default async function PerfilPage() {
     { n: checkins ?? 0, label: "check-ins" },
   ];
 
+  const supportHref = getWhatsAppLink({
+    number: "5541999458878",
+    message: "Olá! Preciso de ajuda com o Movva.",
+  });
+
   return (
     <div className="movva-shell">
       <div className="scroll-area with-nav perfil-gradient">
@@ -102,6 +116,16 @@ export default async function PerfilPage() {
               <span className="account-row-label">Meus dados</span>
               {CHEVRON}
             </Link>
+            <a
+              href={supportHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="account-row"
+            >
+              <span className="account-row-icon">{ICON_HELP}</span>
+              <span className="account-row-label">Ajuda e suporte</span>
+              {CHEVRON}
+            </a>
             <form action={logoutAction} className="account-row-form">
               <button type="submit" className="account-row danger">
                 <span className="account-row-icon">{ICON_LOGOUT}</span>
