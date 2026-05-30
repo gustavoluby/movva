@@ -1340,9 +1340,19 @@
 .post-action:disabled { opacity: 0.6; }
 
 /* ---- Comentários ---- */
+@keyframes movva-comments-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .post-comments {
   border-top: 1px solid var(--border-soft);
   padding: 12px 14px 14px;
+  /* abre suave (fade + leve descida) ao tocar no ícone de comentar */
+  animation: movva-comments-in 0.22s ease-out both;
+  transform-origin: top;
+}
+@media (prefers-reduced-motion: reduce) {
+  .post-comments { animation: none; }
 }
 .comment-list {
   list-style: none;
@@ -2290,49 +2300,23 @@
 }
 
 /* ============================================================
-   Modal de detalhe (intercepting route) — sheet que sobe.
-   A página de trás continua montada; aqui é só o overlay.
+   Detalhe do evento — entrada deslizando da direita (estilo iOS,
+   "empurrar" pra uma subtela). Anima SÓ o conteúdo (.scroll-area);
+   a .sticky-cta fica fixed/intocada pra não bugar o posicionamento.
    ============================================================ */
-@keyframes movva-backdrop-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+@keyframes movva-slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
-@keyframes movva-sheet-up {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+/* clip (não hidden) pra não virar container de scroll vertical; impede o flash
+   horizontal enquanto o conteúdo entra de fora da tela. A .sticky-cta é fixed
+   e escapa do clip (sem transform no ancestral). */
+.detail-page {
+  overflow-x: clip;
 }
-.event-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(26, 35, 29, 0.45);
-  z-index: 90;
-  animation: movva-backdrop-in 0.25s ease-out both;
-}
-.event-modal-sheet {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  max-width: 480px;
-  margin: 0 auto;
-  height: 94dvh;
-  background: var(--surface-warm);
-  border-radius: 24px 24px 0 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  z-index: 100;
-  box-shadow: 0 -12px 48px rgba(26, 35, 29, 0.22);
-  /* a transform (mesmo no estado final translateY(0)) faz o sheet ser o
-     bloco de contenção do .sticky-cta fixo lá dentro — ele fica preso no
-     rodapé do sheet, não rola junto. */
-  animation: movva-sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-/* dentro do sheet o hero não precisa do safe-area-top (não é tela cheia) */
-.event-modal-sheet .hero-actions {
-  top: 14px;
+.detail-page .scroll-area {
+  animation: movva-slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .event-modal-backdrop,
-  .event-modal-sheet { animation: none; }
+  .detail-page .scroll-area { animation: none; }
 }

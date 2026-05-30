@@ -32,7 +32,7 @@ export default async function EventDetailPage({
   const { slug } = await params;
 
   return (
-    <div className="movva-shell">
+    <div className="movva-shell detail-page">
       <EventDetailView slug={slug} backSlot={backToHome} />
     </div>
   );
