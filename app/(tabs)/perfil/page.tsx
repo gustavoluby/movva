@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { BottomNav } from "@/components/layout/bottom-nav";
 import { logoutAction } from "@/app/actions/logout";
 import { getWhatsAppLink } from "@/lib/whatsapp";
 import { memberSince } from "@/lib/utils/date";
@@ -82,8 +81,7 @@ export default async function PerfilPage() {
   });
 
   return (
-    <div className="movva-shell">
-      <div className="scroll-area with-nav perfil-gradient">
+    <div className="scroll-area with-nav perfil-gradient">
         <section className="perfil-hero">
           <Link href="/perfil/dados" className="perfil-avatar" aria-label="Editar perfil">
             {profile?.avatar_url ? (
@@ -135,9 +133,7 @@ export default async function PerfilPage() {
           </div>
         </section>
 
-        <div className="h-12" />
-      </div>
-      <BottomNav loggedIn={!!user} />
+      <div className="h-12" />
     </div>
   );
 }

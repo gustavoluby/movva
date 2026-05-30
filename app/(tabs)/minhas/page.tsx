@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { BottomNav } from "@/components/layout/bottom-nav";
 import {
   eventStartTime,
   formatEventDate,
@@ -107,9 +106,8 @@ export default async function MinhasPage() {
   ];
 
   return (
-    <div className="movva-shell">
-      <div className="scroll-area with-nav">
-        <section className="home-prompt jornada-head">
+    <div className="scroll-area with-nav">
+      <section className="home-prompt jornada-head">
           <h2>
             Sua <em>jornada</em>
           </h2>
@@ -269,9 +267,7 @@ export default async function MinhasPage() {
           </div>
         )}
 
-        <div className="h-12" />
-      </div>
-      <BottomNav loggedIn={!!user} />
+      <div className="h-12" />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { BottomNav } from "@/components/layout/bottom-nav";
 import { PostCard, type FeedPost } from "@/components/comunidade/post-card";
 import { isAdmin } from "@/lib/admin";
 
@@ -66,7 +65,7 @@ export default async function ComunidadePage({
   }));
 
   return (
-    <div className="movva-shell">
+    <>
       <div className="scroll-area with-nav">
         <header className="home-header">
           <div>
@@ -147,8 +146,6 @@ export default async function ComunidadePage({
         </svg>
         <span>Check-in</span>
       </Link>
-
-      <BottomNav loggedIn={!!user} />
-    </div>
+    </>
   );
 }

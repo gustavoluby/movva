@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { BottomNav } from "@/components/layout/bottom-nav";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +24,6 @@ function initials(name: string): string {
 
 export default async function RankingPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   // Cada check-in aprovado conta como 1 atividade. Agrega por autora.
   const { data: posts } = await supabase
@@ -59,9 +55,8 @@ export default async function RankingPage() {
     .slice(0, 50);
 
   return (
-    <div className="movva-shell">
-      <div className="scroll-area with-nav">
-        <header className="home-header">
+    <div className="scroll-area with-nav">
+      <header className="home-header">
           <div>
             <div className="greeting-label">quem mais participou em {CIDADE}</div>
             <div className="greeting-name">Ranking</div>
@@ -111,9 +106,7 @@ export default async function RankingPage() {
           </ol>
         )}
 
-        <div className="h-12" />
-      </div>
-      <BottomNav loggedIn={!!user} />
+      <div className="h-12" />
     </div>
   );
 }

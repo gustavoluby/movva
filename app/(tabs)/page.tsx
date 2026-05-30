@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { FeaturedCard } from "@/components/descobrir/featured-card";
 import { EventCard } from "@/components/descobrir/event-card";
 import { CategoryChips } from "@/components/descobrir/category-chips";
-import { BottomNav } from "@/components/layout/bottom-nav";
 import { CATEGORY_DEFS, eventCategories } from "@/lib/categories";
 
 export default async function DescobrirPage({
@@ -12,24 +11,19 @@ export default async function DescobrirPage({
 }) {
   const { cat } = await searchParams;
   const supabase = await createClient();
-  const [{ data: events, error }, { data: { user } }] = await Promise.all([
-    supabase
-      .from("events")
-      .select(
-        "slug, title, subtitle, description, category, cat_tag, event_date, event_time, location_name, location_short, price_cents, capacity, going_count, image_url, thumb_url, tag, tag_style, is_featured",
-      )
-      .eq("status", "published")
-      .order("event_date", { ascending: true }),
-    supabase.auth.getUser(),
-  ]);
+  const { data: events, error } = await supabase
+    .from("events")
+    .select(
+      "slug, title, subtitle, description, category, cat_tag, event_date, event_time, location_name, location_short, price_cents, capacity, going_count, image_url, thumb_url, tag, tag_style, is_featured",
+    )
+    .eq("status", "published")
+    .order("event_date", { ascending: true });
 
   if (error) {
     return (
-      <div className="movva-shell">
-        <main className="p-10 text-center text-sm text-muted-foreground">
-          Erro carregando eventos: {error.message}
-        </main>
-      </div>
+      <main className="p-10 text-center text-sm text-muted-foreground">
+        Erro carregando eventos: {error.message}
+      </main>
     );
   }
 
@@ -61,9 +55,8 @@ export default async function DescobrirPage({
   const others = visible.filter((e) => e.slug !== featured?.slug);
 
   return (
-    <div className="movva-shell">
-      <div className="scroll-area with-nav">
-        <header className="home-header">
+    <div className="scroll-area with-nav">
+      <header className="home-header">
           <div>
             <div className="greeting-label">bem vinda ao</div>
             <div className="greeting-name">
@@ -134,9 +127,7 @@ export default async function DescobrirPage({
           </>
         )}
 
-        <div className="h-12" />
-      </div>
-      <BottomNav loggedIn={!!user} />
+      <div className="h-12" />
     </div>
   );
 }
