@@ -76,9 +76,7 @@ export default async function DescobrirPage({
 
         <section className="home-prompt">
           <h2>
-            O que vai te <em>florescer</em>
-            <br />
-            essa semana?
+            Qual é o seu <em>Mood</em> da semana?
           </h2>
         </section>
 
