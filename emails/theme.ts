@@ -12,7 +12,7 @@ export const colors = {
 };
 
 export const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL || "https://project-vker8.vercel.app";
+  process.env.NEXT_PUBLIC_APP_URL || "https://www.moodpass.com.br";
 
 export const main = {
   backgroundColor: colors.cream,
