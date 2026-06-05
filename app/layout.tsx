@@ -18,13 +18,13 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Movva — experiências pra florescer juntas",
+  title: "Moodpass — experiências pra florescer juntas",
   description:
     "Encontros, esportes e bem-estar curados pra mulheres em Curitiba.",
   // iOS: abre em tela cheia quando adicionado à tela inicial.
   appleWebApp: {
     capable: true,
-    title: "Movva",
+    title: "Moodpass",
     statusBarStyle: "default",
   },
 };

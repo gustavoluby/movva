@@ -30,12 +30,12 @@ export function Layout({
         <Container style={{ padding: "24px 12px" }}>
           <Container style={t.container}>
             <Section style={t.header}>
-              <Heading style={t.logo}>Movva</Heading>
+              <Heading style={t.logo}>Moodpass</Heading>
             </Section>
             <Section style={t.body}>{children}</Section>
             <Section style={t.footer}>
               <Text style={t.footerText}>
-                Te esperamos no evento! 🌸 — Equipe Movva
+                Te esperamos no evento! 🌸 — Equipe Moodpass
               </Text>
             </Section>
           </Container>

@@ -50,7 +50,7 @@
 }
 
 :root {
-  /* Movva palette — light only */
+  /* Moodpass palette — light only */
   --background: #F4ECE0;          /* cream */
   --foreground: #1A231D;          /* near-black w/ green tint */
 
@@ -78,7 +78,7 @@
   --input: rgba(45, 65, 49, 0.08);
   --ring: #C97B5B;
 
-  /* Chart palette derived from Movva colors */
+  /* Chart palette derived from Moodpass colors */
   --chart-1: #2D4131;
   --chart-2: #C97B5B;
   --chart-3: #F0D9CC;
@@ -98,7 +98,7 @@
   --sidebar-ring: #C97B5B;
 
   /* Tokens originais do protótipo (legacy/index.html) — usados pelos
-     componentes Movva. Mantemos os nomes do HTML pra paridade visual. */
+     componentes Moodpass. Mantemos os nomes do HTML pra paridade visual. */
   --bg: #F4ECE0;
   --bg-warm: #EFE4D2;
   --surface: #FFFFFF;
@@ -134,11 +134,11 @@
 }
 
 /* ============================================================
-   Movva components — porte direto do legacy/index.html
+   Moodpass components — porte direto do legacy/index.html
    ============================================================ */
 
 /* Layout shell — scroll é nativo da página, não container interno */
-.movva-shell {
+.moodpass-shell {
   min-height: 100dvh;
   max-width: 480px;
   margin: 0 auto;
@@ -1340,7 +1340,7 @@
 .post-action:disabled { opacity: 0.6; }
 
 /* ---- Comentários ---- */
-@keyframes movva-comments-in {
+@keyframes moodpass-comments-in {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
@@ -1348,7 +1348,7 @@
   border-top: 1px solid var(--border-soft);
   padding: 12px 14px 14px;
   /* abre suave (fade + leve descida) ao tocar no ícone de comentar */
-  animation: movva-comments-in 0.22s ease-out both;
+  animation: moodpass-comments-in 0.22s ease-out both;
   transform-origin: top;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2249,7 +2249,7 @@
    Skeletons — feedback instantâneo ao trocar de tela.
    Shimmer em tons quentes da paleta; respeita reduced-motion.
    ============================================================ */
-@keyframes movva-shimmer {
+@keyframes moodpass-shimmer {
   0% { background-position: -560px 0; }
   100% { background-position: 560px 0; }
 }
@@ -2264,7 +2264,7 @@
   background-size: 560px 100%;
   background-repeat: no-repeat;
   border-radius: 12px;
-  animation: movva-shimmer 1.4s ease-in-out infinite;
+  animation: moodpass-shimmer 1.4s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .sk { animation: none; }
@@ -2276,24 +2276,24 @@
    100% CSS nativo, zero bundle. A barra inferior (fixed, no
    layout) não se move; só o miolo (.scroll-area) anima.
    ============================================================ */
-@keyframes movva-page-in {
+@keyframes moodpass-page-in {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .scroll-area {
-  animation: movva-page-in 0.26s ease-out both;
+  animation: moodpass-page-in 0.26s ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
   .scroll-area { animation: none; }
 }
 
 /* Estado "Abrindo…" do CTA Reservar (feedback imediato ao toque) */
-@keyframes movva-pulse {
+@keyframes moodpass-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
 }
 .cta-pending {
-  animation: movva-pulse 1s ease-in-out infinite;
+  animation: moodpass-pulse 1s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .cta-pending { animation: none; }
@@ -2304,7 +2304,7 @@
    "empurrar" pra uma subtela). Anima SÓ o conteúdo (.scroll-area);
    a .sticky-cta fica fixed/intocada pra não bugar o posicionamento.
    ============================================================ */
-@keyframes movva-slide-in {
+@keyframes moodpass-slide-in {
   from { transform: translateX(100%); }
   to   { transform: translateX(0); }
 }
@@ -2315,7 +2315,7 @@
   overflow-x: clip;
 }
 .detail-page .scroll-area {
-  animation: movva-slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: moodpass-slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .detail-page .scroll-area { animation: none; }
@@ -2726,7 +2726,7 @@
   border-top: 1px solid var(--border-soft);
   margin-top: 14px;
   padding-top: 12px;
-  animation: movva-comments-in 0.22s ease-out both;
+  animation: moodpass-comments-in 0.22s ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
   .idea-comments { animation: none; }

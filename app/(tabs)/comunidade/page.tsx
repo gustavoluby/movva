@@ -55,7 +55,7 @@ export default async function ComunidadePage({
     commentsCount: p.comments_count ?? 0,
     liked: likedSet.has(p.id),
     author: {
-      name: p.profiles?.full_name ?? "Movva",
+      name: p.profiles?.full_name ?? "Moodpass",
       handle: p.profiles?.handle ?? null,
       avatarUrl: p.profiles?.avatar_url ?? null,
     },

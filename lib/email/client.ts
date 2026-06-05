@@ -4,8 +4,8 @@ import { Resend } from "resend";
 import type { ReactElement } from "react";
 import { writeFile } from "node:fs/promises";
 
-const FROM = process.env.EMAIL_FROM || "Movva <noreply@movva.com.br>";
-const REPLY_TO = process.env.EMAIL_REPLY_TO || "contato@movva.com.br";
+const FROM = process.env.EMAIL_FROM || "Moodpass <noreply@moodpass.com.br>";
+const REPLY_TO = process.env.EMAIL_REPLY_TO || "contato@moodpass.com.br";
 
 export type SendResult =
   | { ok: true; id?: string; mock?: boolean; previewPath?: string }

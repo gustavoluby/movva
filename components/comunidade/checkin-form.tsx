@@ -98,7 +98,7 @@ export function CheckinForm({
 
       {events.length > 0 && (
         <div className="checkin-field">
-          <label htmlFor="ci-event">Foi em algum evento Movva? (opcional)</label>
+          <label htmlFor="ci-event">Foi em algum evento Moodpass? (opcional)</label>
           <select
             id="ci-event"
             name="event_id"

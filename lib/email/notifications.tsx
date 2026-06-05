@@ -91,7 +91,7 @@ export async function sendWelcomeEmail(params: {
 
     await sendEmail(
       params.email,
-      "Bem-vinda à Movva 🌸",
+      "Bem-vinda à Moodpass 🌸",
       <WelcomeEmail
         user={{ fullName: params.fullName, email: params.email }}
         events={(events ?? []).map((e) => toEmailEvent(e as EventRow))}

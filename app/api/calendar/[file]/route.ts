@@ -25,7 +25,7 @@ export async function GET(
   if (!event) return new Response("Evento não encontrado", { status: 404 });
 
   const ics = buildIcs({
-    uid: `${booking.id}@movva`,
+    uid: `${booking.id}@moodpass`,
     title: event.title,
     description: event.subtitle ?? "",
     location: event.location_address || event.location_name,
@@ -86,7 +86,7 @@ function buildIcs(e: {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Movva//Eventos//PT-BR",
+    "PRODID:-//Moodpass//Eventos//PT-BR",
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
     `UID:${e.uid}`,

@@ -14,10 +14,10 @@ export function WelcomeEmail({
   const firstName = user.fullName.split(" ")[0];
 
   return (
-    <Layout preview="Bem-vinda à Movva 🌸">
-      <Heading style={t.h1}>Bem-vinda à Movva, {firstName}! 🌸</Heading>
+    <Layout preview="Bem-vinda à Moodpass 🌸">
+      <Heading style={t.h1}>Bem-vinda à Moodpass, {firstName}! 🌸</Heading>
       <Text style={t.paragraph}>
-        A Movva é uma comunidade de mulheres que se encontram em experiências
+        A Moodpass é uma comunidade de mulheres que se encontram em experiências
         de bem-estar, movimento e conexão em Curitiba — yoga, pilates, rodas e
         muito mais, com curadoria afetiva pra você florescer junto.
       </Text>

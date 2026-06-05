@@ -4,8 +4,8 @@ import type { MetadataRoute } from "next";
 // (standalone), sem a barra do navegador — é o que dá cara de app instalado.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Movva — experiências pra florescer juntas",
-    short_name: "Movva",
+    name: "Moodpass — experiências pra florescer juntas",
+    short_name: "Moodpass",
     description:
       "Encontros, esportes e bem-estar curados pra mulheres em Curitiba.",
     start_url: "/",

@@ -10,7 +10,7 @@ export default function AuthLayout({
       <Link href="/" className="auth-back">
         ← Voltar pra Experiências
       </Link>
-      <div className="auth-logo">Movva</div>
+      <div className="auth-logo">Moodpass</div>
       <div className="auth-tagline">experiências pra florescer juntas</div>
       {children}
     </div>

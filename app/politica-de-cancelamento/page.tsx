@@ -1,16 +1,16 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Política de cancelamento — Movva",
+  title: "Política de cancelamento — Moodpass",
 };
 
 export default function PoliticaCancelamentoPage() {
   return (
-    <div className="movva-shell">
+    <div className="moodpass-shell">
       <div className="scroll-area">
         <header className="home-header">
           <div>
-            <div className="greeting-label">Movva</div>
+            <div className="greeting-label">Moodpass</div>
             <div className="greeting-name">Política de cancelamento</div>
           </div>
         </header>
@@ -34,7 +34,7 @@ export default function PoliticaCancelamentoPage() {
           </h3>
           <p style={{ marginBottom: 16 }}>
             Reembolso de 50% do valor, ou crédito integral pra usar em outra
-            experiência Movva dentro de 90 dias.
+            experiência Moodpass dentro de 90 dias.
           </p>
 
           <h3 style={{ margin: "20px 0 8px", fontWeight: 600 }}>
@@ -46,7 +46,7 @@ export default function PoliticaCancelamentoPage() {
           </p>
 
           <h3 style={{ margin: "20px 0 8px", fontWeight: 600 }}>
-            Evento cancelado pela Movva
+            Evento cancelado pela Moodpass
           </h3>
           <p style={{ marginBottom: 24 }}>
             Se a gente precisar cancelar um evento, o reembolso é sempre integral

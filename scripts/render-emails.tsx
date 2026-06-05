@@ -6,7 +6,7 @@ import { WelcomeEmail } from "../emails/WelcomeEmail";
 import { BookingReminder24h } from "../emails/BookingReminder24h";
 import { BookingCancellation } from "../emails/BookingCancellation";
 
-const user = { fullName: "Gustavo Luby", email: "test@movva.com.br" };
+const user = { fullName: "Gustavo Luby", email: "test@moodpass.com.br" };
 const event = {
   slug: "yoga-mia",
   title: "Yoga com Mia & Ritual de Beleza",

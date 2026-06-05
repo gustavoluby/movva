@@ -55,7 +55,7 @@ export default async function AprovarPage({
   }
 
   return (
-    <div className="movva-shell">
+    <div className="moodpass-shell">
       <div className="scroll-area">
         <header className="aprovar-head">
           <Link href="/perfil" className="hero-btn" aria-label="Voltar pro perfil">

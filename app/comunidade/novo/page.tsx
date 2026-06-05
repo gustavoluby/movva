@@ -37,7 +37,7 @@ export default async function NovoCheckinPage({
     : "";
 
   return (
-    <div className="movva-shell">
+    <div className="moodpass-shell">
       <div className="scroll-area">
         <CheckinForm events={events} defaultEventId={defaultEventId} />
       </div>

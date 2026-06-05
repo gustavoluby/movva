@@ -60,7 +60,7 @@ export default async function DescobrirPage({
           <div>
             <div className="greeting-label">bem vinda ao</div>
             <div className="greeting-name">
-              Movva
+              Moodpass
               <svg
                 width="14"
                 height="14"

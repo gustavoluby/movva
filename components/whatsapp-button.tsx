@@ -1,4 +1,4 @@
-import { getMovvaWhatsAppLink, type WhatsAppContext } from "@/lib/whatsapp";
+import { getMoodpassWhatsAppLink, type WhatsAppContext } from "@/lib/whatsapp";
 
 const WA_ICON = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -16,7 +16,7 @@ export function WhatsAppButton({
   eventTitle?: string;
   label: string;
 }) {
-  const href = getMovvaWhatsAppLink({ context, eventTitle });
+  const href = getMoodpassWhatsAppLink({ context, eventTitle });
   return (
     <a
       href={href}

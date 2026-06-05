@@ -64,7 +64,7 @@ export default async function IdeiasPage() {
       liked: likedSet.has(i.id),
       isMine: !!user && i.user_id === user.id,
       author: {
-        name: prof?.full_name ?? "Movva",
+        name: prof?.full_name ?? "Moodpass",
         avatarUrl: prof?.avatar_url ?? null,
       },
     };

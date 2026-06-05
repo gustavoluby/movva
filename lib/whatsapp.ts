@@ -20,8 +20,8 @@ export function getWhatsAppLink({
 
 export type WhatsAppContext = "event-question" | "post-purchase" | "general";
 
-// Link pro WhatsApp "oficial" do Movva (cai pra Nicole se não configurado).
-export function getMovvaWhatsAppLink({
+// Link pro WhatsApp "oficial" do Moodpass (cai pra Nicole se não configurado).
+export function getMoodpassWhatsAppLink({
   context,
   eventTitle,
 }: {
@@ -29,6 +29,7 @@ export function getMovvaWhatsAppLink({
   eventTitle?: string;
 }): string {
   const number =
+    process.env.WHATSAPP_NUMBER_MOODPASS ||
     process.env.WHATSAPP_NUMBER_MOVVA ||
     process.env.WHATSAPP_NUMBER_NICOLE ||
     NICOLE_FALLBACK;
@@ -37,7 +38,7 @@ export function getMovvaWhatsAppLink({
   const messages: Record<WhatsAppContext, string> = {
     "event-question": `Olá! Tenho interesse no evento ${t} e quero saber mais.`,
     "post-purchase": `Olá! Acabei de comprar o evento ${t} e tenho dúvidas.`,
-    general: "Olá! Quero saber mais sobre o Movva.",
+    general: "Olá! Quero saber mais sobre o Moodpass.",
   };
 
   return getWhatsAppLink({ number, message: messages[context] });

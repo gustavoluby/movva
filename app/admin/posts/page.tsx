@@ -30,7 +30,7 @@ export default async function AdminPostsPage() {
   const list = posts ?? [];
 
   return (
-    <div className="movva-shell">
+    <div className="moodpass-shell">
       <div className="scroll-area">
         <header className="home-header">
           <div>

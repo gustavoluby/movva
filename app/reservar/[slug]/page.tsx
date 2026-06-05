@@ -84,7 +84,7 @@ export default async function ReservarPage({
     const isFull = (event.going_count ?? 0) >= event.capacity;
 
     return (
-      <div className="movva-shell">
+      <div className="moodpass-shell">
         <main className="reservar-page">
           <div className="reservar-icon" aria-hidden>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -132,7 +132,7 @@ export default async function ReservarPage({
         : null;
 
   return (
-    <div className="movva-shell">
+    <div className="moodpass-shell">
       <main className="reservar-page">
         <div className="reservar-icon" aria-hidden>
           {isPaid ? (

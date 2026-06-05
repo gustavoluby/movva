@@ -21,7 +21,7 @@ export default async function MeusDadosPage() {
     .maybeSingle();
 
   return (
-    <div className="movva-shell">
+    <div className="moodpass-shell">
       <div className="scroll-area perfil-gradient">
         <header className="dados-head">
           <Link href="/perfil" className="dados-back" aria-label="Voltar">

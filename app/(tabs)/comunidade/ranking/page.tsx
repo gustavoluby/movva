@@ -71,7 +71,7 @@ export default async function RankingPage({
     } else {
       byUser.set(p.user_id, {
         userId: p.user_id,
-        name: p.profiles?.full_name ?? "Movva",
+        name: p.profiles?.full_name ?? "Moodpass",
         neighborhood: p.profiles?.neighborhood ?? null,
         avatarUrl: p.profiles?.avatar_url ?? null,
         count: 1,

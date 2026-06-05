@@ -144,7 +144,7 @@ export async function getIdeaComments(ideaId: string): Promise<IdeaComment[]> {
       userId: c.user_id,
       fromAnonAuthor,
       author: {
-        name: fromAnonAuthor ? "Autora" : prof?.full_name ?? "Movva",
+        name: fromAnonAuthor ? "Autora" : prof?.full_name ?? "Moodpass",
         avatarUrl: fromAnonAuthor ? null : prof?.avatar_url ?? null,
       },
     };

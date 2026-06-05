@@ -85,7 +85,7 @@ export default async function PerfilPage() {
 
   const supportHref = getWhatsAppLink({
     number: "5541999458878",
-    message: "Olá! Preciso de ajuda com o Movva.",
+    message: "Olá! Preciso de ajuda com o Moodpass.",
   });
 
   return (

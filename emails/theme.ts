@@ -1,4 +1,4 @@
-// Paleta e estilos compartilhados dos emails Movva.
+// Paleta e estilos compartilhados dos emails Moodpass.
 export const colors = {
   sage: "#2D4131",
   terracotta: "#C97B5B",

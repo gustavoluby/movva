@@ -61,7 +61,7 @@ export async function getComments(postId: string): Promise<Comment[]> {
     createdAt: c.created_at,
     userId: c.user_id,
     author: {
-      name: c.profiles?.full_name ?? "Movva",
+      name: c.profiles?.full_name ?? "Moodpass",
       avatarUrl: c.profiles?.avatar_url ?? null,
     },
   }));
