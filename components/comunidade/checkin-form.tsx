@@ -67,7 +67,6 @@ export function CheckinForm({
         type="file"
         name="photo"
         accept="image/*"
-        capture="environment"
         hidden
         onChange={onPick}
       />
