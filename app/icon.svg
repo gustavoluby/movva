@@ -7,10 +7,13 @@
   </defs>
   <rect width="512" height="512" rx="116" fill="url(#moodpassBg)"/>
   <g fill="#FBF3E7">
+    <!-- estrela principal (estilo sparkles da aba Experiências) -->
     <path transform="translate(212 228) scale(14) translate(-12 -10)"
       d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5Z"/>
+    <!-- estrelinha superior direita -->
     <path transform="translate(372 150) scale(6) translate(-12 -10)"
       d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5Z"/>
+    <!-- estrelinha inferior esquerda -->
     <path transform="translate(152 378) scale(4.6) translate(-12 -10)"
       d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5Z"/>
   </g>
