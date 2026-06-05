@@ -23,7 +23,7 @@ export async function signupAction(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: { data: { full_name: fullName } },
@@ -35,6 +35,13 @@ export async function signupAction(
       return { error: "Esse email já tem conta. Vai pra Entrar." };
     }
     return { error: error.message };
+  }
+
+  // Supabase NÃO dá erro em signup de email já existente (anti-enumeração):
+  // devolve um user "fantasma" com identities vazio. É assim que detectamos
+  // a conta duplicada — senão o cadastro "passa" sem reclamar.
+  if (!data.user || (data.user.identities?.length ?? 0) === 0) {
+    return { error: "Esse email já tem conta. Vai pra Entrar." };
   }
 
   // Boas-vindas (não quebra o signup — sendWelcomeEmail trata erro internamente).
