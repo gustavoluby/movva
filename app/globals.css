@@ -687,6 +687,13 @@
   margin-bottom: 20px;
 }
 
+.hosts-section { margin-top: 18px; }
+.hosts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
 .host-card {
   background: white;
   border-radius: 14px;
@@ -703,6 +710,15 @@
   background-size: cover;
   background-position: center;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.host-avatar-initial {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--primary);
 }
 .host-info { flex: 1; min-width: 0; }
 .host-label {

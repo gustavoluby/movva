@@ -41,15 +41,19 @@ export async function EventDetailView({
       .eq("event_id", event.id),
   ]);
 
-  const hostNames = (hostLinks ?? [])
-    .map((l) => l.hosts?.name)
-    .filter(Boolean)
-    .join(" + ");
-
-  const isMultiHost = (hostLinks?.length ?? 0) > 1;
-  const singleHost = !isMultiHost ? hostLinks?.[0]?.hosts : null;
-  const hostBio = event.host_summary ?? singleHost?.bio ?? null;
-  const hostPhoto = event.host_photo_url ?? singleHost?.photo_url ?? null;
+  // Ordena: anfitriã principal primeiro, depois co-anfitrias.
+  const roleRank = (role: string | null) =>
+    role === "principal" ? 0 : role === "co-anfitria" ? 1 : 2;
+  const hosts = [...(hostLinks ?? [])]
+    .filter((l) => l.hosts?.name)
+    .sort((a, b) => roleRank(a.role) - roleRank(b.role));
+  const roleLabel = (role: string | null) =>
+    role === "principal"
+      ? "Anfitriã principal"
+      : role === "palestrante"
+        ? "Palestrante"
+        : "Co-anfitriã";
+  const isMultiHost = hosts.length > 1;
 
   const {
     data: { user },
@@ -199,35 +203,38 @@ export async function EventDetailView({
             <div className="detail-description">{event.description}</div>
           )}
 
-          {hostNames && (
-            <div className="host-card">
-              <div
-                className="host-avatar"
-                style={
-                  hostPhoto
-                    ? { backgroundImage: `url('${hostPhoto}')` }
-                    : undefined
-                }
-              />
-              <div className="host-info">
-                <div className="host-label">
-                  {isMultiHost ? "Anfitriãs" : "Anfitriã"}
-                </div>
-                <div className="host-name">{hostNames}</div>
-                {hostBio && <div className="host-bio">{hostBio}</div>}
+          {hosts.length > 0 && (
+            <div className="hosts-section">
+              <div className="host-label">
+                {isMultiHost ? "Anfitriãs" : "Anfitriã"}
               </div>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--accent)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 18l6-6-6-6" />
-              </svg>
+              <div className="hosts-list">
+                {hosts.map((l, idx) => {
+                  const photo = l.hosts?.photo_url;
+                  return (
+                    <div key={idx} className="host-card">
+                      <div
+                        className="host-avatar"
+                        style={
+                          photo
+                            ? { backgroundImage: `url('${photo}')` }
+                            : undefined
+                        }
+                      >
+                        {!photo && (
+                          <span className="host-avatar-initial">
+                            {l.hosts?.name?.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="host-info">
+                        <div className="host-name">{l.hosts?.name}</div>
+                        <div className="host-bio">{roleLabel(l.role)}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
