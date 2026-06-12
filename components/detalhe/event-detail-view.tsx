@@ -41,18 +41,26 @@ export async function EventDetailView({
       .eq("event_id", event.id),
   ]);
 
-  // Ordena: anfitriã principal primeiro, depois co-anfitrias.
+  // Ordena: anfitriãs primeiro, depois professora/palestrante.
   const roleRank = (role: string | null) =>
-    role === "principal" ? 0 : role === "co-anfitria" ? 1 : 2;
+    role === "principal" || role === "anfitria"
+      ? 0
+      : role === "co-anfitria"
+        ? 1
+        : 3;
   const hosts = [...(hostLinks ?? [])]
     .filter((l) => l.hosts?.name)
     .sort((a, b) => roleRank(a.role) - roleRank(b.role));
   const roleLabel = (role: string | null) =>
     role === "principal"
       ? "Anfitriã principal"
-      : role === "palestrante"
-        ? "Palestrante"
-        : "Co-anfitriã";
+      : role === "anfitria"
+        ? "Anfitriã"
+        : role === "professora-yoga"
+          ? "Professora de yoga"
+          : role === "palestrante"
+            ? "Palestrante"
+            : "Co-anfitriã";
   const isMultiHost = hosts.length > 1;
 
   const {
