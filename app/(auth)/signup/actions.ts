@@ -13,10 +13,15 @@ export async function signupAction(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("full_name") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
   const next = safeNext(formData.get("next")?.toString());
 
-  if (!email || !password || !fullName) {
-    return { error: "Preenche nome, email e senha" };
+  if (!email || !password || !fullName || !phone) {
+    return { error: "Preenche nome, email, WhatsApp e senha" };
+  }
+  // Pelo menos 10 dígitos (DDD + número). Aceita máscara/espaços.
+  if (phone.replace(/\D/g, "").length < 10) {
+    return { error: "Coloca um WhatsApp válido com DDD" };
   }
   if (password.length < 6) {
     return { error: "Senha precisa ter pelo menos 6 caracteres" };
@@ -26,7 +31,7 @@ export async function signupAction(
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: { data: { full_name: fullName, phone } },
   });
 
   if (error) {
@@ -43,6 +48,10 @@ export async function signupAction(
   if (!data.user || (data.user.identities?.length ?? 0) === 0) {
     return { error: "Esse email já tem conta. Vai pra Entrar." };
   }
+
+  // O trigger handle_new_user cria o profile só com nome/handle; gravamos o
+  // WhatsApp aqui (sessão já ativa → RLS "atualize só seu perfil" permite).
+  await supabase.from("profiles").update({ phone }).eq("id", data.user.id);
 
   // Boas-vindas (não quebra o signup — sendWelcomeEmail trata erro internamente).
   await sendWelcomeEmail({ email, fullName });

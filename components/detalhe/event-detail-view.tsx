@@ -182,7 +182,8 @@ export async function EventDetailView({
               <div>
                 <div className="meta-item-label">turma</div>
                 <div>
-                  {event.going_count ?? 0} de {event.capacity} vagas preenchidas
+                  {event.going_count ?? 0}{" "}
+                  {(event.going_count ?? 0) === 1 ? "confirmada" : "confirmadas"}
                 </div>
               </div>
             </div>

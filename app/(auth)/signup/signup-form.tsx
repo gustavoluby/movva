@@ -46,6 +46,20 @@ export function SignupForm({ next }: { next: string }) {
         />
       </div>
 
+      <div className="auth-field">
+        <label htmlFor="signup-phone">WhatsApp</label>
+        <input
+          id="signup-phone"
+          className="auth-input"
+          type="tel"
+          name="phone"
+          inputMode="tel"
+          autoComplete="tel"
+          placeholder="(41) 99999-9999"
+          required
+        />
+      </div>
+
       <PasswordField
         id="signup-password"
         autoComplete="new-password"

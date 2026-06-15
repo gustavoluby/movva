@@ -1,11 +1,11 @@
 "use client";
 
 import { useActionState } from "react";
-import { criarPagamento, type ReservaState } from "./actions";
+import { reservarEPagar, type ReservaState } from "./actions";
 
 export function PagarButton({ slug }: { slug: string }) {
   const [state, formAction, pending] = useActionState<ReservaState, FormData>(
-    criarPagamento,
+    reservarEPagar,
     null,
   );
 

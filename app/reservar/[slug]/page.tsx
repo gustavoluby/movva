@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
 import { reconcilePayment } from "@/lib/payments/mercadopago-reconcile";
 import { WhatsAppButton } from "@/components/whatsapp-button";
-import { ConfirmReserva } from "./confirm-button";
 import { PagarButton } from "./pagar-button";
 
 type Params = { slug: string };
@@ -79,45 +78,7 @@ export default async function ReservarPage({
     </div>
   );
 
-  // ----- Ainda não reservou: tela de confirmação -----
-  if (!booking) {
-    const isFull = (event.going_count ?? 0) >= event.capacity;
-
-    return (
-      <div className="moodpass-shell">
-        <main className="reservar-page">
-          <div className="reservar-icon" aria-hidden>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
-            </svg>
-          </div>
-
-          <h1 className="reservar-title">Confirmar reserva</h1>
-          <p className="reservar-subtitle">
-            {isFull
-              ? "As vagas desse evento esgotaram."
-              : "Confirme pra segurar sua vaga. O pagamento você finaliza depois."}
-          </p>
-
-          {eventCard}
-
-          <div className="reservar-price-row">
-            <span className="reservar-price-label">total</span>
-            <span className="reservar-price">{formatPrice(event.price_cents)}</span>
-          </div>
-
-          <ConfirmReserva slug={event.slug} isFull={isFull} />
-
-          <Link href={`/eventos/${event.slug}`} className="reservar-back">
-            ← Voltar pro evento
-          </Link>
-        </main>
-      </div>
-    );
-  }
-
-  // ----- Já reservou: confirmação / status -----
-  const isPaid = booking.payment_status === "paid";
+  const isPaid = booking?.payment_status === "paid";
 
   // Status quando a pessoa volta do checkout do MP (back_urls trazem ?status=).
   const mpStatus = status ?? collection_status;
@@ -131,82 +92,85 @@ export default async function ReservarPage({
         ? "failure"
         : null;
 
+  // ----- Ainda não pagou: tela única de checkout (cria reserva + abre o MP) -----
+  if (!isPaid) {
+    return (
+      <div className="moodpass-shell">
+        <main className="reservar-page">
+          <div className="reservar-icon" aria-hidden>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
+            </svg>
+          </div>
+
+          <h1 className="reservar-title">Garantir minha vaga</h1>
+          <p className="reservar-subtitle">
+            {returnState === "pending"
+              ? "Estamos confirmando seu pagamento."
+              : returnState === "failure"
+                ? "O pagamento não foi concluído — é só tentar de novo."
+                : "Finalize com Pix ou cartão pra garantir sua vaga."}
+          </p>
+
+          {eventCard}
+
+          <div className="reservar-price-row">
+            <span className="reservar-price-label">total</span>
+            <span className="reservar-price">
+              {formatPrice(booking?.amount_cents ?? event.price_cents)}
+            </span>
+          </div>
+
+          {returnState === "pending" && (
+            <div className="reservar-pix-placeholder">
+              <div className="reservar-pix-label">pagamento em processamento</div>
+              <p className="reservar-pix-text">
+                Estamos confirmando seu pagamento. Se foi Pix, pode levar uns
+                segundos — atualize a página em instantes.
+              </p>
+            </div>
+          )}
+
+          <PagarButton slug={event.slug} />
+
+          <Link href={`/eventos/${event.slug}`} className="reservar-back">
+            ← Voltar pro evento
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
+  // ----- Já pagou: confirmação -----
   return (
     <div className="moodpass-shell">
       <main className="reservar-page">
         <div className="reservar-icon" aria-hidden>
-          {isPaid ? (
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
-            </svg>
-          )}
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
         </div>
 
-        <h1 className="reservar-title">
-          {isPaid ? "Pagamento confirmado" : "Reserva criada"}
-        </h1>
-        <p className="reservar-subtitle">
-          {isPaid
-            ? "Sua vaga tá garantida. Te vemos lá."
-            : "Sua vaga tá segurada enquanto você finaliza o pagamento."}
-        </p>
+        <h1 className="reservar-title">Pagamento confirmado</h1>
+        <p className="reservar-subtitle">Sua vaga tá garantida. Te vemos lá.</p>
 
         {eventCard}
 
         <div className="reservar-price-row">
           <span className="reservar-price-label">total</span>
           <span className="reservar-price">
-            {formatPrice(booking.amount_cents ?? event.price_cents)}
+            {formatPrice(booking?.amount_cents ?? event.price_cents)}
           </span>
         </div>
-
-        {!isPaid && (
-          <>
-            {returnState === "pending" && (
-              <div className="reservar-pix-placeholder">
-                <div className="reservar-pix-label">pagamento em processamento</div>
-                <p className="reservar-pix-text">
-                  Estamos confirmando seu pagamento. Se foi Pix, pode levar uns
-                  segundos — atualize a página em instantes. Sua vaga já está
-                  segurada.
-                </p>
-              </div>
-            )}
-            {returnState === "failure" && (
-              <div className="reservar-pix-placeholder">
-                <div className="reservar-pix-label">pagamento não aprovado</div>
-                <p className="reservar-pix-text">
-                  O pagamento não foi concluído. Sua vaga continua reservada —
-                  é só tentar de novo abaixo.
-                </p>
-              </div>
-            )}
-            {!returnState && (
-              <div className="reservar-pix-placeholder">
-                <div className="reservar-pix-label">aguardando pagamento</div>
-                <p className="reservar-pix-text">
-                  Sua vaga está segurada. Finalize com Pix ou cartão pra
-                  garantir de vez.
-                </p>
-              </div>
-            )}
-
-            <PagarButton slug={event.slug} />
-          </>
-        )}
 
         <div style={{ marginTop: 18 }}>
           <WhatsAppButton
