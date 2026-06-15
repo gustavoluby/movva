@@ -10,7 +10,8 @@ export default function AuthLayout({
       <Link href="/" className="auth-back">
         ← Voltar pra Experiências
       </Link>
-      <div className="auth-logo">Moodpass</div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/moodpass-logo.png" alt="Moodpass" className="auth-logo-img" />
       <div className="auth-tagline">experiências pra florescer juntas</div>
       {children}
     </div>

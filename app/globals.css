@@ -175,6 +175,13 @@
   gap: 8px;
 }
 
+.home-logo-img {
+  display: block;
+  height: 30px;
+  width: auto;
+  margin-top: 5px;
+}
+
 .icon-btn {
   width: 42px;
   height: 42px;
@@ -821,14 +828,11 @@
   padding: 60px 28px 40px;
 }
 
-.auth-logo {
-  font-family: var(--font-heading), 'Fraunces', serif;
-  font-size: 30px;
-  font-weight: 400;
-  color: var(--primary);
-  text-align: center;
-  letter-spacing: -0.02em;
-  font-variation-settings: "opsz" 144;
+.auth-logo-img {
+  display: block;
+  width: 156px;
+  height: auto;
+  margin: 0 auto;
 }
 
 .auth-tagline {

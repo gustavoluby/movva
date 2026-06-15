@@ -59,18 +59,12 @@ export default async function DescobrirPage({
       <header className="home-header">
           <div>
             <div className="greeting-label">bem vinda ao</div>
-            <div className="greeting-name">
-              Moodpass
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="#C97B5B"
-                aria-hidden
-              >
-                <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
-              </svg>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/moodpass-logo-horizontal.png"
+              alt="Moodpass"
+              className="home-logo-img"
+            />
           </div>
         </header>
 
