@@ -10,6 +10,7 @@ type FeaturedCardProps = {
   eventTime: string | null;
   capacity: number;
   goingCount: number;
+  soldOut?: boolean;
 };
 
 export function FeaturedCard({
@@ -21,8 +22,9 @@ export function FeaturedCard({
   eventTime,
   capacity,
   goingCount,
+  soldOut = false,
 }: FeaturedCardProps) {
-  const vagasLeft = capacity - goingCount;
+  const vagasLeft = Math.max(0, capacity - goingCount);
 
   return (
     <Link
@@ -53,7 +55,7 @@ export function FeaturedCard({
           <span className="featured-meta-divider" />
           <span>{eventStartTime(eventTime)}</span>
           <span className="featured-meta-divider" />
-          <span>{vagasLeft} vagas</span>
+          <span>{soldOut ? "Esgotado" : `${vagasLeft} vagas`}</span>
         </div>
       </div>
     </Link>

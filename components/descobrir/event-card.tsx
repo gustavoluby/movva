@@ -20,6 +20,7 @@ type EventCardProps = {
   priceCents: number;
   capacity: number;
   goingCount: number;
+  soldOut?: boolean;
 };
 
 export function EventCard({
@@ -36,6 +37,7 @@ export function EventCard({
   priceCents,
   capacity,
   goingCount,
+  soldOut = false,
 }: EventCardProps) {
   return (
     <Link href={`/eventos/${slug}`} className="event-card">
@@ -64,7 +66,9 @@ export function EventCard({
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
             <circle cx="9" cy="7" r="4" />
           </svg>
-          {goingCount}/{capacity} mulheres
+          {soldOut
+            ? "Esgotado"
+            : `${Math.min(goingCount, capacity)}/${capacity} mulheres`}
         </div>
       </div>
       <div className="event-card-body">

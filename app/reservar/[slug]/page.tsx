@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
 import { reconcilePayment } from "@/lib/payments/mercadopago-reconcile";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { getEventAvailability } from "@/lib/events/availability";
 import { PagarButton } from "./pagar-button";
 
 type Params = { slug: string };
@@ -79,6 +80,30 @@ export default async function ReservarPage({
   );
 
   const isPaid = booking?.payment_status === "paid";
+
+  // Esgotamento: quem ainda não pagou não consegue finalizar depois de lotar.
+  const { soldOut } = await getEventAvailability(event.id, event.capacity);
+  if (!isPaid && soldOut) {
+    return (
+      <div className="moodpass-shell">
+        <main className="reservar-page">
+          <div className="reservar-icon" aria-hidden>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
+            </svg>
+          </div>
+          <h1 className="reservar-title">Vagas esgotadas</h1>
+          <p className="reservar-subtitle">
+            As vagas desse evento acabaram. Fica de olho — em breve tem mais.
+          </p>
+          {eventCard}
+          <Link href={`/eventos/${event.slug}`} className="reservar-back">
+            ← Voltar pro evento
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
   // Status quando a pessoa volta do checkout do MP (back_urls trazem ?status=).
   const mpStatus = status ?? collection_status;

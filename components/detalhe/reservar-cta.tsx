@@ -32,7 +32,21 @@ function CtaContent() {
   );
 }
 
-export function ReservarCta({ slug }: { slug: string }) {
+export function ReservarCta({
+  slug,
+  soldOut = false,
+}: {
+  slug: string;
+  soldOut?: boolean;
+}) {
+  if (soldOut) {
+    return (
+      <button className="cta-btn" disabled aria-disabled>
+        Esgotado
+      </button>
+    );
+  }
+
   return (
     <Link href={`/reservar/${slug}`} prefetch className="cta-btn">
       <CtaContent />

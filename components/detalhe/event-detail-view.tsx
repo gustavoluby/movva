@@ -5,6 +5,7 @@ import { EventHeroActions } from "@/components/detalhe/event-hero-actions";
 import { ReservarCta } from "@/components/detalhe/reservar-cta";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
+import { getEventAvailability } from "@/lib/events/availability";
 
 // Corpo do detalhe do evento compartilhado pela página cheia (/eventos/[slug])
 // e pelo modal (intercepting route). O que muda entre os dois é só o wrapper
@@ -28,6 +29,9 @@ export async function EventDetailView({
     .maybeSingle();
 
   if (!event) notFound();
+
+  const availability = await getEventAvailability(event.id, event.capacity);
+  const ocupadas = Math.min(event.going_count ?? 0, availability.total);
 
   const [{ data: activities }, { data: hostLinks }] = await Promise.all([
     supabase
@@ -182,8 +186,9 @@ export async function EventDetailView({
               <div>
                 <div className="meta-item-label">turma</div>
                 <div>
-                  {event.going_count ?? 0}{" "}
-                  {(event.going_count ?? 0) === 1 ? "confirmada" : "confirmadas"}
+                  {availability.soldOut
+                    ? "Vagas esgotadas"
+                    : `${ocupadas} de ${availability.total} vagas`}
                 </div>
               </div>
             </div>
@@ -262,7 +267,7 @@ export async function EventDetailView({
           <div className="price-label">por pessoa</div>
           <div className="price-value">{formatPrice(event.price_cents)}</div>
         </div>
-        <ReservarCta slug={event.slug} />
+        <ReservarCta slug={event.slug} soldOut={availability.soldOut} />
       </div>
     </>
   );

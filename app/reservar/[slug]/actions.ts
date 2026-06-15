@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { Preference } from "mercadopago";
 import { createClient } from "@/lib/supabase/server";
 import { mpClient } from "@/lib/mercadopago";
+import { getEventAvailability } from "@/lib/events/availability";
 
 export type ReservaState = { error?: string } | null;
 
@@ -73,13 +74,12 @@ export async function reservarEPagar(
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, title, price_cents")
+    .select("id, title, price_cents, capacity")
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();
   if (!event) return { error: "Evento não encontrado." };
 
-  // Reserva idempotente (sem trava de capacidade — venda direta).
   const { data: existing } = await supabase
     .from("bookings")
     .select("id, amount_cents, payment_status")
@@ -89,6 +89,13 @@ export async function reservarEPagar(
 
   if (existing?.payment_status === "paid") {
     return { error: "Você já garantiu esse evento." };
+  }
+
+  // Trava de esgotamento (server-side): conta vendas pagas de todas. Quem
+  // ainda não pagou não consegue iniciar o checkout depois de lotar.
+  const { soldOut } = await getEventAvailability(event.id, event.capacity);
+  if (soldOut) {
+    return { error: "As vagas desse evento esgotaram." };
   }
 
   let booking = existing;
