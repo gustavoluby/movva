@@ -53,6 +53,14 @@ const ICON_MOD = (
   </svg>
 );
 
+const ICON_SALES = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10" />
+    <line x1="12" y1="20" x2="12" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="14" />
+  </svg>
+);
+
 export default async function PerfilPage() {
   const supabase = await createClient();
   const {
@@ -121,6 +129,11 @@ export default async function PerfilPage() {
               <Link href="/admin/aprovar" className="account-row">
                 <span className="account-row-icon">{ICON_MOD}</span>
                 <span className="account-row-label">Aprovar posts e ideias</span>
+                {CHEVRON}
+              </Link>
+              <Link href="/admin/eventos" className="account-row">
+                <span className="account-row-icon">{ICON_SALES}</span>
+                <span className="account-row-label">Eventos (vendas e contas)</span>
                 {CHEVRON}
               </Link>
             </div>

@@ -1708,6 +1708,65 @@
   color: var(--destructive);
 }
 
+/* ----- Admin: eventos (vendas + contas) ----- */
+.admin-events {
+  padding: 4px 16px 0;
+}
+.admin-summary {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 6px 4px 16px;
+}
+.admin-event-block {
+  margin-bottom: 22px;
+}
+.admin-event-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.admin-event-title {
+  font-family: var(--font-heading), "Fraunces", serif;
+  font-size: 17px;
+  color: var(--primary);
+}
+.admin-event-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border, #ece5dd);
+  border-radius: 12px;
+  background: white;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 9px 12px;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border, #f0eae2);
+}
+.admin-table th {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 /* ============================================================
    PERFIL
    ============================================================ */
