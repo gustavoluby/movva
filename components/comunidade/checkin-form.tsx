@@ -18,15 +18,44 @@ export function CheckinForm({
     {},
   );
   const [preview, setPreview] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Foto já comprimida/convertida pra JPEG, pronta pra enviar.
+  const photoRef = useRef<File | null>(null);
 
-  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    setPreview(file ? URL.createObjectURL(file) : null);
+    if (!file) {
+      photoRef.current = null;
+      setPreview(null);
+      return;
+    }
+    setCompressing(true);
+    try {
+      const compressed = await compressImage(file);
+      photoRef.current = compressed;
+      setPreview(URL.createObjectURL(compressed));
+    } catch {
+      // Se a compressão falhar, manda o original (a action ainda valida o tamanho).
+      photoRef.current = file;
+      setPreview(URL.createObjectURL(file));
+    } finally {
+      setCompressing(false);
+    }
+  }
+
+  // O input de arquivo NÃO tem name="photo": o original (que pode ter 8 MB+ e
+  // estourar o limite de 4.5 MB da Vercel) nunca entra no FormData. Em vez disso
+  // injetamos aqui a versão comprimida em JPEG.
+  function handleAction(formData: FormData) {
+    if (photoRef.current) {
+      formData.set("photo", photoRef.current, "checkin.jpg");
+    }
+    formAction(formData);
   }
 
   return (
-    <form action={formAction} className="checkin-form">
+    <form action={handleAction} className="checkin-form">
       <header className="checkin-head">
         <Link href="/comunidade" className="checkin-back" aria-label="Voltar">
           ←
@@ -65,7 +94,6 @@ export function CheckinForm({
       <input
         ref={fileRef}
         type="file"
-        name="photo"
         accept="image/*"
         hidden
         onChange={onPick}
@@ -120,9 +148,56 @@ export function CheckinForm({
         Seu check-in passa por uma aprovação rápida antes de aparecer no feed.
       </p>
 
-      <button type="submit" className="auth-submit" disabled={isPending}>
-        {isPending ? "Enviando..." : "Publicar check-in"}
+      <button
+        type="submit"
+        className="auth-submit"
+        disabled={isPending || compressing}
+      >
+        {compressing
+          ? "Preparando foto..."
+          : isPending
+            ? "Enviando..."
+            : "Publicar check-in"}
       </button>
     </form>
   );
+}
+
+// Redimensiona/comprime a imagem no navegador e exporta JPEG. Carrega via <img>
+// (o Safari decodifica HEIC do iPhone aqui) e desenha num canvas, então a saída
+// é sempre JPEG — converte HEIC e mantém o upload bem abaixo do limite da Vercel.
+async function compressImage(
+  file: File,
+  maxDim = 1600,
+  quality = 0.82,
+): Promise<File> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("decode falhou"));
+      el.src = url;
+    });
+
+    const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+    const w = Math.round(img.width * scale);
+    const h = Math.round(img.height * scale);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("sem contexto 2d");
+    ctx.drawImage(img, 0, 0, w, h);
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", quality),
+    );
+    if (!blob) throw new Error("toBlob falhou");
+
+    return new File([blob], "checkin.jpg", { type: "image/jpeg" });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }

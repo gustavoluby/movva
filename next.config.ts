@@ -9,10 +9,12 @@ const nextConfig: NextConfig = {
       dynamic: 30,
       static: 180,
     },
-    // Server Actions aceitam até 10 MB de body. O padrão do Next é só 1 MB,
-    // o que rejeitava upload de foto de celular (fotos têm 2–8 MB) antes mesmo
-    // do check de 8 MB na action rodar. 10 MB dá folga pro overhead do
-    // multipart e deixa o erro amigável de "máx. 8 MB" aparecer quando passa.
+    // O padrão do Next é 1 MB de body em Server Actions; subimos pra 10 MB.
+    // ATENÇÃO: a Vercel ainda impõe um teto de plataforma de ~4.5 MB no corpo
+    // da requisição (retorna 413 antes do Next), então isso sozinho não basta
+    // pra foto de celular (HEIC/alta resolução passa de 4.5 MB). A garantia
+    // real é a compressão no cliente (components/comunidade/checkin-form.tsx
+    // → compressImage), que reduz a foto pra ~centenas de KB antes do upload.
     serverActions: {
       bodySizeLimit: "10mb",
     },
