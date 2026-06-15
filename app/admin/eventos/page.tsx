@@ -27,6 +27,55 @@ type Buyer = {
   amountCents: number;
 };
 
+type EventRow = {
+  id: string;
+  title: string;
+  status: string | null;
+  buyers: Buyer[];
+  revenue: number;
+};
+
+function EventSalesBlock({ e }: { e: EventRow }) {
+  return (
+    <section className="admin-event-block">
+      <div className="admin-event-head">
+        <span className="admin-event-title">{e.title}</span>
+        <span className="admin-event-count">
+          {e.buyers.length} venda{e.buyers.length === 1 ? "" : "s"}
+          {e.revenue > 0 ? ` · ${formatPrice(e.revenue)}` : ""}
+        </span>
+      </div>
+
+      {e.buyers.length > 0 && (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>WhatsApp</th>
+                <th>Pago em</th>
+                <th>Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {e.buyers.map((b) => (
+                <tr key={`${e.id}-${b.userId}`}>
+                  <td>{b.name}</td>
+                  <td>{b.email}</td>
+                  <td>{b.phone}</td>
+                  <td>{fmtDate(b.paidAt)}</td>
+                  <td>{formatPrice(b.amountCents)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default async function AdminEventosPage({
   searchParams,
 }: {
@@ -86,13 +135,17 @@ export default async function AdminEventosPage({
     else buyersByEvent.set(b.event_id, [buyer]);
   }
 
-  const eventRows = (events ?? []).map((e) => {
+  const eventRows: EventRow[] = (events ?? []).map((e) => {
     const buyers = (buyersByEvent.get(e.id) ?? []).sort((a, b) =>
       (b.paidAt ?? "").localeCompare(a.paidAt ?? ""),
     );
     const revenue = buyers.reduce((s, b) => s + (b.amountCents ?? 0), 0);
-    return { ...e, buyers, revenue };
+    return { id: e.id, title: e.title, status: e.status, buyers, revenue };
   });
+
+  // Ativos = publicados (à venda); inativos = rascunhos/cancelados/etc.
+  const ativos = eventRows.filter((e) => e.status === "published");
+  const inativos = eventRows.filter((e) => e.status !== "published");
 
   const totalVendas = (paidBookings ?? []).length;
   const totalReceita = (paidBookings ?? []).reduce(
@@ -168,44 +221,31 @@ export default async function AdminEventosPage({
               {formatPrice(totalReceita)}
             </p>
 
-            {eventRows.map((e) => (
-              <section key={e.id} className="admin-event-block">
-                <div className="admin-event-head">
-                  <span className="admin-event-title">{e.title}</span>
-                  <span className="admin-event-count">
-                    {e.buyers.length} venda{e.buyers.length === 1 ? "" : "s"}
-                    {e.revenue > 0 ? ` · ${formatPrice(e.revenue)}` : ""}
-                  </span>
-                </div>
-
-                {e.buyers.length > 0 && (
-                  <div className="admin-table-wrap">
-                    <table className="admin-table">
-                      <thead>
-                        <tr>
-                          <th>Nome</th>
-                          <th>Email</th>
-                          <th>WhatsApp</th>
-                          <th>Pago em</th>
-                          <th>Valor</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {e.buyers.map((b) => (
-                          <tr key={`${e.id}-${b.userId}`}>
-                            <td>{b.name}</td>
-                            <td>{b.email}</td>
-                            <td>{b.phone}</td>
-                            <td>{fmtDate(b.paidAt)}</td>
-                            <td>{formatPrice(b.amountCents)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+            <details className="admin-group" open>
+              <summary className="admin-group-head">
+                Eventos ativos · {ativos.length}
+              </summary>
+              <div className="admin-group-body">
+                {ativos.length === 0 ? (
+                  <p className="admin-summary">Nenhum evento ativo.</p>
+                ) : (
+                  ativos.map((e) => <EventSalesBlock key={e.id} e={e} />)
                 )}
-              </section>
-            ))}
+              </div>
+            </details>
+
+            <details className="admin-group">
+              <summary className="admin-group-head">
+                Eventos inativos · {inativos.length}
+              </summary>
+              <div className="admin-group-body">
+                {inativos.length === 0 ? (
+                  <p className="admin-summary">Nenhum evento inativo.</p>
+                ) : (
+                  inativos.map((e) => <EventSalesBlock key={e.id} e={e} />)
+                )}
+              </div>
+            </details>
           </div>
         ) : (
           <div className="admin-events">

@@ -1712,6 +1712,39 @@
 .admin-events {
   padding: 4px 16px 0;
 }
+.admin-group {
+  border-top: 1px solid var(--border, #ece5dd);
+  padding: 4px 0;
+}
+.admin-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 2px;
+  font-family: var(--font-heading), "Fraunces", serif;
+  font-size: 16px;
+  color: var(--primary);
+}
+.admin-group-head::-webkit-details-marker {
+  display: none;
+}
+.admin-group-head::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+.admin-group[open] > .admin-group-head::before {
+  transform: rotate(45deg);
+}
+.admin-group-body {
+  padding-top: 6px;
+}
 .admin-summary {
   font-size: 13px;
   color: var(--text-muted);

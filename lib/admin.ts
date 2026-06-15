@@ -3,7 +3,11 @@ import "server-only";
 // Allowlist de admins por email, via env `ADMIN_EMAILS` (csv).
 // Sem coluna no banco — simples e reversível. Default cobre o Gustavo
 // pra não travar em dev/prod caso a env ainda não esteja setada.
-const DEFAULT_ADMINS = ["marketing@leadster.com.br", "gustavo@leadster.com.br"];
+const DEFAULT_ADMINS = [
+  "marketing@leadster.com.br",
+  "gustavo@leadster.com.br",
+  "nicolebenato@hotmail.com",
+];
 
 function adminList(): string[] {
   const fromEnv = (process.env.ADMIN_EMAILS ?? "")
