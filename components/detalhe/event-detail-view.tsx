@@ -31,7 +31,8 @@ export async function EventDetailView({
   if (!event) notFound();
 
   const availability = await getEventAvailability(event.id, event.capacity);
-  const ocupadas = Math.min(event.going_count ?? 0, availability.total);
+  // Contador = vendas reais (pagas), não going_count (que inclui seed/prova social).
+  const ocupadas = availability.sold;
 
   const [{ data: activities }, { data: hostLinks }] = await Promise.all([
     supabase

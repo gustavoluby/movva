@@ -55,8 +55,9 @@ export default async function DescobrirPage({
   const featured = visible.find((e) => e.is_featured) ?? visible[0];
   const others = visible.filter((e) => e.slug !== featured?.slug);
 
-  // Esgotamento por evento = vendas pagas (todas as usuárias → service-role).
-  // Uma query em lote pros eventos visíveis; deixa 1 vaga de reserva.
+  // Vendas pagas por evento (todas as usuárias → service-role). Uma query em
+  // lote. O contador exibido = vendas reais; esgota deixando 1 vaga de reserva.
+  const soldCount = new Map<string, number>();
   const soldOut = new Map<string, boolean>();
   if (visible.length > 0) {
     const admin = createAdminClient();
@@ -68,11 +69,10 @@ export default async function DescobrirPage({
         visible.map((e) => e.id),
       )
       .eq("payment_status", "paid");
-    const paidByEvent = new Map<string, number>();
     for (const r of paidRows ?? [])
-      paidByEvent.set(r.event_id, (paidByEvent.get(r.event_id) ?? 0) + 1);
+      soldCount.set(r.event_id, (soldCount.get(r.event_id) ?? 0) + 1);
     for (const e of visible)
-      soldOut.set(e.id, (paidByEvent.get(e.id) ?? 0) >= Math.max(0, e.capacity - 1));
+      soldOut.set(e.id, (soldCount.get(e.id) ?? 0) >= Math.max(0, e.capacity - 1));
   }
 
   return (
@@ -106,7 +106,7 @@ export default async function DescobrirPage({
             eventDate={featured.event_date}
             eventTime={featured.event_time}
             capacity={featured.capacity}
-            goingCount={featured.going_count ?? 0}
+            goingCount={soldCount.get(featured.id) ?? 0}
             soldOut={soldOut.get(featured.id) ?? false}
           />
         )}
@@ -136,7 +136,7 @@ export default async function DescobrirPage({
                   locationName={e.location_name}
                   priceCents={e.price_cents}
                   capacity={e.capacity}
-                  goingCount={e.going_count ?? 0}
+                  goingCount={soldCount.get(e.id) ?? 0}
                   soldOut={soldOut.get(e.id) ?? false}
                 />
               ))}
