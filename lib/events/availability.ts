@@ -9,6 +9,8 @@ export type Availability = {
   salesLimit: number;
   /** Esgotado quando as vendas pagas atingem o limite. */
   soldOut: boolean;
+  /** Atingiu 50% da capacidade — só aí vale mostrar o número de ocupadas. */
+  halfReached: boolean;
 };
 
 // "Venda" = reserva paga (payment_status='paid'). A contagem cruza TODAS as
@@ -28,5 +30,11 @@ export async function getEventAvailability(
 
   const sold = count ?? 0;
   const salesLimit = Math.max(0, capacity - 1);
-  return { sold, total: capacity, salesLimit, soldOut: sold >= salesLimit };
+  return {
+    sold,
+    total: capacity,
+    salesLimit,
+    soldOut: sold >= salesLimit,
+    halfReached: sold * 2 >= capacity,
+  };
 }

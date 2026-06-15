@@ -189,7 +189,9 @@ export async function EventDetailView({
                 <div>
                   {availability.soldOut
                     ? "Vagas esgotadas"
-                    : `${ocupadas} de ${availability.total} vagas`}
+                    : availability.halfReached
+                      ? `${ocupadas} de ${availability.total} vagas`
+                      : `${availability.total} vagas`}
                 </div>
               </div>
             </div>
