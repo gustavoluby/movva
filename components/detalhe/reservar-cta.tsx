@@ -15,7 +15,7 @@ function CtaContent() {
 
   return (
     <>
-      Reservar minha vaga
+      Comprar experiência
       <svg
         width="14"
         height="14"

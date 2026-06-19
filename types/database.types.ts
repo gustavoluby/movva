@@ -166,6 +166,7 @@ export type Database = {
           description: string | null
           discount_type: string
           discount_value: number
+          event_id: string | null
           first_purchase_only: boolean | null
           is_active: boolean | null
           max_uses: number | null
@@ -180,6 +181,7 @@ export type Database = {
           description?: string | null
           discount_type: string
           discount_value: number
+          event_id?: string | null
           first_purchase_only?: boolean | null
           is_active?: boolean | null
           max_uses?: number | null
@@ -194,6 +196,7 @@ export type Database = {
           description?: string | null
           discount_type?: string
           discount_value?: number
+          event_id?: string | null
           first_purchase_only?: boolean | null
           is_active?: boolean | null
           max_uses?: number | null
@@ -202,7 +205,15 @@ export type Database = {
           valid_from?: string | null
           valid_until?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "coupons_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_activities: {
         Row: {
@@ -1198,6 +1209,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_coupon_use: { Args: { p_code: string }; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }

@@ -38,11 +38,16 @@ export async function reconcilePayment(
       })
       .eq("id", bookingId)
       .neq("payment_status", "paid")
-      .select("id");
+      .select("id, coupon_code");
 
     // Só houve linha atualizada na transição REAL pending→paid. Isso dedup
-    // o email se o MP mandar o webhook 2x ou se o retorno reconciliar antes.
+    // o email (e o incremento do cupom) se o MP mandar o webhook 2x ou se o
+    // retorno reconciliar antes.
     if (updated && updated.length > 0) {
+      const couponCode = updated[0].coupon_code as string | null;
+      if (couponCode) {
+        await supabase.rpc("increment_coupon_use", { p_code: couponCode });
+      }
       await sendBookingConfirmationEmail(bookingId);
     }
   }

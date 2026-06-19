@@ -61,6 +61,13 @@ const ICON_SALES = (
   </svg>
 );
 
+const ICON_COUPON = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 9a3 3 0 0 0 0 6v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2Z" />
+    <line x1="9" y1="9" x2="15" y2="15" />
+  </svg>
+);
+
 export default async function PerfilPage() {
   const supabase = await createClient();
   const {
@@ -134,6 +141,11 @@ export default async function PerfilPage() {
               <Link href="/admin/eventos" className="account-row">
                 <span className="account-row-icon">{ICON_SALES}</span>
                 <span className="account-row-label">Eventos (vendas e contas)</span>
+                {CHEVRON}
+              </Link>
+              <Link href="/admin/cupons" className="account-row">
+                <span className="account-row-icon">{ICON_COUPON}</span>
+                <span className="account-row-label">Cupons de desconto</span>
                 {CHEVRON}
               </Link>
             </div>

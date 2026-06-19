@@ -5,7 +5,7 @@ import { formatEventDate, formatPrice } from "@/lib/utils/date";
 import { reconcilePayment } from "@/lib/payments/mercadopago-reconcile";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { getEventAvailability } from "@/lib/events/availability";
-import { PagarButton } from "./pagar-button";
+import { CheckoutForm } from "./checkout-form";
 
 type Params = { slug: string };
 type Query = { payment_id?: string; status?: string; collection_status?: string };
@@ -139,13 +139,6 @@ export default async function ReservarPage({
 
           {eventCard}
 
-          <div className="reservar-price-row">
-            <span className="reservar-price-label">total</span>
-            <span className="reservar-price">
-              {formatPrice(booking?.amount_cents ?? event.price_cents)}
-            </span>
-          </div>
-
           {returnState === "pending" && (
             <div className="reservar-pix-placeholder">
               <div className="reservar-pix-label">pagamento em processamento</div>
@@ -156,7 +149,7 @@ export default async function ReservarPage({
             </div>
           )}
 
-          <PagarButton slug={event.slug} />
+          <CheckoutForm slug={event.slug} basePriceCents={event.price_cents} />
 
           <Link href={`/eventos/${event.slug}`} className="reservar-back">
             ← Voltar pro evento
