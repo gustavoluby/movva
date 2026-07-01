@@ -35,6 +35,27 @@ export async function validarCupom(
   return validateCoupon(code, event.id, event.price_cents);
 }
 
+// Quebra o nome completo em nome + sobrenome pro payer do Mercado Pago. O
+// antifraude do MP usa esses campos pra pontuar o risco da transação.
+function splitName(full: string | null): { name: string; surname: string } {
+  const parts = (full ?? "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { name: "", surname: "" };
+  if (parts.length === 1) return { name: parts[0], surname: "" };
+  return { name: parts[0], surname: parts.slice(1).join(" ") };
+}
+
+// Converte o telefone salvo (texto livre digitado no signup) pro formato que o
+// MP espera: { area_code, number }. Remove o DDI 55 se veio junto.
+function parsePhone(
+  raw: string | null,
+): { area_code: string; number: string } | undefined {
+  const digits = (raw ?? "").replace(/\D/g, "");
+  const local =
+    digits.length > 11 && digits.startsWith("55") ? digits.slice(2) : digits;
+  if (local.length < 10) return undefined;
+  return { area_code: local.slice(0, 2), number: local.slice(2) };
+}
+
 // Cria a preferência de Checkout Pro no Mercado Pago pra uma reserva e devolve
 // a URL do checkout (Pix + cartão). A confirmação volta via webhook +
 // reconferência no retorno (ver page.tsx).
@@ -44,6 +65,11 @@ async function criarPreferencia(args: {
   itemId: string;
   title: string;
   unitPriceCents: number;
+  // Dados do comprador — enviados ao antifraude do MP pra reduzir recusas
+  // "cc_rejected_high_risk" (pagamento recusado como suspeito).
+  payerEmail: string;
+  payerName: string | null;
+  payerPhone: string | null;
 }): Promise<string> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
@@ -52,17 +78,31 @@ async function criarPreferencia(args: {
   const origin = `${proto}://${host}`;
   const backUrl = `${origin}/reservar/${args.slug}`;
 
+  const { name, surname } = splitName(args.payerName);
+  const phone = parsePhone(args.payerPhone);
+
   const pref = await new Preference(mpClient()).create({
     body: {
       items: [
         {
           id: args.itemId,
           title: args.title,
+          description: `Ingresso — ${args.title}`,
+          category_id: "tickets",
           quantity: 1,
           unit_price: args.unitPriceCents / 100,
           currency_id: "BRL",
         },
       ],
+      // Comprador: sem esses dados o antifraude do MP fica sem sinal e recusa
+      // compras legítimas como suspeitas. Só manda o que existe no perfil.
+      payer: {
+        email: args.payerEmail,
+        ...(name ? { name } : {}),
+        ...(surname ? { surname } : {}),
+        ...(phone ? { phone } : {}),
+      },
+      statement_descriptor: "MOODPASS",
       // Liga a cobrança à reserva — o webhook usa isso pra achar a booking.
       external_reference: args.bookingId,
       back_urls: { success: backUrl, pending: backUrl, failure: backUrl },
@@ -97,6 +137,14 @@ export async function reservarEPagar(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Você precisa entrar pra reservar." };
+
+  // Perfil do comprador pro payer do MP (antifraude). Best-effort: se faltar,
+  // manda só o email do auth.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, phone")
+    .eq("id", user.id)
+    .maybeSingle();
 
   const { data: event } = await supabase
     .from("events")
@@ -184,6 +232,9 @@ export async function reservarEPagar(
       itemId: event.id,
       title: event.title,
       unitPriceCents: booking.amount_cents ?? event.price_cents,
+      payerEmail: user.email ?? "",
+      payerName: profile?.full_name ?? null,
+      payerPhone: profile?.phone ?? null,
     });
   } catch (err) {
     console.error("[reservarEPagar] erro criando preferência:", err);
