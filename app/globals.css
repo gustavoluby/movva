@@ -4,6 +4,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Conteúdo só pra leitores de tela / crawlers — visível no HTML, fora da tela.
+   Usado pra H1/parágrafos de SEO+GEO sem alterar o layout visual. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -692,6 +706,35 @@
   color: var(--text);
   line-height: 1.6;
   margin-bottom: 20px;
+}
+
+/* FAQ do evento (SEO/GEO: também vira FAQPage JSON-LD com paridade). */
+.faq-section { margin-top: 24px; }
+.faq-title {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+.faq-list { display: flex; flex-direction: column; gap: 12px; }
+.faq-item {
+  border-bottom: 1px solid var(--border-soft);
+  padding-bottom: 12px;
+}
+.faq-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.faq-q {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.faq-a {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
 }
 
 .hosts-section { margin-top: 18px; }

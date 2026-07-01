@@ -7,6 +7,14 @@ import { ReservarCta } from "@/components/detalhe/reservar-cta";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
 import { getEventAvailability } from "@/lib/events/availability";
+import { JsonLd } from "@/components/seo/json-ld";
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_CITY,
+  SITE_REGION,
+  absoluteUrl,
+} from "@/lib/site";
 
 // Corpo do detalhe do evento compartilhado pela página cheia (/eventos/[slug])
 // e pelo modal (intercepting route). O que muda entre os dois é só o wrapper
@@ -23,7 +31,7 @@ export async function EventDetailView({
   const { data: event } = await supabase
     .from("events")
     .select(
-      "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, duration, location_name, location_short, price_cents, capacity, going_count, image_url, tag, tag_style, host_summary, host_photo_url",
+      "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, duration, location_name, location_short, location_address, location_lat, location_lng, price_cents, capacity, going_count, image_url, tag, tag_style, host_summary, host_photo_url",
     )
     .eq("slug", slug)
     .eq("status", "published")
@@ -84,8 +92,148 @@ export async function EventDetailView({
     saved = !!savedRow;
   }
 
+  // ---- SEO / GEO -----------------------------------------------------------
+  const eventUrl = absoluteUrl(`/eventos/${event.slug}`);
+  const reservarUrl = absoluteUrl(`/reservar/${event.slug}`);
+  const dateLabel = formatEventDate(event.event_date);
+  const priceLabel = formatPrice(event.price_cents);
+  const localFull = event.location_short
+    ? `${event.location_name}, ${event.location_short}`
+    : event.location_name;
+
+  // startDate ISO: usa a 1ª hora encontrada no event_time livre (ex.: "10h",
+  // "19h às 22h"); se não achar, fica só a data.
+  const hourMatch = event.event_time?.match(/(\d{1,2})\s*h/);
+  const startHour = hourMatch ? hourMatch[1].padStart(2, "0") : null;
+  const startDate = startHour
+    ? `${event.event_date}T${startHour}:00:00-03:00`
+    : event.event_date;
+
+  // Fatos autocontidos (declarativos) pra extração por IA.
+  const factsSentence = `O ${event.title} acontece em ${dateLabel}${
+    event.event_time ? `, ${event.event_time}` : ""
+  }, no ${event.location_name}, em ${SITE_CITY}, ${SITE_REGION}. O ingresso custa ${priceLabel} por pessoa e há ${event.capacity} vagas.`;
+
+  // FAQ — construído uma vez e usado tanto no HTML visível quanto no FAQPage
+  // (paridade obrigatória do Google).
+  const activityNames = (activities ?? []).map((a) => a.name).filter(Boolean);
+  const faq: { q: string; a: string }[] = [
+    {
+      q: `Quando acontece o ${event.title}?`,
+      a: `${dateLabel}${event.event_time ? `, ${event.event_time}` : ""}, em ${SITE_CITY}, ${SITE_REGION}.`,
+    },
+    {
+      q: `Onde acontece o ${event.title}?`,
+      a: `No ${event.location_name}${
+        event.location_short ? ` (${event.location_short})` : ""
+      }, em ${SITE_CITY}, ${SITE_REGION}.${
+        event.location_address ? ` ${event.location_address}.` : ""
+      }`,
+    },
+    {
+      q: "Quanto custa?",
+      a: `${priceLabel} por pessoa.`,
+    },
+    ...(activityNames.length > 0
+      ? [
+          {
+            q: "O que está incluso?",
+            a: `${activityNames.join(", ")}.`,
+          },
+        ]
+      : event.subtitle
+        ? [{ q: "O que está incluso?", a: `${event.subtitle}.` }]
+        : []),
+    {
+      q: "Quantas vagas?",
+      a: `${event.capacity} vagas. Turma reduzida.`,
+    },
+  ];
+
+  const eventLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    description: event.description || event.subtitle || event.title,
+    startDate,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    ...(event.image_url ? { image: [event.image_url] } : {}),
+    url: eventUrl,
+    maximumAttendeeCapacity: event.capacity,
+    location: {
+      "@type": "Place",
+      name: event.location_name,
+      address: {
+        "@type": "PostalAddress",
+        ...(event.location_address
+          ? { streetAddress: event.location_address }
+          : {}),
+        addressLocality: SITE_CITY,
+        addressRegion: SITE_REGION,
+        addressCountry: "BR",
+      },
+      ...(event.location_lat != null && event.location_lng != null
+        ? {
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: event.location_lat,
+              longitude: event.location_lng,
+            },
+          }
+        : {}),
+    },
+    organizer: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    ...(hosts.length > 0
+      ? {
+          performer: hosts.map((l) => ({
+            "@type": "Person",
+            name: l.hosts?.name,
+          })),
+        }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      price: (event.price_cents / 100).toFixed(2),
+      priceCurrency: "BRL",
+      availability: availability.soldOut
+        ? "https://schema.org/SoldOut"
+        : "https://schema.org/InStock",
+      url: reservarUrl,
+    },
+  };
+
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Início", item: SITE_URL },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: event.title,
+        item: eventUrl,
+      },
+    ],
+  };
+
   return (
     <>
+      <JsonLd data={[eventLd, faqLd, breadcrumbLd]} />
       <div className="scroll-area with-cta">
         <div className="detail-hero">
           {event.image_url && (
@@ -117,10 +265,14 @@ export async function EventDetailView({
             </span>
           )}
 
-          <h1 className="detail-title">{event.title}</h1>
+          <h1 className="detail-title">
+            {event.title}
+            <span className="sr-only"> em {SITE_CITY}</span>
+          </h1>
           {event.subtitle && (
             <div className="detail-subtitle">{event.subtitle}</div>
           )}
+          <p className="sr-only">{factsSentence}</p>
 
           <div className="detail-meta-block">
             <div className="detail-meta-item">
@@ -144,8 +296,10 @@ export async function EventDetailView({
               <div>
                 <div className="meta-item-label">quando</div>
                 <div>
-                  {formatEventDate(event.event_date)}
-                  {event.event_time ? ` · ${event.event_time}` : ""}
+                  <time dateTime={startDate}>
+                    {formatEventDate(event.event_date)}
+                    {event.event_time ? ` · ${event.event_time}` : ""}
+                  </time>
                 </div>
               </div>
             </div>
@@ -257,6 +411,20 @@ export async function EventDetailView({
                 })}
               </div>
             </div>
+          )}
+
+          {faq.length > 0 && (
+            <section className="faq-section">
+              <h2 className="faq-title">Perguntas frequentes</h2>
+              <dl className="faq-list">
+                {faq.map((f, idx) => (
+                  <div key={idx} className="faq-item">
+                    <dt className="faq-q">{f.q}</dt>
+                    <dd className="faq-a">{f.a}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
           )}
 
           <div style={{ marginTop: 18 }}>

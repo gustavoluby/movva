@@ -1,9 +1,23 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FeaturedCard } from "@/components/descobrir/featured-card";
 import { EventCard } from "@/components/descobrir/event-card";
 import { CategoryChips } from "@/components/descobrir/category-chips";
 import { CATEGORY_DEFS, eventCategories } from "@/lib/categories";
+import { JsonLd } from "@/components/seo/json-ld";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, absoluteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Experiências de bem-estar para mulheres em Curitiba",
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    url: SITE_URL,
+    title: `${SITE_NAME} · Experiências de bem-estar para mulheres em Curitiba`,
+    description: SITE_DESCRIPTION,
+  },
+};
 
 export default async function DescobrirPage({
   searchParams,
@@ -77,8 +91,31 @@ export default async function DescobrirPage({
 
   return (
     <div className="scroll-area with-nav">
+      {list.length > 0 && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: "Próximas experiências da Moodpass em Curitiba",
+            itemListElement: list.map((e, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              url: absoluteUrl(`/eventos/${e.slug}`),
+              name: e.title,
+            })),
+          }}
+        />
+      )}
       <header className="home-header">
           <div>
+            <h1 className="sr-only">
+              Experiências de bem-estar para mulheres em Curitiba
+            </h1>
+            <p className="sr-only">
+              A Moodpass é uma curadoria de experiências de bem-estar para
+              mulheres em Curitiba, PR — yoga, autocuidado, drenagem, brunchs e
+              encontros em turmas pequenas.
+            </p>
             <div className="greeting-label">bem vinda ao</div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
