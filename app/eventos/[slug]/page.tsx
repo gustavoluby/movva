@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EventDetailView } from "@/components/detalhe/event-detail-view";
-import { createClient } from "@/lib/supabase/server";
+import { getEventBySlug } from "@/lib/events/get-event";
 import {
   SITE_NAME,
   SITE_CITY,
@@ -20,15 +20,7 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data: event } = await supabase
-    .from("events")
-    .select(
-      "title, subtitle, description, event_date, price_cents, location_name, location_short, image_url",
-    )
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
+  const event = await getEventBySlug(slug);
 
   if (!event) {
     return { title: "Evento não encontrado" };

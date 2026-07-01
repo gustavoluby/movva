@@ -7,6 +7,7 @@ import { ReservarCta } from "@/components/detalhe/reservar-cta";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
 import { getEventAvailability } from "@/lib/events/availability";
+import { getEventBySlug } from "@/lib/events/get-event";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
   SITE_NAME,
@@ -28,32 +29,45 @@ export async function EventDetailView({
 }) {
   const supabase = await createClient();
 
-  const { data: event } = await supabase
-    .from("events")
-    .select(
-      "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, duration, location_name, location_short, location_address, location_lat, location_lng, price_cents, capacity, going_count, image_url, tag, tag_style, host_summary, host_photo_url",
-    )
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
+  // Evento (via cache compartilhado com o generateMetadata) e sessão em
+  // paralelo — getUser() não depende do evento.
+  const [event, userRes] = await Promise.all([
+    getEventBySlug(slug),
+    supabase.auth.getUser(),
+  ]);
 
   if (!event) notFound();
 
-  const availability = await getEventAvailability(event.id, event.capacity);
+  const user = userRes.data.user;
+
+  // Tudo que depende só do evento (e da sessão, no caso do "saved") dispara
+  // junto — colapsa a cascata de ~5 idas ao servidor pra 2 camadas.
+  const [availability, { data: activities }, { data: hostLinks }, savedRow] =
+    await Promise.all([
+      getEventAvailability(event.id, event.capacity),
+      supabase
+        .from("event_activities")
+        .select("icon, name, duration, sort_order")
+        .eq("event_id", event.id)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("event_hosts")
+        .select("role, hosts(name, bio, photo_url)")
+        .eq("event_id", event.id),
+      user
+        ? supabase
+            .from("saved_events")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("event_id", event.id)
+            .maybeSingle()
+            .then(({ data }) => data)
+        : Promise.resolve(null),
+    ]);
+
   // Contador = vendas reais (pagas), não going_count (que inclui seed/prova social).
   const ocupadas = availability.sold;
-
-  const [{ data: activities }, { data: hostLinks }] = await Promise.all([
-    supabase
-      .from("event_activities")
-      .select("icon, name, duration, sort_order")
-      .eq("event_id", event.id)
-      .order("sort_order", { ascending: true }),
-    supabase
-      .from("event_hosts")
-      .select("role, hosts(name, bio, photo_url)")
-      .eq("event_id", event.id),
-  ]);
+  const saved = !!savedRow;
 
   // Ordena: anfitriãs primeiro, depois professora/palestrante.
   const roleRank = (role: string | null) =>
@@ -76,21 +90,6 @@ export async function EventDetailView({
             ? "Palestrante"
             : "Co-anfitriã";
   const isMultiHost = hosts.length > 1;
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  let saved = false;
-  if (user) {
-    const { data: savedRow } = await supabase
-      .from("saved_events")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("event_id", event.id)
-      .maybeSingle();
-    saved = !!savedRow;
-  }
 
   // ---- SEO / GEO -----------------------------------------------------------
   const eventUrl = absoluteUrl(`/eventos/${event.slug}`);

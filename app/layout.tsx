@@ -16,7 +16,9 @@ import {
 const manrope = Manrope({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  // Peso 300 removido — não é usado em lugar nenhum (menos 1 arquivo de fonte
+  // no primeiro paint).
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
