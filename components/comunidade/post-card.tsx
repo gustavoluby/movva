@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { timeAgo, shortDay } from "@/lib/utils/date";
 import {
   toggleLike,
@@ -166,8 +167,13 @@ export function PostCard({
 
       {post.photoUrl && (
         <div className="post-photo">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={post.photoUrl} alt="" />
+          <Image
+            src={post.photoUrl}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, 500px"
+            style={{ objectFit: "cover" }}
+          />
           {post.locationName && maps ? (
             <a
               className="post-pill post-pill-link"

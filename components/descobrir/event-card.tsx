@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   eventStartTime,
   eventWeekday,
@@ -41,10 +42,16 @@ export function EventCard({
 }: EventCardProps) {
   return (
     <Link href={`/eventos/${slug}`} className="event-card">
-      <div
-        className="event-card-img"
-        style={imageUrl ? { backgroundImage: `url('${imageUrl}')` } : undefined}
-      >
+      <div className="event-card-img">
+        {imageUrl && (
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            sizes="(max-width: 640px) 100vw, 400px"
+            style={{ objectFit: "cover" }}
+          />
+        )}
         {tag && (
           <span
             className={`ec-tag${tagStyle === "accent" ? " accent" : ""}`}

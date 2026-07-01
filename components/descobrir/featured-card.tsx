@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { eventStartTime, eventWeekday } from "@/lib/utils/date";
 
 type FeaturedCardProps = {
@@ -27,11 +28,17 @@ export function FeaturedCard({
   const vagasLeft = Math.max(0, capacity - goingCount);
 
   return (
-    <Link
-      href={`/eventos/${slug}`}
-      className="featured-card"
-      style={imageUrl ? { backgroundImage: `url('${imageUrl}')` } : undefined}
-    >
+    <Link href={`/eventos/${slug}`} className="featured-card">
+      {imageUrl && (
+        <Image
+          src={imageUrl}
+          alt={title}
+          fill
+          priority
+          sizes="(max-width: 640px) 100vw, 600px"
+          style={{ objectFit: "cover" }}
+        />
+      )}
       <span className="featured-tag">Destaque da semana</span>
       <div className="featured-bookmark" aria-hidden>
         <svg

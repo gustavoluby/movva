@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    // Hosts das imagens remotas, pra o next/image poder otimizar (resize + WebP
+    // + lazy). Storage do Supabase (fotos de evento/perfil/feed) e pravatar
+    // (avatares seed de anfitriã).
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "ikoehiplcpekvexnmhgs.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      { protocol: "https", hostname: "i.pravatar.cc" },
+    ],
+  },
   experimental: {
     // Cache de navegação do client: ao voltar pra uma aba já visitada dentro
     // desse tempo, o Next reusa o render em vez de rebuscar no Supabase —

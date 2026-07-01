@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ActivityIcon } from "@/components/detalhe/activity-icon";
@@ -86,14 +87,17 @@ export async function EventDetailView({
   return (
     <>
       <div className="scroll-area with-cta">
-        <div
-          className="detail-hero"
-          style={
-            event.image_url
-              ? { backgroundImage: `url('${event.image_url}')` }
-              : undefined
-          }
-        >
+        <div className="detail-hero">
+          {event.image_url && (
+            <Image
+              src={event.image_url}
+              alt={event.title}
+              fill
+              priority
+              sizes="(max-width: 640px) 100vw, 640px"
+              style={{ objectFit: "cover" }}
+            />
+          )}
           <div className="hero-actions">
             {backSlot}
             <EventHeroActions
