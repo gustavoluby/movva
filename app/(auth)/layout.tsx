@@ -11,7 +11,13 @@ export default function AuthLayout({
         ← Voltar pra Experiências
       </Link>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/moodpass-logo.png" alt="Moodpass" className="auth-logo-img" />
+      <img
+        src="/moodpass-logo.webp"
+        alt="Moodpass"
+        className="auth-logo-img"
+        width={156}
+        height={96}
+      />
       <div className="auth-tagline">experiências pra florescer juntas</div>
       {children}
     </div>

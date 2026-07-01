@@ -82,9 +82,11 @@ export default async function DescobrirPage({
             <div className="greeting-label">bem vinda ao</div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/moodpass-logo-horizontal.png"
+              src="/moodpass-logo-horizontal.webp"
               alt="Moodpass"
               className="home-logo-img"
+              width={121}
+              height={30}
             />
           </div>
         </header>
@@ -130,7 +132,7 @@ export default async function DescobrirPage({
                   catTag={e.cat_tag}
                   tag={e.tag}
                   tagStyle={e.tag_style}
-                  imageUrl={e.image_url}
+                  imageUrl={e.thumb_url ?? e.image_url}
                   eventDate={e.event_date}
                   eventTime={e.event_time}
                   locationName={e.location_name}
