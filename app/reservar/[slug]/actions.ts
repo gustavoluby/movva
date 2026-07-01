@@ -56,6 +56,20 @@ function parsePhone(
   return { area_code: local.slice(0, 2), number: local.slice(2) };
 }
 
+// Valida CPF (11 dígitos + dígitos verificadores). Rejeita sequências iguais.
+export function isValidCpf(raw: string): boolean {
+  const cpf = (raw ?? "").replace(/\D/g, "");
+  if (cpf.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
+  const digit = (len: number) => {
+    let sum = 0;
+    for (let i = 0; i < len; i++) sum += Number(cpf[i]) * (len + 1 - i);
+    const d = (sum * 10) % 11;
+    return d === 10 ? 0 : d;
+  };
+  return digit(9) === Number(cpf[9]) && digit(10) === Number(cpf[10]);
+}
+
 // Cria a preferência de Checkout Pro no Mercado Pago pra uma reserva e devolve
 // a URL do checkout (Pix + cartão). A confirmação volta via webhook +
 // reconferência no retorno (ver page.tsx).
@@ -70,6 +84,7 @@ async function criarPreferencia(args: {
   payerEmail: string;
   payerName: string | null;
   payerPhone: string | null;
+  payerCpf: string; // só dígitos, já validado no reservarEPagar
 }): Promise<string> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
@@ -101,6 +116,9 @@ async function criarPreferencia(args: {
         ...(name ? { name } : {}),
         ...(surname ? { surname } : {}),
         ...(phone ? { phone } : {}),
+        // CPF é o sinal antifraude mais forte — reduz a recusa de cartão de
+        // comprador/dispositivo desconhecido.
+        identification: { type: "CPF", number: args.payerCpf },
       },
       statement_descriptor: "MOODPASS",
       // Referência única por tentativa: `${bookingId}:${timestamp}`. Duas
@@ -142,6 +160,13 @@ export async function reservarEPagar(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Você precisa entrar pra reservar." };
+
+  // CPF do pagador: obrigatório e validado no servidor (nunca confia no client).
+  // Vai pro payer.identification do MP — principal sinal antifraude. Não é salvo.
+  const cpf = String(formData.get("cpf") ?? "").replace(/\D/g, "");
+  if (!isValidCpf(cpf)) {
+    return { error: "Informe um CPF válido pra concluir o pagamento." };
+  }
 
   // Perfil do comprador pro payer do MP (antifraude). Best-effort: se faltar,
   // manda só o email do auth.
@@ -240,6 +265,7 @@ export async function reservarEPagar(
       payerEmail: user.email ?? "",
       payerName: profile?.full_name ?? null,
       payerPhone: profile?.phone ?? null,
+      payerCpf: cpf,
     });
   } catch (err) {
     console.error("[reservarEPagar] erro criando preferência:", err);

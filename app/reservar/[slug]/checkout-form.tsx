@@ -27,6 +27,13 @@ export function CheckoutForm({
   const [couponErr, setCouponErr] = useState<string | null>(null);
   const [validating, startValidate] = useTransition();
 
+  // CPF do pagador — enviado ao antifraude do MP (payer.identification). É o
+  // sinal que mais reduz a recusa "pagamento suspeito" no cartão. Não guardamos
+  // no banco; só repassamos pro MP na cobrança.
+  const [cpf, setCpf] = useState("");
+  const cpfDigits = cpf.replace(/\D/g, "");
+  const cpfOk = cpfDigits.length === 11;
+
   const finalCents = applied?.finalCents ?? basePriceCents;
 
   function aplicar() {
@@ -53,6 +60,16 @@ export function CheckoutForm({
     setCode("");
     setCouponErr(null);
     setOpen(false);
+  }
+
+  // Máscara 000.000.000-00 enquanto digita (guarda só dígitos no submit).
+  function formatCpf(v: string) {
+    const d = v.replace(/\D/g, "").slice(0, 11);
+    if (d.length > 9)
+      return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+    if (d.length > 6) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+    if (d.length > 3) return `${d.slice(0, 3)}.${d.slice(3)}`;
+    return d;
   }
 
   return (
@@ -121,10 +138,46 @@ export function CheckoutForm({
         {couponErr && <p className="coupon-error">{couponErr}</p>}
       </div>
 
+      <div className="coupon-block" style={{ marginTop: 4 }}>
+        <label
+          htmlFor="checkout-cpf"
+          style={{
+            display: "block",
+            fontSize: 13,
+            fontWeight: 600,
+            marginBottom: 6,
+          }}
+        >
+          CPF do pagador
+        </label>
+        <input
+          id="checkout-cpf"
+          className="coupon-input"
+          style={{ width: "100%" }}
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder="000.000.000-00"
+          value={cpf}
+          onChange={(e) => setCpf(formatCpf(e.target.value))}
+        />
+        <p
+          className="reservar-subtitle"
+          style={{ margin: "6px 0 0", fontSize: 12, opacity: 0.7 }}
+        >
+          Necessário pra aprovar o pagamento (o Mercado Pago usa pra confirmar
+          sua identidade). Não fica salvo no app.
+        </p>
+      </div>
+
       <form action={formAction}>
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="coupon" value={applied?.code ?? ""} />
-        <button className="cta-btn" type="submit" disabled={paying}>
+        <input type="hidden" name="cpf" value={cpfDigits} />
+        <button
+          className="cta-btn"
+          type="submit"
+          disabled={paying || !cpfOk}
+        >
           {paying ? "Abrindo pagamento…" : "Pagar com Pix ou cartão"}
           {!paying && (
             <svg
