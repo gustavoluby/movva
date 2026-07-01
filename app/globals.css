@@ -824,6 +824,28 @@
 .wa-btn:active { transform: scale(0.98); }
 .wa-btn:hover { filter: brightness(0.97); }
 
+/* Variante discreta: "tem uma dúvida?" — pílula suave, não compete com o CTA. */
+.wa-help {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 12px 18px;
+  background: rgba(37, 211, 102, 0.08);
+  color: #0f8a45;
+  border: 1px solid rgba(37, 211, 102, 0.28);
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+.wa-help svg { color: #25d366; }
+.wa-help:active { transform: scale(0.99); }
+.wa-help:hover { background: rgba(37, 211, 102, 0.14); }
+
 /* ============================================================
    Auth screens (login / signup)
    ============================================================ */
@@ -2041,6 +2063,84 @@
 }
 .admin-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* ----- Contas criadas (cards) ----- */
+.admin-conta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.admin-conta-card {
+  border: 1px solid var(--border, #ece5dd);
+  border-radius: 14px;
+  background: white;
+  padding: 14px 16px;
+}
+.admin-conta-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.admin-conta-name {
+  font-family: var(--font-heading), "Fraunces", serif;
+  font-size: 17px;
+  color: var(--primary);
+}
+.admin-conta-badges {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.admin-conta-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.admin-conta-badge.verified {
+  background: #eef7ee;
+  color: #2f7d32;
+}
+.admin-conta-badge.inactive {
+  background: #f6ece9;
+  color: #b04a3a;
+}
+.admin-conta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+.admin-conta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.admin-conta-field-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.admin-conta-field-value {
+  font-size: 13px;
+  color: var(--primary);
+  overflow-wrap: anywhere;
+}
+.admin-conta-bio {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border, #f0eae2);
+  font-size: 13px;
+  color: var(--primary);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 /* ============================================================
