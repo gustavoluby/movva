@@ -57,7 +57,8 @@ function parsePhone(
 }
 
 // Valida CPF (11 dígitos + dígitos verificadores). Rejeita sequências iguais.
-export function isValidCpf(raw: string): boolean {
+// Não exportada: num arquivo "use server" todo export precisa ser async.
+function isValidCpf(raw: string): boolean {
   const cpf = (raw ?? "").replace(/\D/g, "");
   if (cpf.length !== 11) return false;
   if (/^(\d)\1{10}$/.test(cpf)) return false;
