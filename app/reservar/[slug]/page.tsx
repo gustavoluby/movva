@@ -151,6 +151,15 @@ export default async function ReservarPage({
 
           <CheckoutForm slug={event.slug} basePriceCents={event.price_cents} />
 
+          <div style={{ marginTop: 14 }}>
+            <WhatsAppButton
+              context="event-question"
+              eventTitle={event.title}
+              label="Tem uma dúvida ou precisa de ajuda?"
+              variant="help"
+            />
+          </div>
+
           <Link href={`/eventos/${event.slug}`} className="reservar-back">
             ← Voltar pro evento
           </Link>

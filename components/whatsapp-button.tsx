@@ -7,14 +7,17 @@ const WA_ICON = (
 );
 
 // Botão verde do WhatsApp pra UI (server-render: o link vem de env server-side).
+// `variant`: "solid" (verde cheio, ação) ou "help" (pílula suave, discreta).
 export function WhatsAppButton({
   context,
   eventTitle,
   label,
+  variant = "solid",
 }: {
   context: WhatsAppContext;
   eventTitle?: string;
   label: string;
+  variant?: "solid" | "help";
 }) {
   const href = getMoodpassWhatsAppLink({ context, eventTitle });
   return (
@@ -22,7 +25,7 @@ export function WhatsAppButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="wa-btn"
+      className={variant === "help" ? "wa-help" : "wa-btn"}
     >
       {WA_ICON}
       {label}
