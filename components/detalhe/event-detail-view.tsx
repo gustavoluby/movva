@@ -97,9 +97,21 @@ export async function EventDetailView({
   const reservarUrl = absoluteUrl(`/reservar/${event.slug}`);
   const dateLabel = formatEventDate(event.event_date);
   const priceLabel = formatPrice(event.price_cents);
-  const localFull = event.location_short
-    ? `${event.location_name}, ${event.location_short}`
-    : event.location_name;
+  // location_short às vezes repete o nome do local (não é o bairro); só usa
+  // como complemento se de fato diferir do location_name.
+  const bairro =
+    event.location_short &&
+    event.location_short.toLowerCase() !== event.location_name.toLowerCase()
+      ? event.location_short
+      : null;
+
+  // Endereço: separa o CEP (postalCode) do logradouro (streetAddress).
+  const cepMatch = event.location_address?.match(/\d{5}-?\d{3}/);
+  const postalCode = cepMatch ? cepMatch[0] : null;
+  const streetAddress =
+    event.location_address?.replace(/,?\s*\d{5}-?\d{3}\s*$/, "").trim() ||
+    event.location_address ||
+    null;
 
   // startDate ISO: usa a 1ª hora encontrada no event_time livre (ex.: "10h",
   // "19h às 22h"); se não achar, fica só a data.
@@ -125,7 +137,7 @@ export async function EventDetailView({
     {
       q: `Onde acontece o ${event.title}?`,
       a: `No ${event.location_name}${
-        event.location_short ? ` (${event.location_short})` : ""
+        bairro ? ` (${bairro})` : ""
       }, em ${SITE_CITY}, ${SITE_REGION}.${
         event.location_address ? ` ${event.location_address}.` : ""
       }`,
@@ -166,9 +178,8 @@ export async function EventDetailView({
       name: event.location_name,
       address: {
         "@type": "PostalAddress",
-        ...(event.location_address
-          ? { streetAddress: event.location_address }
-          : {}),
+        ...(streetAddress ? { streetAddress } : {}),
+        ...(postalCode ? { postalCode } : {}),
         addressLocality: SITE_CITY,
         addressRegion: SITE_REGION,
         addressCountry: "BR",

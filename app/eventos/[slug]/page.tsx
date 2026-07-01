@@ -37,8 +37,13 @@ export async function generateMetadata({
   const url = absoluteUrl(`/eventos/${slug}`);
   const dateStr = formatEventDate(event.event_date);
   const priceStr = formatPrice(event.price_cents);
-  const local = event.location_short
-    ? `${event.location_name}, ${event.location_short}`
+  const bairro =
+    event.location_short &&
+    event.location_short.toLowerCase() !== event.location_name.toLowerCase()
+      ? event.location_short
+      : null;
+  const local = bairro
+    ? `${event.location_name}, ${bairro}`
     : event.location_name;
 
   const title = `${event.title} em ${SITE_CITY} · ${dateStr}`;
