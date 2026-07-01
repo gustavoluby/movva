@@ -24,8 +24,9 @@ export const SITE_REGION = "PR";
 export const WHATSAPP_NUMBER = "5541999458878";
 
 // Perfis sociais oficiais pra sameAs (desambiguação de entidade).
-// TODO: preencher com o Instagram oficial da marca quando confirmado.
-export const SOCIAL_LINKS: string[] = [];
+export const SOCIAL_LINKS: string[] = [
+  "https://www.instagram.com/moodpasss/",
+];
 
 // URL absoluta a partir de um path relativo.
 export function absoluteUrl(path = "/"): string {
