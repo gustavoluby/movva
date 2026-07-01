@@ -19,7 +19,14 @@ export async function reconcilePayment(
 ): Promise<ReconcileResult | null> {
   const payment = await new Payment(mpClient()).get({ id: paymentId });
 
-  const bookingId = payment.external_reference;
+  // external_reference agora é `${bookingId}:${timestamp}` (único por tentativa
+  // p/ antifraude). Pega a parte antes do ":". Refs antigas sem ":" seguem
+  // funcionando (split devolve a string inteira). metadata.booking_id é fallback.
+  const rawRef = payment.external_reference ?? null;
+  const metaBookingId =
+    (payment.metadata as { booking_id?: string } | undefined)?.booking_id ??
+    null;
+  const bookingId = (rawRef ? rawRef.split(":")[0] : null) ?? metaBookingId;
   if (!bookingId) return null;
 
   const status = payment.status ?? "unknown";

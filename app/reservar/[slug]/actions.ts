@@ -103,8 +103,13 @@ async function criarPreferencia(args: {
         ...(phone ? { phone } : {}),
       },
       statement_descriptor: "MOODPASS",
-      // Liga a cobrança à reserva — o webhook usa isso pra achar a booking.
-      external_reference: args.bookingId,
+      // Referência única por tentativa: `${bookingId}:${timestamp}`. Duas
+      // tentativas idênticas (mesmo external_reference) podem ser lidas pelo
+      // antifraude do MP como duplicata e recusadas (cc_rejected_high_risk).
+      // O webhook extrai o bookingId de volta (parte antes do ":"). booking_id
+      // vai no metadata como reforço de conciliação.
+      external_reference: `${args.bookingId}:${Date.now()}`,
+      metadata: { booking_id: args.bookingId },
       back_urls: { success: backUrl, pending: backUrl, failure: backUrl },
       // auto_return e webhook só com HTTPS público: o MP rejeita auto_return
       // com back_url http://localhost, e o webhook não alcança localhost.
