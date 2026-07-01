@@ -200,7 +200,9 @@ export function CheckoutForm({
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="coupon" value={applied?.code ?? ""} />
         <input type="hidden" name="cpf" value={cpfDigits} />
-        {cpfError && (
+        {/* Um único ponto de erro (client CPF ou server). cpfError tem
+            precedência — assim uma mensagem substitui a outra, nunca as duas. */}
+        {(cpfError ?? state?.error) && (
           <p
             className="coupon-error"
             style={{
@@ -209,7 +211,7 @@ export function CheckoutForm({
               fontWeight: 600,
             }}
           >
-            {cpfError}
+            {cpfError ?? state?.error}
           </p>
         )}
         <button className="cta-btn" type="submit" disabled={paying}>
@@ -230,15 +232,6 @@ export function CheckoutForm({
           )}
         </button>
       </form>
-
-      {state?.error && (
-        <p
-          className="reservar-subtitle"
-          style={{ marginTop: 12, marginBottom: 0, color: "var(--accent)" }}
-        >
-          {state.error}
-        </p>
-      )}
     </>
   );
 }
