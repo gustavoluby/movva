@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useRef, useState, useTransition } from "react";
 import { reservarEPagar, validarCupom, type ReservaState } from "./actions";
 import { formatPrice } from "@/lib/utils/date";
 
@@ -33,6 +33,8 @@ export function CheckoutForm({
   const [cpf, setCpf] = useState("");
   const cpfDigits = cpf.replace(/\D/g, "");
   const cpfOk = cpfDigits.length === 11;
+  const [cpfError, setCpfError] = useState<string | null>(null);
+  const cpfRef = useRef<HTMLInputElement>(null);
 
   const finalCents = applied?.finalCents ?? basePriceCents;
 
@@ -152,32 +154,63 @@ export function CheckoutForm({
         </label>
         <input
           id="checkout-cpf"
+          ref={cpfRef}
           className="coupon-input"
-          style={{ width: "100%" }}
+          style={{
+            width: "100%",
+            ...(cpfError
+              ? { borderColor: "var(--accent)", outline: "2px solid var(--accent)" }
+              : null),
+          }}
           inputMode="numeric"
           autoComplete="off"
           placeholder="000.000.000-00"
+          aria-invalid={cpfError ? true : undefined}
           value={cpf}
-          onChange={(e) => setCpf(formatCpf(e.target.value))}
+          onChange={(e) => {
+            setCpf(formatCpf(e.target.value));
+            if (cpfError) setCpfError(null);
+          }}
         />
-        <p
-          className="reservar-subtitle"
-          style={{ margin: "6px 0 0", fontSize: 12, opacity: 0.7 }}
-        >
-          Necessário pra aprovar o pagamento (o Mercado Pago usa pra confirmar
-          sua identidade). Não fica salvo no app.
-        </p>
+        {cpfError ? (
+          <p className="coupon-error" style={{ margin: "6px 0 0" }}>
+            {cpfError}
+          </p>
+        ) : (
+          <p
+            className="reservar-subtitle"
+            style={{ margin: "6px 0 0", fontSize: 12, opacity: 0.7 }}
+          >
+            Necessário pra aprovar o pagamento (o Mercado Pago usa pra confirmar
+            sua identidade). Não fica salvo no app.
+          </p>
+        )}
       </div>
 
-      <form action={formAction}>
+      <form
+        action={formAction}
+        onSubmit={(e) => {
+          // Sem CPF válido: bloqueia, avisa e foca o campo (em vez de só deixar
+          // o botão inerte, que confunde quem não vê por que "não acontece nada").
+          if (!cpfOk) {
+            e.preventDefault();
+            setCpfError(
+              cpfDigits.length === 0
+                ? "Preencha o CPF do pagador pra continuar."
+                : "CPF incompleto — precisa ter 11 dígitos.",
+            );
+            cpfRef.current?.focus();
+            cpfRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }}
+      >
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="coupon" value={applied?.code ?? ""} />
         <input type="hidden" name="cpf" value={cpfDigits} />
-        <button
-          className="cta-btn"
-          type="submit"
-          disabled={paying || !cpfOk}
-        >
+        <button className="cta-btn" type="submit" disabled={paying}>
           {paying ? "Abrindo pagamento…" : "Pagar com Pix ou cartão"}
           {!paying && (
             <svg
