@@ -172,19 +172,13 @@ export function CheckoutForm({
             if (cpfError) setCpfError(null);
           }}
         />
-        {cpfError ? (
-          <p className="coupon-error" style={{ margin: "6px 0 0" }}>
-            {cpfError}
-          </p>
-        ) : (
-          <p
-            className="reservar-subtitle"
-            style={{ margin: "6px 0 0", fontSize: 12, opacity: 0.7 }}
-          >
-            Necessário pra aprovar o pagamento (o Mercado Pago usa pra confirmar
-            sua identidade). Não fica salvo no app.
-          </p>
-        )}
+        <p
+          className="reservar-subtitle"
+          style={{ margin: "6px 0 0", fontSize: 12, opacity: 0.7 }}
+        >
+          Necessário pra aprovar o pagamento (o Mercado Pago usa pra confirmar
+          sua identidade). Não fica salvo no app.
+        </p>
       </div>
 
       <form
@@ -194,11 +188,7 @@ export function CheckoutForm({
           // o botão inerte, que confunde quem não vê por que "não acontece nada").
           if (!cpfOk) {
             e.preventDefault();
-            setCpfError(
-              cpfDigits.length === 0
-                ? "Preencha o CPF do pagador pra continuar."
-                : "CPF incompleto — precisa ter 11 dígitos.",
-            );
+            setCpfError("Informe um CPF válido pra concluir o pagamento.");
             cpfRef.current?.focus();
             cpfRef.current?.scrollIntoView({
               behavior: "smooth",
@@ -210,6 +200,18 @@ export function CheckoutForm({
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="coupon" value={applied?.code ?? ""} />
         <input type="hidden" name="cpf" value={cpfDigits} />
+        {cpfError && (
+          <p
+            className="coupon-error"
+            style={{
+              margin: "0 0 10px",
+              textAlign: "center",
+              fontWeight: 600,
+            }}
+          >
+            {cpfError}
+          </p>
+        )}
         <button className="cta-btn" type="submit" disabled={paying}>
           {paying ? "Abrindo pagamento…" : "Pagar com Pix ou cartão"}
           {!paying && (
