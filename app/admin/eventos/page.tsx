@@ -27,6 +27,16 @@ type Buyer = {
   phone: string;
   paidAt: string | null;
   amountCents: number;
+  paymentMethod: string | null;
+  paymentId: string | null;
+};
+
+type PendingBuyer = {
+  userId: string;
+  name: string;
+  email: string;
+  phone: string;
+  createdAt: string | null;
 };
 
 type EventRow = {
@@ -34,8 +44,15 @@ type EventRow = {
   title: string;
   status: string | null;
   buyers: Buyer[];
+  pending: PendingBuyer[];
   revenue: number;
 };
+
+function paymentLabel(method: string | null): string {
+  if (method === "pix") return "Pix";
+  if (method === "card" || method === "credit_card") return "Cartão";
+  return method ?? "—";
+}
 
 function EventSalesBlock({ e }: { e: EventRow }) {
   return (
@@ -45,6 +62,7 @@ function EventSalesBlock({ e }: { e: EventRow }) {
         <span className="admin-event-count">
           {e.buyers.length} venda{e.buyers.length === 1 ? "" : "s"}
           {e.revenue > 0 ? ` · ${formatPrice(e.revenue)}` : ""}
+          {e.pending.length > 0 ? ` · ${e.pending.length} pendente${e.pending.length === 1 ? "" : "s"}` : ""}
         </span>
       </div>
 
@@ -58,6 +76,7 @@ function EventSalesBlock({ e }: { e: EventRow }) {
                 <th>WhatsApp</th>
                 <th>Pago em</th>
                 <th>Valor</th>
+                <th>Pagamento</th>
                 <th aria-label="Ações"></th>
               </tr>
             </thead>
@@ -69,6 +88,14 @@ function EventSalesBlock({ e }: { e: EventRow }) {
                   <td>{b.phone}</td>
                   <td>{fmtDate(b.paidAt)}</td>
                   <td>{formatPrice(b.amountCents)}</td>
+                  <td>
+                    {paymentLabel(b.paymentMethod)}
+                    {b.paymentId ? (
+                      <span className="admin-payment-id" title="ID do pagamento no Mercado Pago">
+                        {" "}#{b.paymentId}
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="admin-table-action">
                     <RemoveSaleButton bookingId={b.bookingId} name={b.name} />
                   </td>
@@ -77,6 +104,37 @@ function EventSalesBlock({ e }: { e: EventRow }) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {e.pending.length > 0 && (
+        <details className="admin-pending">
+          <summary className="admin-pending-head">
+            {e.pending.length} reserva{e.pending.length === 1 ? "" : "s"} pendente
+            {e.pending.length === 1 ? "" : "s"} (checkout não pago)
+          </summary>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>WhatsApp</th>
+                  <th>Iniciado em</th>
+                </tr>
+              </thead>
+              <tbody>
+                {e.pending.map((p) => (
+                  <tr key={`${e.id}-pend-${p.userId}`}>
+                    <td>{p.name}</td>
+                    <td>{p.email}</td>
+                    <td>{p.phone}</td>
+                    <td>{fmtDate(p.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
       )}
     </section>
   );
@@ -110,11 +168,25 @@ export default async function AdminEventosPage({
 
   const { data: paidBookings } = await admin
     .from("bookings")
-    .select("id, event_id, user_id, amount_cents, paid_at, created_at")
+    .select(
+      "id, event_id, user_id, amount_cents, paid_at, created_at, payment_method, payment_id",
+    )
     .eq("payment_status", "paid");
 
-  // Perfis de quem comprou (nome + WhatsApp).
-  const buyerIds = [...new Set((paidBookings ?? []).map((b) => b.user_id))];
+  // Reservas pendentes (checkout iniciado, não pago) — não seguram vaga, mas
+  // ajudam a enxergar abandono de checkout.
+  const { data: pendingBookings } = await admin
+    .from("bookings")
+    .select("event_id, user_id, created_at")
+    .eq("payment_status", "pending");
+
+  // Perfis de quem comprou/iniciou (nome + WhatsApp) — busca uma vez pros dois.
+  const buyerIds = [
+    ...new Set([
+      ...(paidBookings ?? []).map((b) => b.user_id),
+      ...(pendingBookings ?? []).map((b) => b.user_id),
+    ]),
+  ];
   const profById = new Map<string, { full_name: string; phone: string | null }>();
   if (buyerIds.length > 0) {
     const { data: profs } = await admin
@@ -136,18 +208,38 @@ export default async function AdminEventosPage({
       phone: prof?.phone ?? "—",
       paidAt: b.paid_at ?? b.created_at,
       amountCents: b.amount_cents,
+      paymentMethod: b.payment_method,
+      paymentId: b.payment_id,
     };
     const arr = buyersByEvent.get(b.event_id);
     if (arr) arr.push(buyer);
     else buyersByEvent.set(b.event_id, [buyer]);
   }
 
+  const pendingByEvent = new Map<string, PendingBuyer[]>();
+  for (const b of pendingBookings ?? []) {
+    const prof = profById.get(b.user_id);
+    const pend: PendingBuyer = {
+      userId: b.user_id,
+      name: prof?.full_name ?? "—",
+      email: emailById.get(b.user_id) ?? "—",
+      phone: prof?.phone ?? "—",
+      createdAt: b.created_at,
+    };
+    const arr = pendingByEvent.get(b.event_id);
+    if (arr) arr.push(pend);
+    else pendingByEvent.set(b.event_id, [pend]);
+  }
+
   const eventRows: EventRow[] = (events ?? []).map((e) => {
     const buyers = (buyersByEvent.get(e.id) ?? []).sort((a, b) =>
       (b.paidAt ?? "").localeCompare(a.paidAt ?? ""),
     );
+    const pending = (pendingByEvent.get(e.id) ?? []).sort((a, b) =>
+      (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
+    );
     const revenue = buyers.reduce((s, b) => s + (b.amountCents ?? 0), 0);
-    return { id: e.id, title: e.title, status: e.status, buyers, revenue };
+    return { id: e.id, title: e.title, status: e.status, buyers, pending, revenue };
   });
 
   // Ativos = publicados (à venda); inativos = rascunhos/cancelados/etc.

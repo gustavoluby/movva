@@ -2128,6 +2128,31 @@
   background: #fdecea;
   border-color: #f5c6c0;
 }
+.admin-payment-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.admin-pending {
+  margin-top: 10px;
+}
+.admin-pending-head {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 2px;
+  list-style: none;
+}
+.admin-pending-head::-webkit-details-marker {
+  display: none;
+}
+.admin-pending-head::before {
+  content: "▸ ";
+}
+.admin-pending[open] .admin-pending-head::before {
+  content: "▾ ";
+}
 
 /* ----- Contas criadas (cards) ----- */
 .admin-conta-list {
