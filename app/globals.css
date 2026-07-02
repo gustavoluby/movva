@@ -2128,6 +2128,21 @@
   background: #fdecea;
   border-color: #f5c6c0;
 }
+.admin-sale-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+.admin-remove-btn.refund {
+  color: white;
+  background: #c0392b;
+  border-color: #c0392b;
+}
+.admin-remove-btn.refund:hover {
+  background: #a93226;
+  border-color: #a93226;
+}
 .admin-payment-id {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;

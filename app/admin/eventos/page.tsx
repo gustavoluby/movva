@@ -97,7 +97,11 @@ function EventSalesBlock({ e }: { e: EventRow }) {
                     ) : null}
                   </td>
                   <td className="admin-table-action">
-                    <RemoveSaleButton bookingId={b.bookingId} name={b.name} />
+                    <RemoveSaleButton
+                      bookingId={b.bookingId}
+                      name={b.name}
+                      paymentId={b.paymentId}
+                    />
                   </td>
                 </tr>
               ))}
