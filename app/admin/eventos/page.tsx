@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/admin";
 import { fetchUserEmails } from "@/lib/admin-users";
 import { formatPrice } from "@/lib/utils/date";
+import { RemoveSaleButton } from "./remove-sale-button";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,7 @@ function fmtDate(d: string | null): string {
 
 type Buyer = {
   userId: string;
+  bookingId: string;
   name: string;
   email: string;
   phone: string;
@@ -56,6 +58,7 @@ function EventSalesBlock({ e }: { e: EventRow }) {
                 <th>WhatsApp</th>
                 <th>Pago em</th>
                 <th>Valor</th>
+                <th aria-label="Ações"></th>
               </tr>
             </thead>
             <tbody>
@@ -66,6 +69,9 @@ function EventSalesBlock({ e }: { e: EventRow }) {
                   <td>{b.phone}</td>
                   <td>{fmtDate(b.paidAt)}</td>
                   <td>{formatPrice(b.amountCents)}</td>
+                  <td className="admin-table-action">
+                    <RemoveSaleButton bookingId={b.bookingId} name={b.name} />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -104,7 +110,7 @@ export default async function AdminEventosPage({
 
   const { data: paidBookings } = await admin
     .from("bookings")
-    .select("event_id, user_id, amount_cents, paid_at, created_at")
+    .select("id, event_id, user_id, amount_cents, paid_at, created_at")
     .eq("payment_status", "paid");
 
   // Perfis de quem comprou (nome + WhatsApp).
@@ -124,6 +130,7 @@ export default async function AdminEventosPage({
     const prof = profById.get(b.user_id);
     const buyer: Buyer = {
       userId: b.user_id,
+      bookingId: b.id,
       name: prof?.full_name ?? "—",
       email: emailById.get(b.user_id) ?? "—",
       phone: prof?.phone ?? "—",
