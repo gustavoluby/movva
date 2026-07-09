@@ -61,3 +61,38 @@ export async function reconcilePayment(
 
   return { bookingId, status, paid };
 }
+
+// Rede de segurança: puxa do MP os pagamentos APROVADOS dos últimos dias e
+// reconcilia cada um. É o espelho do webhook — em vez de esperar o MP avisar,
+// a gente pergunta. Pega qualquer aprovação assíncrona (Pix ou cartão que exigiu
+// autorização do banco/3DS) cujo webhook se perdeu. Idempotente: reservas já
+// pagas viram no-op (o .neq('payment_status','paid') não atualiza nada, então
+// não reenvia email nem reincrementa cupom). Rodado por cron.
+export async function sweepRecentPayments(
+  sinceDays = 3,
+): Promise<{ scanned: number; paid: number }> {
+  const search = await new Payment(mpClient()).search({
+    options: {
+      sort: "date_created",
+      criteria: "desc",
+      range: "date_created",
+      begin_date: `NOW-${sinceDays}DAYS`,
+      end_date: "NOW",
+      status: "approved",
+      limit: 100,
+    },
+  });
+
+  const results = search.results ?? [];
+  let paid = 0;
+  for (const p of results) {
+    if (!p.id) continue;
+    try {
+      const r = await reconcilePayment(String(p.id));
+      if (r?.paid) paid++;
+    } catch (err) {
+      console.error("[sweep] reconcile falhou p/ pagamento", p.id, err);
+    }
+  }
+  return { scanned: results.length, paid };
+}

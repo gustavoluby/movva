@@ -5,6 +5,10 @@
     {
       "path": "/api/cron/reminders-24h",
       "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/reconcile-payments",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

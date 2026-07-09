@@ -6,6 +6,7 @@ import { reconcilePayment } from "@/lib/payments/mercadopago-reconcile";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { getEventAvailability } from "@/lib/events/availability";
 import { CheckoutForm } from "./checkout-form";
+import { PendingPoller } from "./pending-poller";
 
 type Params = { slug: string };
 type Query = { payment_id?: string; status?: string; collection_status?: string };
@@ -141,10 +142,12 @@ export default async function ReservarPage({
 
           {returnState === "pending" && (
             <div className="reservar-pix-placeholder">
+              <PendingPoller />
               <div className="reservar-pix-label">pagamento em processamento</div>
               <p className="reservar-pix-text">
-                Estamos confirmando seu pagamento. Se foi Pix, pode levar uns
-                segundos — atualize a página em instantes.
+                Estamos confirmando seu pagamento — esta tela atualiza sozinha.
+                Pix e cartão que pediram autorização do banco levam alguns
+                segundos.
               </p>
             </div>
           )}
