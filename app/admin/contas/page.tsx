@@ -46,13 +46,47 @@ type Conta = {
   createdAt: string | null;
 };
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string;
+  href?: string;
+}) {
   return (
     <div className="admin-conta-field">
       <span className="admin-conta-field-label">{label}</span>
-      <span className="admin-conta-field-value">{value}</span>
+      {href ? (
+        <a
+          className="admin-conta-field-value admin-conta-field-link"
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {value}
+        </a>
+      ) : (
+        <span className="admin-conta-field-value">{value}</span>
+      )}
     </div>
   );
+}
+
+/** Converte um telefone BR em link do WhatsApp (wa.me com DDI 55). */
+function whatsappHref(phone: string | null): string | undefined {
+  if (!phone) return undefined;
+  let digits = phone.replace(/\D/g, "");
+  if (!digits) return undefined;
+  // Garante o código do país (55) para números nacionais.
+  if (!digits.startsWith("55") && digits.length <= 11) {
+    digits = `55${digits}`;
+  }
+  const msg = encodeURIComponent(
+    "Oi! Aqui é da Moodpass 💜",
+  );
+  return `https://wa.me/${digits}?text=${msg}`;
 }
 
 export default async function AdminContasPage() {
@@ -149,7 +183,11 @@ export default async function AdminContasPage() {
                   <div className="admin-conta-grid">
                     <Field label="Instagram" value={c.handle ? `@${c.handle}` : "—"} />
                     <Field label="Email" value={c.email} />
-                    <Field label="WhatsApp" value={c.phone ?? "—"} />
+                    <Field
+                      label="WhatsApp"
+                      value={c.phone ?? "—"}
+                      href={whatsappHref(c.phone)}
+                    />
                     <Field label="Aniversário" value={fmtDate(c.birthday)} />
                     <Field label="Cidade" value={c.city ?? "—"} />
                     <Field label="Bairro" value={c.neighborhood ?? "—"} />

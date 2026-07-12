@@ -2236,6 +2236,14 @@
   color: var(--primary);
   overflow-wrap: anywhere;
 }
+.admin-conta-field-link {
+  color: #25d366;
+  font-weight: 600;
+  text-decoration: none;
+}
+.admin-conta-field-link:hover {
+  text-decoration: underline;
+}
 .admin-conta-bio {
   margin: 12px 0 0;
   padding-top: 12px;
