@@ -1,8 +1,8 @@
 import "server-only";
 
-// Allowlist de admins por email, via env `ADMIN_EMAILS` (csv).
-// Sem coluna no banco — simples e reversível. Default cobre o Gustavo
-// pra não travar em dev/prod caso a env ainda não esteja setada.
+// Allowlist de admins por email. Os fundadores ficam SEMPRE na lista (não
+// dependem de env, pra ninguém ficar travado). A env `ADMIN_EMAILS` (csv) só
+// ADICIONA admins extras — nunca remove os padrão.
 const DEFAULT_ADMINS = [
   "marketing@leadster.com.br",
   "gustavo@leadster.com.br",
@@ -14,7 +14,7 @@ function adminList(): string[] {
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
-  return fromEnv.length > 0 ? fromEnv : DEFAULT_ADMINS;
+  return [...new Set([...DEFAULT_ADMINS, ...fromEnv])];
 }
 
 export function isAdmin(email: string | null | undefined): boolean {
