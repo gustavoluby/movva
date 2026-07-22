@@ -1500,6 +1500,9 @@
 .exp-host-summary {
   margin-bottom: 0;
 }
+.exp-form {
+  padding: 0 20px;
+}
 .exp-error {
   color: var(--accent);
   font-size: 14px;
@@ -1519,15 +1522,17 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--primary);
-  margin-bottom: 16px;
+  margin: 0 20px 16px;
 }
 .exp-list-actions {
+  padding: 0 20px;
   margin-bottom: 18px;
 }
 .exp-admin-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 0 20px;
 }
 .exp-admin-row {
   border: 1px solid var(--border);
