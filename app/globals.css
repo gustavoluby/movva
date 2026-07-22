@@ -390,6 +390,22 @@
 }
 .event-card:active { transform: scale(0.99); }
 
+/* Experiências que já rolaram: card mais discreto (imagem dessaturada + selo). */
+.event-card.is-past .event-card-img img {
+  filter: grayscale(0.35) brightness(0.96);
+}
+.ec-past-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: var(--surface-warm, rgba(0, 0, 0, 0.05));
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
 .event-card-img {
   aspect-ratio: 16 / 9;
   background-size: cover;
@@ -1462,6 +1478,19 @@
   font-size: 13px;
   color: var(--text-muted);
   margin-bottom: 12px;
+}
+.exp-hint {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.exp-hint strong {
+  color: var(--text);
+  font-weight: 600;
 }
 .exp-divider {
   height: 1px;

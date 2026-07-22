@@ -66,8 +66,21 @@ export default async function DescobrirPage({
     ? list.filter((e) => eventCategories(e.title).includes(activeCat))
     : list;
 
-  const featured = visible.find((e) => e.is_featured) ?? visible[0];
-  const others = visible.filter((e) => e.slug !== featured?.slug);
+  // Hoje em Curitiba (America/Sao_Paulo) como "YYYY-MM-DD" — compara direto com
+  // event_date (também YYYY-MM-DD) pra separar o que ainda vai rolar do que já
+  // aconteceu. Evento do próprio dia ainda conta como futuro.
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date());
+
+  const upcoming = visible.filter((e) => e.event_date >= today);
+  // Passados: mais recentes primeiro (event_date desc).
+  const past = visible
+    .filter((e) => e.event_date < today)
+    .sort((a, b) => b.event_date.localeCompare(a.event_date));
+
+  const featured = upcoming.find((e) => e.is_featured) ?? upcoming[0];
+  const others = upcoming.filter((e) => e.slug !== featured?.slug);
 
   // Vendas pagas por evento (todas as usuárias → service-role). Uma query em
   // lote. O contador exibido = vendas reais; esgota deixando 1 vaga de reserva.
@@ -177,6 +190,38 @@ export default async function DescobrirPage({
                   capacity={e.capacity}
                   goingCount={soldCount.get(e.id) ?? 0}
                   soldOut={soldOut.get(e.id) ?? false}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {past.length > 0 && (
+          <>
+            <div className="section-header">
+              <h3>Experiências que já rolaram</h3>
+            </div>
+
+            <div className="event-list">
+              {past.map((e) => (
+                <EventCard
+                  key={e.slug}
+                  slug={e.slug}
+                  title={e.title}
+                  subtitle={e.subtitle}
+                  category={e.category}
+                  catTag={e.cat_tag}
+                  tag={e.tag}
+                  tagStyle={e.tag_style}
+                  imageUrl={e.thumb_url ?? e.image_url}
+                  eventDate={e.event_date}
+                  eventTime={e.event_time}
+                  locationName={e.location_name}
+                  priceCents={e.price_cents}
+                  capacity={e.capacity}
+                  goingCount={soldCount.get(e.id) ?? 0}
+                  soldOut={soldOut.get(e.id) ?? false}
+                  past
                 />
               ))}
             </div>

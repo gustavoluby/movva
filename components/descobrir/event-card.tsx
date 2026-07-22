@@ -22,6 +22,7 @@ type EventCardProps = {
   capacity: number;
   goingCount: number;
   soldOut?: boolean;
+  past?: boolean;
 };
 
 export function EventCard({
@@ -39,9 +40,13 @@ export function EventCard({
   capacity,
   goingCount,
   soldOut = false,
+  past = false,
 }: EventCardProps) {
   return (
-    <Link href={`/eventos/${slug}`} className="event-card">
+    <Link
+      href={`/eventos/${slug}`}
+      className={`event-card${past ? " is-past" : ""}`}
+    >
       <div className="event-card-img">
         {imageUrl && (
           <Image
@@ -73,9 +78,13 @@ export function EventCard({
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
             <circle cx="9" cy="7" r="4" />
           </svg>
-          {soldOut
-            ? "Esgotado"
-            : `${Math.min(goingCount, capacity)}/${capacity} mulheres`}
+          {past
+            ? goingCount > 0
+              ? `${Math.min(goingCount, capacity)} mulheres foram`
+              : "Já aconteceu"
+            : soldOut
+              ? "Esgotado"
+              : `${Math.min(goingCount, capacity)}/${capacity} mulheres`}
         </div>
       </div>
       <div className="event-card-body">
@@ -100,10 +109,14 @@ export function EventCard({
             </div>
             <div className="ec-place">{locationName}</div>
           </div>
-          <div>
-            <span className="ec-price-label">a partir de</span>
-            <span className="ec-price">{formatPrice(priceCents)}</span>
-          </div>
+          {past ? (
+            <div className="ec-past-badge">encerrado</div>
+          ) : (
+            <div>
+              <span className="ec-price-label">a partir de</span>
+              <span className="ec-price">{formatPrice(priceCents)}</span>
+            </div>
+          )}
         </div>
       </div>
     </Link>

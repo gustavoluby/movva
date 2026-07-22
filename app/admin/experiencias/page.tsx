@@ -25,6 +25,8 @@ const STATUS_LABEL: Record<string, string> = {
   completed: "Concluído",
 };
 
+type Tab = "avenda" | "passados" | "rascunhos";
+
 type EventRow = {
   id: string;
   slug: string;
@@ -33,14 +35,67 @@ type EventRow = {
   event_date: string | null;
   price_cents: number | null;
   capacity: number | null;
+  updated_at: string | null;
 };
+
+function EventAdminRow({ e }: { e: EventRow }) {
+  const published = e.status === "published";
+  return (
+    <div className={`exp-admin-row${published ? "" : " is-off"}`}>
+      <div className="exp-admin-main">
+        <div className="exp-admin-title">{e.title}</div>
+        <div className="exp-admin-meta">
+          <span className={`exp-status exp-status-${e.status ?? "draft"}`}>
+            {STATUS_LABEL[e.status ?? "draft"] ?? e.status}
+          </span>
+          <span>{fmtDate(e.event_date)}</span>
+          <span>{formatPrice(e.price_cents ?? 0)}</span>
+          <span>{e.capacity ?? 0} vagas</span>
+        </div>
+      </div>
+      <div className="exp-admin-actions">
+        <Link href={`/admin/experiencias/${e.id}`} className="admin-btn">
+          Editar
+        </Link>
+        {published ? (
+          <form action={mudarStatusExperiencia}>
+            <input type="hidden" name="id" value={e.id} />
+            <input type="hidden" name="status" value="draft" />
+            <button type="submit" className="admin-btn reject">
+              Despublicar
+            </button>
+          </form>
+        ) : (
+          <form action={mudarStatusExperiencia}>
+            <input type="hidden" name="id" value={e.id} />
+            <input type="hidden" name="status" value="published" />
+            <button type="submit" className="admin-btn approve">
+              Publicar
+            </button>
+          </form>
+        )}
+        {published && (
+          <Link href={`/eventos/${e.slug}`} className="admin-btn" target="_blank">
+            Ver
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default async function AdminExperienciasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string }>;
+  searchParams: Promise<{ ok?: string; tab?: string }>;
 }) {
-  const { ok } = await searchParams;
+  const { ok, tab: tabRaw } = await searchParams;
+  const tab: Tab =
+    tabRaw === "passados"
+      ? "passados"
+      : tabRaw === "rascunhos"
+        ? "rascunhos"
+        : "avenda";
 
   const supabase = await createClient();
   const {
@@ -50,12 +105,45 @@ export default async function AdminExperienciasPage({
   if (!isAdmin(user.email)) redirect("/perfil");
 
   const admin = createAdminClient();
+  // Ordena pela última edição (mais recente no topo).
   const { data: events } = await admin
     .from("events")
-    .select("id, slug, title, status, event_date, price_cents, capacity")
-    .order("event_date", { ascending: false });
+    .select(
+      "id, slug, title, status, event_date, price_cents, capacity, updated_at",
+    )
+    .order("updated_at", { ascending: false, nullsFirst: false });
 
-  const list = (events ?? []) as EventRow[];
+  const all = (events ?? []) as EventRow[];
+
+  // Hoje em Curitiba (America/Sao_Paulo) como "YYYY-MM-DD" — compara com
+  // event_date pra separar publicados à venda dos que já rolaram.
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date());
+
+  const avenda = all.filter(
+    (e) => e.status === "published" && (e.event_date ?? "") >= today,
+  );
+  const passados = all.filter(
+    (e) => e.status === "published" && (e.event_date ?? "") < today,
+  );
+  const rascunhos = all.filter((e) => e.status !== "published");
+
+  const current =
+    tab === "passados" ? passados : tab === "rascunhos" ? rascunhos : avenda;
+
+  const emptyText =
+    tab === "passados"
+      ? "Nenhuma experiência publicada já aconteceu."
+      : tab === "rascunhos"
+        ? "Nenhum rascunho."
+        : "Nenhuma experiência à venda.";
+
+  const TABS: { key: Tab; label: string; count: number }[] = [
+    { key: "avenda", label: "À venda", count: avenda.length },
+    { key: "passados", label: "Passados", count: passados.length },
+    { key: "rascunhos", label: "Rascunhos", count: rascunhos.length },
+  ];
 
   return (
     <div className="moodpass-shell">
@@ -78,15 +166,13 @@ export default async function AdminExperienciasPage({
           </Link>
           <div>
             <div className="greeting-label">
-              admin · {list.length} experiência(s)
+              admin · {all.length} experiência(s)
             </div>
             <div className="greeting-name">Experiências</div>
           </div>
         </header>
 
-        {ok && (
-          <p className="exp-saved">Experiência salva com sucesso.</p>
-        )}
+        {ok && <p className="exp-saved">Experiência salva com sucesso.</p>}
 
         <div className="exp-list-actions">
           <Link href="/admin/experiencias/nova" className="admin-btn approve">
@@ -94,63 +180,26 @@ export default async function AdminExperienciasPage({
           </Link>
         </div>
 
-        {list.length === 0 ? (
+        <nav className="elas-tabs" style={{ position: "static" }}>
+          {TABS.map((t) => (
+            <Link
+              key={t.key}
+              href={`/admin/experiencias?tab=${t.key}`}
+              className={`elas-tab${tab === t.key ? " active" : ""}`}
+            >
+              {t.label} · {t.count}
+            </Link>
+          ))}
+        </nav>
+
+        {current.length === 0 ? (
           <div className="minhas-empty">
-            <p className="minhas-empty-text">Nenhuma experiência ainda.</p>
+            <p className="minhas-empty-text">{emptyText}</p>
           </div>
         ) : (
           <div className="exp-admin-list">
-            {list.map((e) => (
-              <div
-                key={e.id}
-                className={`exp-admin-row${e.status === "published" ? "" : " is-off"}`}
-              >
-                <div className="exp-admin-main">
-                  <div className="exp-admin-title">{e.title}</div>
-                  <div className="exp-admin-meta">
-                    <span className={`exp-status exp-status-${e.status ?? "draft"}`}>
-                      {STATUS_LABEL[e.status ?? "draft"] ?? e.status}
-                    </span>
-                    <span>{fmtDate(e.event_date)}</span>
-                    <span>{formatPrice(e.price_cents ?? 0)}</span>
-                    <span>{e.capacity ?? 0} vagas</span>
-                  </div>
-                </div>
-                <div className="exp-admin-actions">
-                  <Link
-                    href={`/admin/experiencias/${e.id}`}
-                    className="admin-btn"
-                  >
-                    Editar
-                  </Link>
-                  {e.status === "published" ? (
-                    <form action={mudarStatusExperiencia}>
-                      <input type="hidden" name="id" value={e.id} />
-                      <input type="hidden" name="status" value="draft" />
-                      <button type="submit" className="admin-btn reject">
-                        Despublicar
-                      </button>
-                    </form>
-                  ) : (
-                    <form action={mudarStatusExperiencia}>
-                      <input type="hidden" name="id" value={e.id} />
-                      <input type="hidden" name="status" value="published" />
-                      <button type="submit" className="admin-btn approve">
-                        Publicar
-                      </button>
-                    </form>
-                  )}
-                  {e.status === "published" && (
-                    <Link
-                      href={`/eventos/${e.slug}`}
-                      className="admin-btn"
-                      target="_blank"
-                    >
-                      Ver
-                    </Link>
-                  )}
-                </div>
-              </div>
+            {current.map((e) => (
+              <EventAdminRow key={e.id} e={e} />
             ))}
           </div>
         )}

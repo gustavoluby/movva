@@ -171,14 +171,19 @@ export function EventForm({
             />
           </label>
 
-          <label className="coupon-field">
-            <span>Slug (URL)</span>
+          <label className="coupon-field coupon-field-wide">
+            <span>Slug (endereço do link)</span>
             <input
               name="slug"
               defaultValue={event?.slug ?? ""}
-              placeholder="gera do título"
+              placeholder="wellness-day"
               autoComplete="off"
             />
+            <span className="exp-hint">
+              Vira o link: moodpass.com.br/eventos/
+              <strong>{event?.slug ?? "wellness-day"}</strong> · deixe em branco
+              pra gerar do título.
+            </span>
           </label>
 
           <label className="coupon-field">
@@ -262,32 +267,31 @@ export function EventForm({
             />
           </label>
 
-          <label className="coupon-field">
+          <label className="coupon-field coupon-field-wide">
             <span>Endereço completo</span>
             <input
               name="location_address"
               defaultValue={event?.location_address ?? ""}
               placeholder="Rua X, 123 · 80000-000"
             />
+            <span className="exp-hint">
+              📍 O ponto no mapa é preenchido automaticamente pelo endereço — você
+              não precisa se preocupar com coordenadas.
+            </span>
           </label>
 
-          <label className="coupon-field">
-            <span>Latitude</span>
-            <input
-              name="location_lat"
-              defaultValue={event?.location_lat ?? ""}
-              placeholder="-25.4372"
-            />
-          </label>
-
-          <label className="coupon-field">
-            <span>Longitude</span>
-            <input
-              name="location_lng"
-              defaultValue={event?.location_lng ?? ""}
-              placeholder="-49.2712"
-            />
-          </label>
+          {/* lat/lng não são digitados: geocodificados do endereço ao salvar.
+              Ficam como hidden só pra preservar o valor atual se o geocode falhar. */}
+          <input
+            type="hidden"
+            name="location_lat"
+            defaultValue={event?.location_lat ?? ""}
+          />
+          <input
+            type="hidden"
+            name="location_lng"
+            defaultValue={event?.location_lng ?? ""}
+          />
         </div>
       </section>
 

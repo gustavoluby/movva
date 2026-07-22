@@ -6,10 +6,37 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/admin";
+import { SITE_CITY, SITE_REGION } from "@/lib/site";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
+
+// Geocodifica um endereço via Nominatim (OpenStreetMap, grátis, sem chave).
+// Best-effort: qualquer erro/timeout devolve null e o save segue sem coords.
+async function geocode(
+  query: string,
+): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(
+      query,
+    )}`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Moodpass/1.0 (contato@moodpass.com.br)" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { lat?: string; lon?: string }[];
+    const first = Array.isArray(data) ? data[0] : null;
+    if (!first) return null;
+    const lat = Number(first.lat);
+    const lng = Number(first.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return { lat, lng };
+  } catch {
+    return null;
+  }
+}
 
 export type ExperienciaState = { error?: string };
 
@@ -132,6 +159,24 @@ export async function salvarExperiencia(
     imageUrl = up.url ?? imageUrl;
   }
 
+  // Coordenadas do mapa: o admin não digita lat/lng — geocodificamos o
+  // endereço automaticamente. Se o geocode falhar, mantém o que já existia
+  // (vem como hidden no form).
+  let lat = optNumber(formData, "location_lat");
+  let lng = optNumber(formData, "location_lng");
+  const geoQuery = [
+    optText(formData, "location_address"),
+    locationName,
+    `${SITE_CITY}, ${SITE_REGION}, Brasil`,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const geo = await geocode(geoQuery);
+  if (geo) {
+    lat = geo.lat;
+    lng = geo.lng;
+  }
+
   // Foto do grupo de organizadores (host_summary): idem.
   let hostPhotoUrl = optText(formData, "host_photo_url");
   const hostPhotoFile = formData.get("host_photo");
@@ -156,8 +201,8 @@ export async function salvarExperiencia(
     location_name: locationName,
     location_short: optText(formData, "location_short"),
     location_address: optText(formData, "location_address"),
-    location_lat: optNumber(formData, "location_lat"),
-    location_lng: optNumber(formData, "location_lng"),
+    location_lat: lat,
+    location_lng: lng,
     price_cents: priceCents,
     capacity: Math.round(capacity),
     image_url: imageUrl,
