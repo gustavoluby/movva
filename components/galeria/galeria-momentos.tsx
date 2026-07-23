@@ -1,7 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { GALERIA_ALBUNS } from "@/lib/galeria";
-import { AlbumVideo } from "./album-video";
+import { AlbumRail } from "./album-rail";
 
 /**
  * Galeria das experiências que já rolaram — um trilho horizontal de fotos e
@@ -73,31 +72,7 @@ export function GaleriaMomentos({
               <div className="galeria-album-head">{meta}</div>
             )}
 
-            <div className="galeria-rail">
-              {album.items.map((item) => (
-                <figure
-                  key={item.src}
-                  className="galeria-card"
-                  style={{ aspectRatio: item.ratio }}
-                >
-                  {item.type === "video" ? (
-                    <AlbumVideo
-                      src={item.src}
-                      poster={item.poster}
-                      alt={item.alt}
-                    />
-                  ) : (
-                    <Image
-                      className="galeria-media"
-                      src={item.src}
-                      alt={item.alt}
-                      fill
-                      sizes="260px"
-                    />
-                  )}
-                </figure>
-              ))}
-            </div>
+            <AlbumRail items={album.items} />
           </div>
         );
       })}
