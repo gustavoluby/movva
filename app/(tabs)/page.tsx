@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { FeaturedCard } from "@/components/descobrir/featured-card";
 import { EventCard } from "@/components/descobrir/event-card";
 import { CategoryChips } from "@/components/descobrir/category-chips";
+import { GaleriaMomentos } from "@/components/galeria/galeria-momentos";
 import { CATEGORY_DEFS, eventCategories } from "@/lib/categories";
 import { activePriceCents } from "@/lib/events/pricing";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -75,17 +76,14 @@ export default async function DescobrirPage({
     : list;
 
   // Hoje em Curitiba (America/Sao_Paulo) como "YYYY-MM-DD" — compara direto com
-  // event_date (também YYYY-MM-DD) pra separar o que ainda vai rolar do que já
-  // aconteceu. Evento do próprio dia ainda conta como futuro.
+  // event_date (também YYYY-MM-DD) pra ficar só com o que ainda vai rolar. O que
+  // já passou aparece na galeria de momentos, no rodapé. Evento do próprio dia
+  // ainda conta como futuro.
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
   }).format(new Date());
 
   const upcoming = visible.filter((e) => e.event_date >= today);
-  // Passados: mais recentes primeiro (event_date desc).
-  const past = visible
-    .filter((e) => e.event_date < today)
-    .sort((a, b) => b.event_date.localeCompare(a.event_date));
 
   const featured = upcoming.find((e) => e.is_featured) ?? upcoming[0];
   const others = upcoming.filter((e) => e.slug !== featured?.slug);
@@ -94,19 +92,19 @@ export default async function DescobrirPage({
   // lote. O contador exibido = vendas reais; esgota deixando 1 vaga de reserva.
   const soldCount = new Map<string, number>();
   const soldOut = new Map<string, boolean>();
-  if (visible.length > 0) {
+  if (upcoming.length > 0) {
     const admin = createAdminClient();
     const { data: paidRows } = await admin
       .from("bookings")
       .select("event_id")
       .in(
         "event_id",
-        visible.map((e) => e.id),
+        upcoming.map((e) => e.id),
       )
       .eq("payment_status", "paid");
     for (const r of paidRows ?? [])
       soldCount.set(r.event_id, (soldCount.get(r.event_id) ?? 0) + 1);
-    for (const e of visible)
+    for (const e of upcoming)
       soldOut.set(e.id, (soldCount.get(e.id) ?? 0) >= Math.max(0, e.capacity - 1));
   }
 
@@ -204,37 +202,8 @@ export default async function DescobrirPage({
           </>
         )}
 
-        {past.length > 0 && (
-          <>
-            <div className="section-header">
-              <h3>Experiências que já rolaram</h3>
-            </div>
-
-            <div className="event-list">
-              {past.map((e) => (
-                <EventCard
-                  key={e.slug}
-                  slug={e.slug}
-                  title={e.title}
-                  subtitle={e.subtitle}
-                  category={e.category}
-                  catTag={e.cat_tag}
-                  tag={e.tag}
-                  tagStyle={e.tag_style}
-                  imageUrl={e.thumb_url ?? e.image_url}
-                  eventDate={e.event_date}
-                  eventTime={e.event_time}
-                  locationName={e.location_name}
-                  priceCents={activePriceCents(e, soldCount.get(e.id) ?? 0)}
-                  capacity={e.capacity}
-                  goingCount={soldCount.get(e.id) ?? 0}
-                  soldOut={soldOut.get(e.id) ?? false}
-                  past
-                />
-              ))}
-            </div>
-          </>
-        )}
+        {/* O que já rolou vira álbum de fotos/vídeo — não card de evento. */}
+        <GaleriaMomentos title="Momentos que já rolaram" />
 
         <div className="home-outro">
           <Link href="/sobre" className="home-about-cta">

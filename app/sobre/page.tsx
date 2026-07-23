@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { GaleriaMomentos } from "@/components/galeria/galeria-momentos";
 import { getNicoleWhatsAppLink } from "@/lib/whatsapp";
 import {
   SITE_NAME,
@@ -52,19 +53,17 @@ export default async function SobrePage() {
   } = await supabase.auth.getUser();
   const loggedIn = !!user;
 
-  // Fotos reais das experiências pra galeria e hero. Publicadas, com imagem.
+  // Foto do hero: a experiência em destaque (ou a mais recente) com imagem.
   const { data: eventos } = await supabase
     .from("events")
-    .select("slug, title, location_short, image_url, thumb_url, is_featured")
+    .select("slug, title, location_short, image_url, is_featured")
     .eq("status", "published")
     .not("image_url", "is", null)
     .order("is_featured", { ascending: false })
     .order("event_date", { ascending: false })
-    .limit(7);
+    .limit(1);
 
-  const lista = eventos ?? [];
-  const hero = lista[0] ?? null;
-  const galeria = (hero ? lista.slice(1) : lista).slice(0, 6);
+  const hero = eventos?.[0] ?? null;
 
   const organizarHref = getNicoleWhatsAppLink(
     "Olá! Organizo experiências pra mulheres e quero publicar a minha no Moodpass. Pode me contar como funciona?",
@@ -231,43 +230,8 @@ export default async function SobrePage() {
           </dl>
         </section>
 
-        {/* ---- Galeria de experiências reais ---- */}
-        {galeria.length > 0 && (
-          <section className="lp-gallery">
-            <h2 className="lp-section-title lp-gallery-title">
-              Um gostinho do que já rolou
-            </h2>
-            <div className="lp-gallery-strip">
-              {galeria.map((e) => (
-                <Link
-                  key={e.slug}
-                  href={`/eventos/${e.slug}`}
-                  className="lp-gallery-card"
-                >
-                  <div className="lp-gallery-img">
-                    {(e.thumb_url ?? e.image_url) && (
-                      <Image
-                        src={(e.thumb_url ?? e.image_url) as string}
-                        alt={`${e.title} — Moodpass`}
-                        fill
-                        sizes="240px"
-                        style={{ objectFit: "cover" }}
-                      />
-                    )}
-                  </div>
-                  <div className="lp-gallery-meta">
-                    <span className="lp-gallery-name">{e.title}</span>
-                    {e.location_short && (
-                      <span className="lp-gallery-place">
-                        {e.location_short}
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* ---- Galeria: fotos e vídeo reais das experiências ---- */}
+        <GaleriaMomentos title="Um gostinho do que já rolou" variant="lp" />
 
         {/* ---- CTA organizadora (mundo visual próprio: sage) ---- */}
         <section className="lp-organizer">

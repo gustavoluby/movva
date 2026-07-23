@@ -4103,3 +4103,120 @@
     font-weight: 600;
   }
 }
+
+/* ============================================================
+   Galeria "Momentos" — trilho horizontal com as fotos/vídeos reais
+   das experiências que já rolaram (home e /sobre)
+   ============================================================ */
+.galeria { margin-top: 36px; }
+
+.galeria-header { padding: 0 24px; }
+.galeria-kicker {
+  display: block;
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--accent);
+}
+.galeria-title {
+  margin-top: 1px;
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--primary);
+}
+
+.galeria-album { margin-top: 14px; }
+
+/* Linha de crédito do álbum: nome do evento + quando/onde, clicável. */
+.galeria-album-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 24px 10px;
+  color: var(--text);
+}
+.galeria-album-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.galeria-album-meta {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.galeria-album-head svg {
+  flex: none;
+  align-self: center;
+  color: var(--text-subtle);
+  transition: transform 0.2s ease;
+}
+.galeria-album-head.is-link:hover svg { transform: translateX(3px); }
+
+/* O trilho tem altura fixa — a proporção de cada arquivo é quem define a
+   largura. É daí que vem o ritmo (o 9/16 entra mais estreito que o 3/4). */
+.galeria-rail {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  height: clamp(232px, 62vw, 288px);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  padding: 2px 24px 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.galeria-rail::-webkit-scrollbar { display: none; }
+
+.galeria-card {
+  position: relative;
+  flex: 0 0 auto;
+  height: 100%;
+  width: auto;
+  margin: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--bg-warm);
+  box-shadow: var(--shadow-sm);
+  scroll-snap-align: center;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s;
+}
+/* Aro claro por dentro + sombra no pé: dá profundidade sem borda dura. */
+.galeria-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    inset 0 -70px 60px -60px rgba(26, 35, 29, 0.4);
+  pointer-events: none;
+}
+.galeria-card:active { transform: scale(0.985); }
+.galeria-card:hover { box-shadow: var(--shadow-md); }
+
+.galeria-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Na landing o respiro lateral é 22px — alinha com as outras seções. */
+.galeria-lp { margin-top: 34px; }
+.galeria-lp .galeria-header,
+.galeria-lp .galeria-album-head,
+.galeria-lp .galeria-rail {
+  padding-left: 22px;
+  padding-right: 22px;
+}
+.galeria-lp .galeria-album { margin-top: 0; }
