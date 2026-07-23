@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { getNicoleWhatsAppLink } from "@/lib/whatsapp";
 import {
   SITE_NAME,
@@ -323,6 +324,28 @@ export default async function SobrePage() {
           </div>
         </footer>
       </div>
+
+      {/* Sidebar (desktop/tablet). No mobile some — a /sobre usa o topbar
+          próprio e o CTA flutuante abaixo. */}
+      <BottomNav loggedIn={loggedIn} sidebarOnly />
+
+      {/* CTA flutuante — só no mobile: acesso rápido às experiências ao rolar. */}
+      <Link href="/" className="lp-fab" aria-label="Acessar experiências">
+        Acessar experiências
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M5 12h14M13 5l7 7-7 7" />
+        </svg>
+      </Link>
     </div>
   );
 }

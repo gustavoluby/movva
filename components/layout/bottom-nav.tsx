@@ -109,7 +109,15 @@ const ICON_INFO = (
   </svg>
 );
 
-export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
+export function BottomNav({
+  loggedIn,
+  sidebarOnly = false,
+}: {
+  loggedIn: boolean;
+  // "sidebarOnly": some no mobile (a /sobre tem topbar próprio) e só aparece
+  // como sidebar no desktop/tablet. Usado fora do grupo (tabs).
+  sidebarOnly?: boolean;
+}) {
   const pathname = usePathname();
 
   // Destaque otimista: ao tocar numa aba, ela acende NA HORA, sem esperar a
@@ -135,8 +143,10 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
         { href: "/login", label: "Entrar", icon: ICON_LOGIN },
       ];
 
+  const sobreActive = current.startsWith("/sobre");
+
   return (
-    <nav className="bottom-nav">
+    <nav className={`bottom-nav${sidebarOnly ? " nav-sidebar-only" : ""}`}>
       {/* Marca no topo — só aparece quando a nav vira sidebar (≥768px). */}
       <Link href="/" className="nav-brand" aria-label="Moodpass — início">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -180,7 +190,7 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
       <Link
         href="/sobre"
         prefetch
-        className="nav-item nav-item-desktop"
+        className={`nav-item nav-item-desktop${sobreActive ? " active" : ""}`}
       >
         {ICON_INFO}
         <span>Sobre</span>
