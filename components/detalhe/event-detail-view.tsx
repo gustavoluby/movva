@@ -13,6 +13,8 @@ import {
   tier1SpotsLeft,
 } from "@/lib/events/pricing";
 import { getEventBySlug } from "@/lib/events/get-event";
+import { EventSocialProof } from "@/components/detalhe/event-social-proof";
+import { albumForVenue } from "@/lib/galeria";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
   SITE_NAME,
@@ -101,6 +103,10 @@ export async function EventDetailView({
             ? "Palestrante"
             : "Co-anfitriã";
   const isMultiHost = hosts.length > 1;
+
+  // Álbum de um encontro que já rolou no mesmo local — vira prova social logo
+  // acima das perguntas frequentes. Nulo quando o local não bate.
+  const proofAlbum = albumForVenue(event.location_name, event.slug);
 
   // ---- SEO / GEO -----------------------------------------------------------
   const eventUrl = absoluteUrl(`/eventos/${event.slug}`);
@@ -441,6 +447,9 @@ export async function EventDetailView({
               </div>
             </div>
           )}
+
+          {/* Prova social: fotos de um encontro que já rolou no mesmo espaço. */}
+          {proofAlbum && <EventSocialProof album={proofAlbum} />}
 
           {faq.length > 0 && (
             <section className="faq-section">

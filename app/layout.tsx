@@ -3,6 +3,7 @@ import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
 import { SessionSync } from "@/components/auth/session-sync";
 import { JsonLd } from "@/components/seo/json-ld";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import {
   SITE_URL,
   SITE_NAME,
@@ -101,6 +102,7 @@ export default function RootLayout({
         className={`${manrope.variable} ${fraunces.variable} antialiased`}
       >
         <JsonLd data={[organizationLd, websiteLd]} />
+        <GoogleAnalytics />
         <SessionSync />
         {children}
       </body>
