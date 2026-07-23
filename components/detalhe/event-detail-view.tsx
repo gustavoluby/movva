@@ -139,6 +139,14 @@ export async function EventDetailView({
   // FAQ — construído uma vez e usado tanto no HTML visível quanto no FAQPage
   // (paridade obrigatória do Google).
   const activityNames = (activities ?? []).map((a) => a.name).filter(Boolean);
+  // Resposta de preço: com lote, explica os dois valores; senão, preço único.
+  const priceAnswer = hasPriceTiers(event)
+    ? `As ${event.tier1_capacity} primeiras vagas custam ${formatPrice(
+        event.price_cents,
+      )} (1º lote). As vagas restantes custam ${formatPrice(
+        event.price_tier2_cents as number,
+      )}.`
+    : `${priceLabel} por pessoa.`;
   const faq: { q: string; a: string }[] = [
     {
       q: `Quando acontece o ${event.title}?`,
@@ -154,7 +162,7 @@ export async function EventDetailView({
     },
     {
       q: "Quanto custa?",
-      a: `${priceLabel} por pessoa.`,
+      a: priceAnswer,
     },
     ...(activityNames.length > 0
       ? [

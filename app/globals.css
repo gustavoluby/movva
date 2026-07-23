@@ -722,6 +722,8 @@
   color: var(--text);
   line-height: 1.6;
   margin-bottom: 20px;
+  /* respeita as quebras de linha que o admin digita na descrição */
+  white-space: pre-line;
 }
 
 /* FAQ do evento (SEO/GEO: também vira FAQPage JSON-LD com paridade). */
