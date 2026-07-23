@@ -32,6 +32,14 @@ const ICON_HELP = (
   </svg>
 );
 
+const ICON_SOBRE = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+);
+
 const ICON_LOGOUT = (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -188,6 +196,11 @@ export default async function PerfilPage() {
             <Link href="/perfil/dados" className="account-row">
               <span className="account-row-icon">{ICON_DATA}</span>
               <span className="account-row-label">Meus dados</span>
+              {CHEVRON}
+            </Link>
+            <Link href="/sobre" className="account-row">
+              <span className="account-row-icon">{ICON_SOBRE}</span>
+              <span className="account-row-label">Sobre o Moodpass</span>
               {CHEVRON}
             </Link>
             <a
