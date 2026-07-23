@@ -3571,6 +3571,53 @@
   padding: 16px 20px 6px;
 }
 
+/* CTA de fechamento na home → /sobre ("Conheça o Moodpass") */
+.home-about-cta {
+  display: block;
+  margin: 10px 20px 0;
+  padding: 24px 22px;
+  border-radius: 22px;
+  background: linear-gradient(155deg, var(--blush-soft) 0%, #fff 100%);
+  border: 1px solid rgba(45, 65, 49, 0.06);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s;
+}
+.home-about-cta:active { transform: scale(0.99); }
+.home-about-cta:hover { box-shadow: var(--shadow-md); }
+.home-about-kicker {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--accent);
+}
+.home-about-title {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+  margin: 4px 0 0;
+}
+.home-about-sub {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 46ch;
+}
+.home-about-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.home-about-link svg { transition: transform 0.2s ease; }
+.home-about-cta:hover .home-about-link svg { transform: translateX(3px); }
+
 /* ============================================================
    Landing / "Sobre o Moodpass" (/sobre) — mobile-first
    ============================================================ */
@@ -3601,6 +3648,17 @@
   transition: background 0.2s, border-color 0.2s;
 }
 .lp-topbar-link:hover { background: #fff; border-color: rgba(45, 65, 49, 0.16); }
+
+.lp-topbar-nav { display: flex; align-items: center; gap: 8px; }
+.lp-topbar-link-ghost {
+  color: var(--text-muted);
+  background: transparent;
+  border-color: transparent;
+}
+.lp-topbar-link-ghost:hover {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: var(--border);
+}
 
 /* ---- Hero ---- */
 .lp-hero { padding: 22px 22px 8px; }

@@ -46,6 +46,11 @@ const OFERTAS: { titulo: string; texto: string }[] = [
 export default async function SobrePage() {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const loggedIn = !!user;
+
   // Fotos reais das experiências pra galeria e hero. Publicadas, com imagem.
   const { data: eventos } = await supabase
     .from("events")
@@ -79,9 +84,27 @@ export default async function SobrePage() {
               height={29}
             />
           </Link>
-          <Link href="/login" className="lp-topbar-link">
-            Entrar
-          </Link>
+          <nav className="lp-topbar-nav">
+            {loggedIn ? (
+              // Já logado: "Acessar" já leva pras experiências — dispensa o
+              // "Ver experiências" (seria o mesmo destino).
+              <Link href="/" className="lp-topbar-link">
+                Acessar
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/"
+                  className="lp-topbar-link lp-topbar-link-ghost"
+                >
+                  Ver experiências
+                </Link>
+                <Link href="/login" className="lp-topbar-link">
+                  Entrar
+                </Link>
+              </>
+            )}
+          </nav>
         </header>
 
         {/* ---- Hero ---- */}

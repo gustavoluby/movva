@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FeaturedCard } from "@/components/descobrir/featured-card";
@@ -7,7 +8,13 @@ import { CategoryChips } from "@/components/descobrir/category-chips";
 import { CATEGORY_DEFS, eventCategories } from "@/lib/categories";
 import { activePriceCents } from "@/lib/events/pricing";
 import { JsonLd } from "@/components/seo/json-ld";
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, absoluteUrl } from "@/lib/site";
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_CITY,
+  SITE_DESCRIPTION,
+  absoluteUrl,
+} from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Experiências de bem-estar para mulheres em Curitiba",
@@ -228,6 +235,31 @@ export default async function DescobrirPage({
             </div>
           </>
         )}
+
+        <Link href="/sobre" className="home-about-cta">
+          <span className="home-about-kicker">Novidade por aqui?</span>
+          <h3 className="home-about-title">Conheça o Moodpass</h3>
+          <p className="home-about-sub">
+            Uma curadoria de experiências de bem-estar pra mulheres florescerem
+            juntas em {SITE_CITY}.
+          </p>
+          <span className="home-about-link">
+            Saber mais
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
+          </span>
+        </Link>
 
       <div className="h-12" />
     </div>
