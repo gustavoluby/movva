@@ -119,6 +119,25 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
 
   return (
     <nav className="bottom-nav">
+      {/* Marca no topo — só aparece quando a nav vira sidebar (≥768px). */}
+      <Link href="/" className="nav-brand" aria-label="Moodpass — início">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/moodpass-logo-horizontal.webp"
+          alt="Moodpass"
+          className="nav-brand-full"
+          width={132}
+          height={33}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/moodpass-logo.webp"
+          alt="Moodpass"
+          className="nav-brand-mark"
+          width={50}
+          height={31}
+        />
+      </Link>
       {items.map((item) => {
         const active =
           item.href === "/"

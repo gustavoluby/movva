@@ -3915,3 +3915,91 @@
 @media (prefers-reduced-motion: reduce) {
   .lp-reveal { animation: none; }
 }
+
+/* ============================================================
+   Tablet / desktop — a barra inferior vira sidebar à esquerda
+   (estilo Instagram). PURAMENTE ADITIVO: só regras min-width.
+   Abaixo de 768px nada muda — o mobile fica idêntico.
+   A coluna de conteúdo continua em 480px (identidade preservada);
+   a sidebar mora na sobra da esquerda e nunca sobrepõe o conteúdo
+   (nas larguras usadas, a folga lateral > largura da sidebar).
+   ============================================================ */
+.nav-brand { display: none; }
+
+@media (min-width: 768px) {
+  /* Coluna central vira uma "moldura" sutil sobre o fundo creme da página. */
+  .moodpass-shell {
+    border-inline: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    min-height: 100dvh;
+  }
+
+  /* Barra inferior → sidebar vertical fixa na esquerda da viewport. */
+  .bottom-nav {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: auto;
+    width: 90px;
+    max-width: none;
+    margin: 0;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 4px;
+    padding: 22px 14px calc(22px + env(safe-area-inset-bottom));
+    border-top: none;
+    border-right: 1px solid var(--border);
+    background: rgba(253, 248, 239, 0.97);
+    backdrop-filter: blur(20px);
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 4px 20px;
+  }
+  .nav-brand-full { display: none; }
+  .nav-brand-mark { height: 30px; width: auto; display: block; }
+
+  /* Itens empilhados, sem esticar; alvo confortável e cantos arredondados. */
+  .nav-item {
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 5px;
+    padding: 12px 4px;
+    border-radius: 16px;
+    font-size: 10.5px;
+    transition: color 0.2s ease, background 0.2s ease;
+  }
+  .nav-item svg { width: 23px; height: 23px; }
+  .nav-item:hover { color: var(--primary); background: rgba(45, 65, 49, 0.05); }
+  .nav-item.active { background: var(--blush-soft); }
+  .nav-item.active::before { display: none; } /* remove o pontinho do topo */
+}
+
+@media (min-width: 1264px) {
+  /* Sidebar larga com logo + rótulos, itens em linha (ícone à esquerda). */
+  .bottom-nav {
+    width: 236px;
+    padding: 28px 16px calc(24px + env(safe-area-inset-bottom));
+    gap: 6px;
+  }
+  .nav-brand {
+    justify-content: flex-start;
+    padding: 6px 14px 24px;
+  }
+  .nav-brand-full { display: block; height: 30px; width: auto; }
+  .nav-brand-mark { display: none; }
+
+  .nav-item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 13px 16px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+}
