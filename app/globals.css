@@ -3723,36 +3723,6 @@
   max-width: 42ch;
   text-wrap: pretty;
 }
-.lp-hero-img {
-  position: relative;
-  margin-top: 22px;
-  aspect-ratio: 4 / 5;
-  border-radius: 22px;
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-}
-.lp-hero-img::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(26, 35, 29, 0.5) 0%,
-    rgba(26, 35, 29, 0.08) 34%,
-    transparent 60%
-  );
-}
-.lp-hero-caption {
-  position: absolute;
-  left: 16px;
-  bottom: 15px;
-  z-index: 1;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
-}
 
 /* ---- CTA participante ---- */
 .lp-join { padding: 30px 22px 8px; }
