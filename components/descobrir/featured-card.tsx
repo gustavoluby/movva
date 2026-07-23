@@ -26,6 +26,9 @@ export function FeaturedCard({
   soldOut = false,
 }: FeaturedCardProps) {
   const vagasLeft = Math.max(0, capacity - goingCount);
+  // "restantes" deixa claro que é o que sobrou, não o tamanho da turma.
+  const vagasLabel =
+    vagasLeft === 1 ? "1 vaga restante" : `${vagasLeft} vagas restantes`;
 
   return (
     <Link href={`/eventos/${slug}`} className="featured-card">
@@ -64,7 +67,7 @@ export function FeaturedCard({
           <span className="featured-meta-divider" />
           <span>{eventStartTime(eventTime)}</span>
           <span className="featured-meta-divider" />
-          <span>{soldOut ? "Esgotado" : `${vagasLeft} vagas`}</span>
+          <span>{soldOut ? "Esgotado" : vagasLabel}</span>
         </div>
       </div>
     </Link>
