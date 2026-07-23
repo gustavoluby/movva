@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mpClient } from "@/lib/mercadopago";
 import { getEventAvailability } from "@/lib/events/availability";
+import { activePriceCents } from "@/lib/events/pricing";
 import { validateCoupon, type CouponValidation } from "@/lib/coupons/validate";
 
 export type ReservaState = { error?: string } | null;
@@ -26,13 +27,17 @@ export async function validarCupom(
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, price_cents")
+    .select("id, price_cents, price_tier2_cents, tier1_capacity, capacity")
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();
   if (!event) return { ok: false, error: "Evento não encontrado." };
 
-  return validateCoupon(code, event.id, event.price_cents);
+  // Base do cupom = preço do lote ativo agora (função das vendas pagas).
+  const { sold } = await getEventAvailability(event.id, event.capacity);
+  const basePrice = activePriceCents(event, sold);
+
+  return validateCoupon(code, event.id, basePrice);
 }
 
 // Quebra o nome completo em nome + sobrenome pro payer do Mercado Pago. O
@@ -179,7 +184,9 @@ export async function reservarEPagar(
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, title, price_cents, capacity")
+    .select(
+      "id, title, price_cents, price_tier2_cents, tier1_capacity, capacity",
+    )
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();
@@ -198,19 +205,26 @@ export async function reservarEPagar(
 
   // Trava de esgotamento (server-side): conta vendas pagas de todas. Quem
   // ainda não pagou não consegue iniciar o checkout depois de lotar.
-  const { soldOut } = await getEventAvailability(event.id, event.capacity);
+  const { soldOut, sold } = await getEventAvailability(
+    event.id,
+    event.capacity,
+  );
   if (soldOut) {
     return { error: "As vagas desse evento esgotaram." };
   }
 
+  // Preço base = lote ativo agora (função das vendas pagas). Fonte de verdade
+  // do valor cobrado — nunca confia no client.
+  const basePriceCents = activePriceCents(event, sold);
+
   // Cupom: revalida do zero (nunca confia no client) e recalcula o preço a
-  // partir do valor cheio do evento.
+  // partir do valor cheio do evento (já no lote ativo).
   const couponCode = String(formData.get("coupon") ?? "").trim();
-  let amountCents = event.price_cents;
+  let amountCents = basePriceCents;
   let discountCents = 0;
   let appliedCoupon: string | null = null;
   if (couponCode) {
-    const v = await validateCoupon(couponCode, event.id, event.price_cents);
+    const v = await validateCoupon(couponCode, event.id, basePriceCents);
     if (!v.ok) return { error: v.error };
     amountCents = v.finalCents;
     discountCents = v.discountCents;
@@ -262,7 +276,7 @@ export async function reservarEPagar(
       slug,
       itemId: event.id,
       title: event.title,
-      unitPriceCents: booking.amount_cents ?? event.price_cents,
+      unitPriceCents: booking.amount_cents ?? basePriceCents,
       payerEmail: user.email ?? "",
       payerName: profile?.full_name ?? null,
       payerPhone: profile?.phone ?? null,

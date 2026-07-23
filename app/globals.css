@@ -835,6 +835,12 @@
   font-weight: 500;
   white-space: nowrap;
 }
+.price-tier-note {
+  font-size: 9px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-top: 1px;
+}
 .cta-btn {
   flex: 1;
   padding: 14px 20px;

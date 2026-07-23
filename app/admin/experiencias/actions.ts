@@ -140,6 +140,24 @@ export async function salvarExperiencia(
   if (capacity == null || capacity < 1)
     return { error: "Informe a quantidade de vagas." };
 
+  // Preço escalonado (lotes): opcional. Só grava se o admin marcou "tiered" e
+  // preencheu os dois campos. Senão, zera (evento com preço único).
+  let tier1Capacity: number | null = null;
+  let priceTier2Cents: number | null = null;
+  if (formData.get("tiered") === "on") {
+    tier1Capacity = optNumber(formData, "tier1_capacity");
+    priceTier2Cents = reaisToCents(String(formData.get("price_tier2") ?? ""));
+    if (tier1Capacity == null || tier1Capacity < 1)
+      return { error: "Informe as vagas do 1º lote (ou desmarque os lotes)." };
+    if (priceTier2Cents == null)
+      return { error: "Informe o preço do 2º lote (ou desmarque os lotes)." };
+    if (tier1Capacity > capacity)
+      return {
+        error: "As vagas do 1º lote não podem passar do total de vagas.",
+      };
+    tier1Capacity = Math.round(tier1Capacity);
+  }
+
   const admin = createAdminClient();
 
   // Slug: usa o que o admin digitou (se digitou) ou gera do título; garante único.
@@ -204,6 +222,8 @@ export async function salvarExperiencia(
     location_lat: lat,
     location_lng: lng,
     price_cents: priceCents,
+    price_tier2_cents: priceTier2Cents,
+    tier1_capacity: tier1Capacity,
     capacity: Math.round(capacity),
     image_url: imageUrl,
     host_summary: optText(formData, "host_summary"),

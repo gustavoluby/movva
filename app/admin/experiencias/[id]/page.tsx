@@ -12,7 +12,7 @@ import {
 export const dynamic = "force-dynamic";
 
 const EVENT_COLUMNS =
-  "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, duration, is_recurring, recurrence_rule, location_name, location_short, location_address, location_lat, location_lng, price_cents, capacity, image_url, host_summary, host_photo_url, tag, tag_style, is_featured, status";
+  "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, duration, is_recurring, recurrence_rule, location_name, location_short, location_address, location_lat, location_lng, price_cents, price_tier2_cents, tier1_capacity, capacity, image_url, host_summary, host_photo_url, tag, tag_style, is_featured, status";
 
 export default async function EditarExperienciaPage({
   params,

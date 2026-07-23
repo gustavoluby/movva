@@ -5,6 +5,7 @@ import { formatEventDate, formatPrice } from "@/lib/utils/date";
 import { reconcilePayment } from "@/lib/payments/mercadopago-reconcile";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { getEventAvailability } from "@/lib/events/availability";
+import { activePriceCents } from "@/lib/events/pricing";
 import { CheckoutForm } from "./checkout-form";
 import { PendingPoller } from "./pending-poller";
 
@@ -33,7 +34,7 @@ export default async function ReservarPage({
   const { data: event } = await supabase
     .from("events")
     .select(
-      "id, slug, title, subtitle, event_date, event_time, location_name, price_cents, capacity, going_count, image_url",
+      "id, slug, title, subtitle, event_date, event_time, location_name, price_cents, price_tier2_cents, tier1_capacity, capacity, going_count, image_url",
     )
     .eq("slug", slug)
     .eq("status", "published")
@@ -83,7 +84,10 @@ export default async function ReservarPage({
   const isPaid = booking?.payment_status === "paid";
 
   // Esgotamento: quem ainda não pagou não consegue finalizar depois de lotar.
-  const { soldOut } = await getEventAvailability(event.id, event.capacity);
+  const { soldOut, sold } = await getEventAvailability(event.id, event.capacity);
+  // Preço base do checkout = lote ativo agora (função das vendas pagas). A
+  // cobrança recalcula isso no servidor, então esse valor é só pra exibir.
+  const basePriceCents = activePriceCents(event, sold);
   if (!isPaid && soldOut) {
     return (
       <div className="moodpass-shell">
@@ -152,7 +156,7 @@ export default async function ReservarPage({
             </div>
           )}
 
-          <CheckoutForm slug={event.slug} basePriceCents={event.price_cents} />
+          <CheckoutForm slug={event.slug} basePriceCents={basePriceCents} />
 
           <div style={{ marginTop: 14 }}>
             <WhatsAppButton

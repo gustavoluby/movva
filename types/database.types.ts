@@ -306,6 +306,7 @@ export type Database = {
           location_name: string
           location_short: string | null
           price_cents: number
+          price_tier2_cents: number | null
           recurrence_rule: string | null
           slug: string
           status: string | null
@@ -313,6 +314,7 @@ export type Database = {
           tag: string | null
           tag_style: string | null
           thumb_url: string | null
+          tier1_capacity: number | null
           title: string
           updated_at: string | null
         }
@@ -338,6 +340,7 @@ export type Database = {
           location_name: string
           location_short?: string | null
           price_cents: number
+          price_tier2_cents?: number | null
           recurrence_rule?: string | null
           slug: string
           status?: string | null
@@ -345,6 +348,7 @@ export type Database = {
           tag?: string | null
           tag_style?: string | null
           thumb_url?: string | null
+          tier1_capacity?: number | null
           title: string
           updated_at?: string | null
         }
@@ -370,6 +374,7 @@ export type Database = {
           location_name?: string
           location_short?: string | null
           price_cents?: number
+          price_tier2_cents?: number | null
           recurrence_rule?: string | null
           slug?: string
           status?: string | null
@@ -377,6 +382,7 @@ export type Database = {
           tag?: string | null
           tag_style?: string | null
           thumb_url?: string | null
+          tier1_capacity?: number | null
           title?: string
           updated_at?: string | null
         }

@@ -7,6 +7,11 @@ import { ReservarCta } from "@/components/detalhe/reservar-cta";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { formatEventDate, formatPrice } from "@/lib/utils/date";
 import { getEventAvailability } from "@/lib/events/availability";
+import {
+  activePriceCents,
+  hasPriceTiers,
+  tier1SpotsLeft,
+} from "@/lib/events/pricing";
 import { getEventBySlug } from "@/lib/events/get-event";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
@@ -69,6 +74,12 @@ export async function EventDetailView({
   const ocupadas = availability.sold;
   const saved = !!savedRow;
 
+  // Preço escalonado (lotes): o preço mostrado é o do lote ativo agora (função
+  // das vendas pagas). Sem lote, é o preço único.
+  const currentPriceCents = activePriceCents(event, availability.sold);
+  const tierActive = hasPriceTiers(event) && !availability.soldOut;
+  const spotsLeftTier1 = tier1SpotsLeft(event, availability.sold);
+
   // Ordena: anfitriãs primeiro, depois professora/palestrante.
   const roleRank = (role: string | null) =>
     role === "principal" || role === "anfitria"
@@ -95,7 +106,7 @@ export async function EventDetailView({
   const eventUrl = absoluteUrl(`/eventos/${event.slug}`);
   const reservarUrl = absoluteUrl(`/reservar/${event.slug}`);
   const dateLabel = formatEventDate(event.event_date);
-  const priceLabel = formatPrice(event.price_cents);
+  const priceLabel = formatPrice(currentPriceCents);
   // location_short às vezes repete o nome do local (não é o bairro); só usa
   // como complemento se de fato diferir do location_name.
   const bairro =
@@ -208,7 +219,7 @@ export async function EventDetailView({
       : {}),
     offers: {
       "@type": "Offer",
-      price: (event.price_cents / 100).toFixed(2),
+      price: (currentPriceCents / 100).toFixed(2),
       priceCurrency: "BRL",
       availability: availability.soldOut
         ? "https://schema.org/SoldOut"
@@ -449,8 +460,20 @@ export async function EventDetailView({
 
       <div className="sticky-cta">
         <div className="price-block">
-          <div className="price-label">por pessoa</div>
-          <div className="price-value">{formatPrice(event.price_cents)}</div>
+          <div className="price-label">
+            {tierActive && spotsLeftTier1 && spotsLeftTier1 > 0
+              ? `1º lote · restam ${spotsLeftTier1}`
+              : "por pessoa"}
+          </div>
+          <div className="price-value">{formatPrice(currentPriceCents)}</div>
+          {tierActive &&
+            spotsLeftTier1 != null &&
+            spotsLeftTier1 > 0 &&
+            event.price_tier2_cents != null && (
+              <div className="price-tier-note">
+                depois {formatPrice(event.price_tier2_cents)}
+              </div>
+            )}
         </div>
         <ReservarCta slug={event.slug} soldOut={availability.soldOut} />
       </div>

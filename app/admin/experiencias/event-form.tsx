@@ -44,6 +44,8 @@ export type EventFormData = {
   location_lat?: number | null;
   location_lng?: number | null;
   price_cents?: number | null;
+  price_tier2_cents?: number | null;
+  tier1_capacity?: number | null;
   capacity?: number | null;
   image_url?: string | null;
   host_summary?: string | null;
@@ -106,6 +108,15 @@ export function EventForm({
 
   const priceDefault =
     event?.price_cents != null ? String(event.price_cents / 100) : "";
+  const tier2Default =
+    event?.price_tier2_cents != null
+      ? String(event.price_tier2_cents / 100)
+      : "";
+
+  // Preço escalonado (lotes): começa ligado se o evento já tem lote salvo.
+  const [tiered, setTiered] = useState(
+    event?.tier1_capacity != null && event?.price_tier2_cents != null,
+  );
 
   return (
     <form action={formAction} className="exp-form">
@@ -300,7 +311,7 @@ export function EventForm({
         <div className="admin-card-title">Vagas e preço</div>
         <div className="coupon-form-grid">
           <label className="coupon-field">
-            <span>Preço (R$) *</span>
+            <span>{tiered ? "Preço do 1º lote (R$) *" : "Preço (R$) *"}</span>
             <input
               name="price"
               type="number"
@@ -308,7 +319,7 @@ export function EventForm({
               step="any"
               defaultValue={priceDefault}
               required
-              placeholder="179"
+              placeholder="139"
             />
           </label>
 
@@ -324,6 +335,51 @@ export function EventForm({
               placeholder="18"
             />
           </label>
+
+          {/* ---- Preço escalonado por vagas (lotes) ---- */}
+          <label className="coupon-field exp-check coupon-field-wide">
+            <input
+              type="checkbox"
+              name="tiered"
+              checked={tiered}
+              onChange={(e) => setTiered(e.target.checked)}
+            />
+            <span>Preço aumenta depois das primeiras vagas (lotes)</span>
+          </label>
+
+          {tiered && (
+            <>
+              <label className="coupon-field">
+                <span>Vagas no 1º lote *</span>
+                <input
+                  name="tier1_capacity"
+                  type="number"
+                  min="1"
+                  step="1"
+                  defaultValue={event?.tier1_capacity ?? ""}
+                  placeholder="10"
+                />
+              </label>
+
+              <label className="coupon-field">
+                <span>Preço do 2º lote (R$) *</span>
+                <input
+                  name="price_tier2"
+                  type="number"
+                  min="0"
+                  step="any"
+                  defaultValue={tier2Default}
+                  placeholder="159"
+                />
+              </label>
+
+              <p className="exp-hint coupon-field-wide" style={{ margin: 0 }}>
+                As primeiras vagas (as do 1º lote) pagam o preço promocional.
+                Assim que essas vagas esgotam, o valor passa automaticamente pro
+                preço do 2º lote pra quem comprar depois.
+              </p>
+            </>
+          )}
 
           <label className="coupon-field">
             <span>Tag de destaque</span>
