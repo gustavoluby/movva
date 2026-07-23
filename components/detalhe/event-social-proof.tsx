@@ -1,5 +1,5 @@
-import Image from "next/image";
 import type { GaleriaAlbum } from "@/lib/galeria";
+import { PhotoRail } from "@/components/galeria/photo-rail";
 
 /**
  * Prova social na página do evento: fotos de um encontro que já rolou no mesmo
@@ -7,7 +7,8 @@ import type { GaleriaAlbum } from "@/lib/galeria";
  * é a página que converte.
  *
  * Sem link pro álbum: essa seção é prova, não desvio. A pessoa está na página
- * que converte — nada aqui pode tirá-la do evento que ela está vendo.
+ * que converte — nada aqui pode tirá-la do evento que ela está vendo. Ampliar
+ * a foto não fere isso: abre por cima e fecha de volta no mesmo lugar.
  */
 export function EventSocialProof({ album }: { album: GaleriaAlbum }) {
   const fotos = album.items.filter((i) => i.type === "photo");
@@ -20,23 +21,11 @@ export function EventSocialProof({ album }: { album: GaleriaAlbum }) {
         Fotos do <strong>{album.title}</strong>, {album.when} — no mesmo espaço.
       </p>
 
-      <div className="galeria-rail proof-rail">
-        {fotos.map((f) => (
-          <figure
-            key={f.src}
-            className="galeria-card"
-            style={{ aspectRatio: f.ratio }}
-          >
-            <Image
-              className="galeria-media"
-              src={f.src}
-              alt={f.alt}
-              fill
-              sizes="200px"
-            />
-          </figure>
-        ))}
-      </div>
+      <PhotoRail
+        items={fotos}
+        railClassName="galeria-rail proof-rail"
+        sizes="200px"
+      />
     </section>
   );
 }

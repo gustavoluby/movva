@@ -7,13 +7,25 @@ import type { GaleriaItem } from "@/lib/galeria";
 import { AlbumVideo } from "./album-video";
 
 /**
- * Trilho do álbum. As fotos abrem em tela cheia (o vídeo continua tocando no
- * próprio card — abrir vídeo em overlay só atrapalharia).
+ * Trilho horizontal de fotos. Clicar numa foto abre ampliada (o vídeo continua
+ * tocando no próprio card — abrir vídeo em overlay só atrapalharia).
+ *
+ * Serve a galeria "Momentos" (home e /sobre) e a prova social "Já rolou aqui"
+ * na página do evento — o que muda entre elas é só a classe do trilho e o
+ * tamanho que o next/image deve baixar.
  *
  * O overlay vai num portal pro <body>: o trilho tem `overflow-x: auto` e, na
  * /sobre, um ancestral anima `transform` — os dois quebram `position: fixed`.
  */
-export function AlbumRail({ items }: { items: GaleriaItem[] }) {
+export function PhotoRail({
+  items,
+  railClassName = "galeria-rail",
+  sizes = "260px",
+}: {
+  items: GaleriaItem[];
+  railClassName?: string;
+  sizes?: string;
+}) {
   const fotos = items.filter((i) => i.type === "photo");
   const [aberta, setAberta] = useState<number | null>(null);
   // Devolve o foco pro card de onde a foto foi aberta quando o overlay fecha.
@@ -33,7 +45,7 @@ export function AlbumRail({ items }: { items: GaleriaItem[] }) {
 
   return (
     <>
-      <div className="galeria-rail">
+      <div className={railClassName}>
         {items.map((item) => {
           if (item.type === "video") {
             return (
@@ -68,7 +80,7 @@ export function AlbumRail({ items }: { items: GaleriaItem[] }) {
                 src={item.src}
                 alt={item.alt}
                 fill
-                sizes="260px"
+                sizes={sizes}
               />
             </button>
           );

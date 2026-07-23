@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { GALERIA_ALBUNS } from "@/lib/galeria";
-import { AlbumRail } from "./album-rail";
+import { PhotoRail } from "./photo-rail";
 
 /**
  * Galeria das experiências que já rolaram — um trilho horizontal de fotos e
@@ -72,7 +72,7 @@ export function GaleriaMomentos({
               <div className="galeria-album-head">{meta}</div>
             )}
 
-            <AlbumRail items={album.items} />
+            <PhotoRail items={album.items} />
           </div>
         );
       })}

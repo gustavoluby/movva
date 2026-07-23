@@ -3852,50 +3852,6 @@
   color: var(--text-muted);
 }
 
-/* ---- Galeria ---- */
-.lp-gallery { padding: 34px 0 6px; }
-.lp-gallery-title { padding: 0 22px; }
-.lp-gallery-strip {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding: 4px 22px 8px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.lp-gallery-strip::-webkit-scrollbar { display: none; }
-.lp-gallery-card {
-  flex: 0 0 auto;
-  width: 210px;
-  scroll-snap-align: start;
-}
-.lp-gallery-img {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s;
-}
-.lp-gallery-card:active .lp-gallery-img { transform: scale(0.98); }
-.lp-gallery-card:hover .lp-gallery-img { box-shadow: var(--shadow-md); }
-.lp-gallery-meta { padding: 10px 2px 0; }
-.lp-gallery-name {
-  display: block;
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.25;
-}
-.lp-gallery-place {
-  display: block;
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
 /* ---- CTA organizadora (mundo sage) ---- */
 .lp-organizer {
   margin-top: 40px;
