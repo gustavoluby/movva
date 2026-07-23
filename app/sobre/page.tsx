@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { GaleriaMomentos } from "@/components/galeria/galeria-momentos";
@@ -52,18 +51,6 @@ export default async function SobrePage() {
     data: { user },
   } = await supabase.auth.getUser();
   const loggedIn = !!user;
-
-  // Foto do hero: a experiência em destaque (ou a mais recente) com imagem.
-  const { data: eventos } = await supabase
-    .from("events")
-    .select("slug, title, location_short, image_url, is_featured")
-    .eq("status", "published")
-    .not("image_url", "is", null)
-    .order("is_featured", { ascending: false })
-    .order("event_date", { ascending: false })
-    .limit(1);
-
-  const hero = eventos?.[0] ?? null;
 
   const organizarHref = getNicoleWhatsAppLink(
     "Olá! Organizo experiências pra mulheres e quero publicar a minha no Moodpass. Pode me contar como funciona?",
@@ -119,24 +106,13 @@ export default async function SobrePage() {
             Yoga, autocuidado, drenagem e encontros cuidadosamente selecionados
             em {SITE_CITY}. Turmas reduzidas, presença de verdade.
           </p>
-
-          {hero?.image_url && (
-            <div className="lp-hero-img lp-reveal lp-reveal-3">
-              <Image
-                src={hero.image_url}
-                alt={`Experiência ${hero.title} — Moodpass em ${SITE_CITY}`}
-                fill
-                priority
-                sizes="(max-width: 480px) 100vw, 480px"
-                style={{ objectFit: "cover" }}
-              />
-              <span className="lp-hero-caption">
-                {hero.title}
-                {hero.location_short ? ` · ${hero.location_short}` : ""}
-              </span>
-            </div>
-          )}
         </section>
+
+        {/* Logo abaixo da chamada: as fotos reais valem mais que uma capa de
+            evento — é a primeira prova de que isso acontece de verdade. */}
+        <div className="lp-reveal lp-reveal-3">
+          <GaleriaMomentos title="Um gostinho do que já rolou" variant="lp" />
+        </div>
 
         {/* ---- CTA participante (ciente de login) ---- */}
         <section className="lp-join">
@@ -229,9 +205,6 @@ export default async function SobrePage() {
             ))}
           </dl>
         </section>
-
-        {/* ---- Galeria: fotos e vídeo reais das experiências ---- */}
-        <GaleriaMomentos title="Um gostinho do que já rolou" variant="lp" />
 
         {/* ---- CTA organizadora (mundo visual próprio: sage) ---- */}
         <section className="lp-organizer">
