@@ -56,6 +56,8 @@ export type Database = {
           discount_cents: number | null
           event_id: string
           id: string
+          mp_status: string | null
+          mp_status_detail: string | null
           paid_at: string | null
           payment_id: string | null
           payment_method: string | null
@@ -73,6 +75,8 @@ export type Database = {
           discount_cents?: number | null
           event_id: string
           id?: string
+          mp_status?: string | null
+          mp_status_detail?: string | null
           paid_at?: string | null
           payment_id?: string | null
           payment_method?: string | null
@@ -90,6 +94,8 @@ export type Database = {
           discount_cents?: number | null
           event_id?: string
           id?: string
+          mp_status?: string | null
+          mp_status_detail?: string | null
           paid_at?: string | null
           payment_id?: string | null
           payment_method?: string | null
