@@ -6,6 +6,7 @@ import { isAdmin } from "@/lib/admin";
 import { fetchUserEmails } from "@/lib/admin-users";
 import { formatPrice } from "@/lib/utils/date";
 import { RemoveSaleButton } from "./remove-sale-button";
+import { AddSaleForm } from "./add-sale-form";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,8 @@ type EventRow = {
 function paymentLabel(method: string | null): string {
   if (method === "pix") return "Pix";
   if (method === "card" || method === "credit_card") return "Cartão";
+  if (method === "dinheiro") return "Dinheiro";
+  if (method === "cortesia") return "Cortesia";
   return method ?? "—";
 }
 
@@ -150,7 +153,12 @@ export default async function AdminEventosPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab: tabRaw } = await searchParams;
-  const tab = tabRaw === "contas" ? "contas" : "vendas";
+  const tab =
+    tabRaw === "contas"
+      ? "contas"
+      : tabRaw === "adicionar"
+        ? "adicionar"
+        : "vendas";
 
   const supabase = await createClient();
   const {
@@ -310,6 +318,12 @@ export default async function AdminEventosPage({
             Vendas
           </Link>
           <Link
+            href="/admin/eventos?tab=adicionar"
+            className={`elas-tab${tab === "adicionar" ? " active" : ""}`}
+          >
+            Adicionar
+          </Link>
+          <Link
             href="/admin/eventos?tab=contas"
             className={`elas-tab${tab === "contas" ? " active" : ""}`}
           >
@@ -317,7 +331,15 @@ export default async function AdminEventosPage({
           </Link>
         </nav>
 
-        {tab === "vendas" ? (
+        {tab === "adicionar" ? (
+          <AddSaleForm
+            events={(events ?? []).map((e) => ({
+              id: e.id,
+              title: e.title,
+              active: e.status === "published",
+            }))}
+          />
+        ) : tab === "vendas" ? (
           <div className="admin-events">
             <p className="admin-summary">
               {totalVendas} venda{totalVendas === 1 ? "" : "s"} no total ·{" "}
