@@ -32,6 +32,20 @@ export async function reconcilePayment(
   const status = payment.status ?? "unknown";
   const paid = status === "approved";
 
+  // Diagnóstico das recusas: registra o MOTIVO real (status_detail) pra separar
+  // antifraude (cc_rejected_high_risk → nossos dados de payer ajudam) de causas
+  // do banco/cartão (saldo, cartão bloqueado → não dá pra resolver por código).
+  // Aparece nos logs de runtime da Vercel. Não roda pra 'approved'/'pending'.
+  if (status === "rejected" || status === "cancelled") {
+    console.warn("[mp] pagamento não aprovado", {
+      bookingId,
+      paymentId: String(payment.id ?? paymentId),
+      status,
+      status_detail: payment.status_detail ?? null,
+      payment_method: payment.payment_method_id ?? null,
+    });
+  }
+
   if (paid) {
     const method = payment.payment_type_id?.includes("card") ? "card" : "pix";
     const supabase = createAdminClient();

@@ -91,6 +91,8 @@ async function criarPreferencia(args: {
   payerName: string | null;
   payerPhone: string | null;
   payerCpf: string; // só dígitos, já validado no reservarEPagar
+  // Sinal antifraude extra (recomendado pela doc do MP p/ subir aprovação):
+  payerRegistrationDate?: string | null; // ISO — quando a conta foi criada
 }): Promise<string> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
@@ -102,49 +104,57 @@ async function criarPreferencia(args: {
   const { name, surname } = splitName(args.payerName);
   const phone = parsePhone(args.payerPhone);
 
-  const pref = await new Preference(mpClient()).create({
-    body: {
-      items: [
-        {
-          id: args.itemId,
-          title: args.title,
-          description: `Ingresso — ${args.title}`,
-          category_id: "tickets",
-          quantity: 1,
-          unit_price: args.unitPriceCents / 100,
-          currency_id: "BRL",
-        },
-      ],
-      // Comprador: sem esses dados o antifraude do MP fica sem sinal e recusa
-      // compras legítimas como suspeitas. Só manda o que existe no perfil.
-      payer: {
-        email: args.payerEmail,
-        ...(name ? { name } : {}),
-        ...(surname ? { surname } : {}),
-        ...(phone ? { phone } : {}),
-        // CPF é o sinal antifraude mais forte — reduz a recusa de cartão de
-        // comprador/dispositivo desconhecido.
-        identification: { type: "CPF", number: args.payerCpf },
+  const body = {
+    items: [
+      {
+        id: args.itemId,
+        title: args.title,
+        description: `Ingresso — ${args.title}`,
+        category_id: "tickets",
+        quantity: 1,
+        unit_price: args.unitPriceCents / 100,
+        currency_id: "BRL",
       },
-      statement_descriptor: "MOODPASS",
-      // Referência única por tentativa: `${bookingId}:${timestamp}`. Duas
-      // tentativas idênticas (mesmo external_reference) podem ser lidas pelo
-      // antifraude do MP como duplicata e recusadas (cc_rejected_high_risk).
-      // O webhook extrai o bookingId de volta (parte antes do ":"). booking_id
-      // vai no metadata como reforço de conciliação.
-      external_reference: `${args.bookingId}:${Date.now()}`,
-      metadata: { booking_id: args.bookingId },
-      back_urls: { success: backUrl, pending: backUrl, failure: backUrl },
-      // auto_return e webhook só com HTTPS público: o MP rejeita auto_return
-      // com back_url http://localhost, e o webhook não alcança localhost.
-      ...(origin.startsWith("https://")
-        ? {
-            auto_return: "approved",
-            notification_url: `${origin}/api/webhooks/mercadopago`,
-          }
-        : {}),
+    ],
+    // Comprador: sem esses dados o antifraude do MP fica sem sinal e recusa
+    // compras legítimas como suspeitas. Só manda o que existe no perfil.
+    payer: {
+      email: args.payerEmail,
+      ...(name ? { name } : {}),
+      ...(surname ? { surname } : {}),
+      ...(phone ? { phone } : {}),
+      // CPF é o sinal antifraude mais forte — reduz a recusa de cartão de
+      // comprador/dispositivo desconhecido.
+      identification: { type: "CPF", number: args.payerCpf },
     },
-  });
+    statement_descriptor: "MOODPASS",
+    // Referência única por tentativa: `${bookingId}:${timestamp}`. Duas
+    // tentativas idênticas (mesmo external_reference) podem ser lidas pelo
+    // antifraude do MP como duplicata e recusadas (cc_rejected_high_risk).
+    // O webhook extrai o bookingId de volta (parte antes do ":"). booking_id
+    // vai no metadata como reforço de conciliação.
+    external_reference: `${args.bookingId}:${Date.now()}`,
+    metadata: { booking_id: args.bookingId },
+    back_urls: { success: backUrl, pending: backUrl, failure: backUrl },
+    // auto_return e webhook só com HTTPS público: o MP rejeita auto_return
+    // com back_url http://localhost, e o webhook não alcança localhost.
+    ...(origin.startsWith("https://")
+      ? {
+          auto_return: "approved",
+          notification_url: `${origin}/api/webhooks/mercadopago`,
+        }
+      : {}),
+  };
+
+  // Sinal antifraude extra que a API do MP aceita mas o SDK não tipa (doc
+  // "improve-payment-approval"): payer.date_created — conta antiga = menor
+  // risco. Campo validado na referência oficial da Preference.
+  if (args.payerRegistrationDate) {
+    (body.payer as Record<string, unknown>).date_created =
+      args.payerRegistrationDate;
+  }
+
+  const pref = await new Preference(mpClient()).create({ body });
 
   const url = pref.init_point ?? pref.sandbox_init_point;
   if (!url) throw new Error("checkout sem init_point");
@@ -281,6 +291,9 @@ export async function reservarEPagar(
       payerName: profile?.full_name ?? null,
       payerPhone: profile?.phone ?? null,
       payerCpf: cpf,
+      // Sinal antifraude extra (sobe a aprovação): idade da conta. user.created_at
+      // sempre existe pra usuária logada.
+      payerRegistrationDate: user.created_at ?? null,
     });
   } catch (err) {
     console.error("[reservarEPagar] erro criando preferência:", err);
