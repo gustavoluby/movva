@@ -1305,6 +1305,16 @@
   text-transform: none;
   color: var(--text);
 }
+/* Campos lado a lado com rótulos de alturas diferentes (ex.: "WhatsApp
+   (opcional)" quebra em duas linhas, "Valor pago" não): a célula do grid
+   estica, e o auto-margin joga o controle pro rodapé — os dois inputs ficam
+   na mesma linha de base. Só quando o controle é o último filho: campo com
+   dica embaixo (slug) ou checkbox (rótulo depois do input) fica como está. */
+.coupon-field > input:last-child,
+.coupon-field > select:last-child,
+.coupon-field > textarea:last-child {
+  margin-top: auto;
+}
 .coupon-field input:focus,
 .coupon-field select:focus {
   outline: none;
