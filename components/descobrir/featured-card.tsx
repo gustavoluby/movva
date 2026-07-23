@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { eventStartTime, eventWeekday } from "@/lib/utils/date";
+import { eventDateShort, eventStartTime, eventWeekday } from "@/lib/utils/date";
 
 type FeaturedCardProps = {
   slug: string;
@@ -58,7 +58,9 @@ export function FeaturedCard({
         <div className="featured-title">{title}</div>
         {subtitle && <div className="featured-subtitle">{subtitle}</div>}
         <div className="featured-meta">
-          <span>{eventWeekday(eventDate)}</span>
+          <span>
+            {eventWeekday(eventDate)}, {eventDateShort(eventDate)}
+          </span>
           <span className="featured-meta-divider" />
           <span>{eventStartTime(eventTime)}</span>
           <span className="featured-meta-divider" />

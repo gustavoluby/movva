@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
+  eventDateShort,
   eventStartTime,
   eventWeekday,
   formatPrice,
@@ -105,7 +106,10 @@ export function EventCard({
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 6v6l4 2" />
               </svg>
-              {eventWeekday(eventDate)} · {eventStartTime(eventTime)}
+              {past
+                ? eventDateShort(eventDate)
+                : `${eventWeekday(eventDate)}, ${eventDateShort(eventDate)}`}
+              {eventStartTime(eventTime) ? ` · ${eventStartTime(eventTime)}` : ""}
             </div>
             <div className="ec-place">{locationName}</div>
           </div>

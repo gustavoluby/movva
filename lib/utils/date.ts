@@ -35,6 +35,13 @@ export function eventWeekday(dateStr: string): string {
   return WEEKDAYS[date.getDay()];
 }
 
+// "19/06" — dia/mês a partir de "YYYY-MM-DD" (sem timezone). Nos passados
+// substitui o dia da semana; nos próximos vai junto do dia da semana.
+export function eventDateShort(dateStr: string): string {
+  const [, m, d] = dateStr.split("-").map(Number);
+  return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}`;
+}
+
 // "19h em diante" → "19h em diante"
 // "19h30 às 22h"  → "19h30"
 export function eventStartTime(timeStr: string | null): string {
