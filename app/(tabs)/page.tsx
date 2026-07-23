@@ -236,9 +236,10 @@ export default async function DescobrirPage({
           </>
         )}
 
-        <Link href="/sobre" className="home-about-cta">
-          <span className="home-about-kicker">Novidade por aqui?</span>
-          <h3 className="home-about-title">Conheça o Moodpass</h3>
+        <div className="home-outro">
+          <Link href="/sobre" className="home-about-cta">
+          <span className="home-about-kicker">Nova por aqui?</span>
+          <h3 className="home-about-title">Saiba mais sobre o Moodpass</h3>
           <p className="home-about-sub">
             Uma curadoria de experiências de bem-estar pra mulheres florescerem
             juntas em {SITE_CITY}.
@@ -259,7 +260,8 @@ export default async function DescobrirPage({
               <path d="M5 12h14M13 5l7 7-7 7" />
             </svg>
           </span>
-        </Link>
+          </Link>
+        </div>
 
       <div className="h-12" />
     </div>

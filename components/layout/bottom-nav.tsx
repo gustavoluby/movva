@@ -91,6 +91,24 @@ const ICON_PROFILE = (
   </svg>
 );
 
+// Círculo com "i" — link "Sobre" (só na sidebar de desktop/tablet).
+const ICON_INFO = (
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+);
+
 export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
   const pathname = usePathname();
 
@@ -156,6 +174,17 @@ export function BottomNav({ loggedIn }: { loggedIn: boolean }) {
           </Link>
         );
       })}
+
+      {/* "Sobre" — só aparece quando a nav é sidebar (desktop/tablet).
+          No mobile fica escondido via CSS (.nav-item-desktop). */}
+      <Link
+        href="/sobre"
+        prefetch
+        className="nav-item nav-item-desktop"
+      >
+        {ICON_INFO}
+        <span>Sobre</span>
+      </Link>
     </nav>
   );
 }

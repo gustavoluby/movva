@@ -3571,10 +3571,17 @@
   padding: 16px 20px 6px;
 }
 
-/* CTA de fechamento na home → /sobre ("Conheça o Moodpass") */
+/* Seção de rodapé da home (separada do feed por uma divisória). */
+.home-outro {
+  margin-top: 36px;
+  padding-top: 30px;
+  border-top: 1px solid var(--border);
+}
+
+/* CTA de fechamento na home → /sobre ("Saiba mais sobre o Moodpass") */
 .home-about-cta {
   display: block;
-  margin: 10px 20px 0;
+  margin: 0 20px;
   padding: 24px 22px;
   border-radius: 22px;
   background: linear-gradient(155deg, var(--blush-soft) 0%, #fff 100%);
@@ -3983,8 +3990,12 @@
    (nas larguras usadas, a folga lateral > largura da sidebar).
    ============================================================ */
 .nav-brand { display: none; }
+/* "Sobre" só existe na sidebar (≥768px); no mobile (bottom bar) fica oculto. */
+.nav-item-desktop { display: none; }
 
 @media (min-width: 768px) {
+  .nav-item-desktop { display: flex; }
+
   /* Coluna central vira uma "moldura" sutil sobre o fundo creme da página. */
   .moodpass-shell {
     border-inline: 1px solid var(--border);

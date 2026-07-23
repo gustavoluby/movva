@@ -138,33 +138,65 @@ export default async function SobrePage() {
           )}
         </section>
 
-        {/* ---- CTA participante ---- */}
+        {/* ---- CTA participante (ciente de login) ---- */}
         <section className="lp-join">
           <div className="lp-join-inner">
-            <h2 className="lp-join-title">Quero viver essas experiências</h2>
-            <p className="lp-join-text">
-              Crie sua conta gratuita e garanta seu lugar nas próximas
-              experiências do Moodpass.
-            </p>
-            <Link href="/signup" className="lp-btn lp-btn-primary">
-              Criar minha conta
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-              >
-                <path d="M5 12h14M13 5l7 7-7 7" />
-              </svg>
-            </Link>
-            <Link href="/" className="lp-link-quiet">
-              Só quero dar uma olhada nas experiências
-            </Link>
+            {loggedIn ? (
+              <>
+                <h2 className="lp-join-title">
+                  Pronta pra próxima experiência?
+                </h2>
+                <p className="lp-join-text">
+                  Você já tem conta — é só escolher sua próxima experiência e
+                  garantir seu lugar.
+                </p>
+                <Link href="/" className="lp-btn lp-btn-primary">
+                  Ver as experiências
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </>
+            ) : (
+              <>
+                <h2 className="lp-join-title">
+                  Quero viver essas experiências
+                </h2>
+                <p className="lp-join-text">
+                  Crie sua conta gratuita e garanta seu lugar nas próximas
+                  experiências do Moodpass.
+                </p>
+                <Link href="/signup" className="lp-btn lp-btn-primary">
+                  Criar minha conta
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </Link>
+                <Link href="/" className="lp-link-quiet">
+                  Só quero dar uma olhada nas experiências
+                </Link>
+              </>
+            )}
           </div>
         </section>
 
