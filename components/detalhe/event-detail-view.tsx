@@ -176,7 +176,7 @@ export async function EventDetailView({
         : []),
     {
       q: "Quantas vagas?",
-      a: `${event.capacity} vagas. Turma reduzida.`,
+      a: `${event.capacity} vagas.`,
     },
   ];
 
