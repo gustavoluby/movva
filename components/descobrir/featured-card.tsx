@@ -58,9 +58,9 @@ export function FeaturedCard({
         <div className="featured-title">{title}</div>
         {subtitle && <div className="featured-subtitle">{subtitle}</div>}
         <div className="featured-meta">
-          <span>
-            {eventWeekday(eventDate)}, {eventDateShort(eventDate)}
-          </span>
+          <span>{eventWeekday(eventDate)}</span>
+          <span className="featured-meta-divider" />
+          <span>{eventDateShort(eventDate)}</span>
           <span className="featured-meta-divider" />
           <span>{eventStartTime(eventTime)}</span>
           <span className="featured-meta-divider" />

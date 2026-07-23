@@ -108,7 +108,7 @@ export function EventCard({
               </svg>
               {past
                 ? eventDateShort(eventDate)
-                : `${eventWeekday(eventDate)}, ${eventDateShort(eventDate)}`}
+                : `${eventWeekday(eventDate)} · ${eventDateShort(eventDate)}`}
               {eventStartTime(eventTime) ? ` · ${eventStartTime(eventTime)}` : ""}
             </div>
             <div className="ec-place">{locationName}</div>
