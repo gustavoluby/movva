@@ -71,6 +71,35 @@ export type HostRow = {
   photo_url?: string | null;
 };
 
+// "?" com balão explicativo. Clique (não hover) pra funcionar também no toque.
+// type=button + preventDefault pra não disparar o label/checkbox em volta.
+function InfoTip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="info-tip">
+      <button
+        type="button"
+        className="info-tip-btn"
+        aria-label="O que é isso?"
+        aria-expanded={open}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        onBlur={() => setOpen(false)}
+      >
+        ?
+      </button>
+      {open && (
+        <span className="info-tip-bubble" role="tooltip">
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
+
 function SubmitButton({ editing }: { editing: boolean }) {
   const { pending } = useFormStatus();
   return (
@@ -345,6 +374,7 @@ export function EventForm({
               onChange={(e) => setTiered(e.target.checked)}
             />
             <span>Preço aumenta depois das primeiras vagas (lotes)</span>
+            <InfoTip text="Preço promocional pras primeiras vagas (o 1º lote). Quando essas vagas esgotam, quem comprar depois paga automaticamente o preço do 2º lote (mais alto). Ex.: primeiras 10 vagas a R$139, depois R$159." />
           </label>
 
           {tiered && (
