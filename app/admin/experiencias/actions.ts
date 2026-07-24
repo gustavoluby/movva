@@ -234,6 +234,10 @@ export async function salvarExperiencia(
       : "accent",
     is_featured: formData.get("is_featured") === "on",
     status: String(formData.get("status") ?? "draft"),
+    // "O que levar" no email: lista editável + toggle de exibição. Guardamos o
+    // texto mesmo quando oculto, pra não perder ao religar depois.
+    what_to_bring: optText(formData, "what_to_bring"),
+    show_what_to_bring: formData.get("show_what_to_bring") === "on",
     updated_at: new Date().toISOString(),
   };
 

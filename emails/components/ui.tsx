@@ -103,4 +103,31 @@ export function EventDetailCard({
   );
 }
 
+// "O que levar" definido por evento (um item por linha no admin). Seção
+// desligada ou lista vazia → não renderiza nada. Tira "•"/"-" que o admin
+// tenha digitado. Usado na confirmação e no lembrete de 24h.
+export function bringItems(event: EmailEvent): string[] {
+  if (event.showWhatToBring === false) return [];
+  return (event.whatToBring ?? "")
+    .split("\n")
+    .map((l) => l.replace(/^\s*[•\-–]\s*/, "").trim())
+    .filter(Boolean);
+}
+
+export function WhatToBring({ event }: { event: EmailEvent }) {
+  const items = bringItems(event);
+  if (items.length === 0) return null;
+  return (
+    <>
+      <Hr style={t.hr} />
+      <Text style={t.cardTitle}>O que levar</Text>
+      {items.map((item) => (
+        <Text key={item} style={t.metaRow}>
+          • {item}
+        </Text>
+      ))}
+    </>
+  );
+}
+
 export { Hr };

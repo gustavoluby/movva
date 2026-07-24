@@ -13,6 +13,9 @@ export type EmailEvent = {
   locationName: string;
   locationAddress?: string | null;
   imageUrl?: string | null;
+  // "O que levar": lista (um item por linha) + se a seção deve aparecer.
+  whatToBring?: string | null;
+  showWhatToBring?: boolean | null;
 };
 
 export type EmailBooking = {

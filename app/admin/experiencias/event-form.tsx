@@ -54,6 +54,8 @@ export type EventFormData = {
   tag_style?: string | null;
   is_featured?: boolean | null;
   status?: string | null;
+  what_to_bring?: string | null;
+  show_what_to_bring?: boolean | null;
 };
 
 export type ActivityRow = {
@@ -145,6 +147,12 @@ export function EventForm({
   // Preço escalonado (lotes): começa ligado se o evento já tem lote salvo.
   const [tiered, setTiered] = useState(
     event?.tier1_capacity != null && event?.price_tier2_cents != null,
+  );
+
+  // "O que levar" no email: pode ser ocultado (às vezes não precisa levar nada).
+  // Evento novo começa mostrando; edição respeita o que está salvo.
+  const [showBring, setShowBring] = useState(
+    event?.show_what_to_bring ?? true,
   );
 
   return (
@@ -498,6 +506,42 @@ export function EventForm({
         >
           + Adicionar atividade
         </button>
+      </section>
+
+      {/* ---- O que levar (email de confirmação) ---- */}
+      <section className="admin-card">
+        <div className="admin-card-title">
+          O que levar
+          <InfoTip text="Aparece no email de confirmação da compra, um item por linha. Escreva pensando NESSA experiência (num ensaio não se leva garrafa de água). Desmarque 'Mostrar' quando não precisa levar nada." />
+        </div>
+
+        <label className="coupon-field exp-check coupon-field-wide">
+          <input
+            type="checkbox"
+            name="show_what_to_bring"
+            checked={showBring}
+            onChange={(e) => setShowBring(e.target.checked)}
+          />
+          <span>Mostrar a seção &ldquo;O que levar&rdquo; no email</span>
+        </label>
+
+        {/* Sempre no DOM (mesmo oculto) pra não apagar a lista ao desmarcar —
+            o admin pode religar depois e o texto continua lá. */}
+        <label
+          className="coupon-field coupon-field-wide"
+          style={showBring ? undefined : { opacity: 0.5 }}
+        >
+          <span>
+            Itens (um por linha)
+            {!showBring && " · oculto no email"}
+          </span>
+          <textarea
+            name="what_to_bring"
+            defaultValue={event?.what_to_bring ?? ""}
+            rows={4}
+            placeholder={"Roupa confortável pra se movimentar\nUma garrafa de água\nDisposição e boa energia 🌿"}
+          />
+        </label>
       </section>
 
       {/* ---- Organizadores ---- */}

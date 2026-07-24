@@ -7,7 +7,7 @@ import { BookingReminder24h } from "@/emails/BookingReminder24h";
 import type { EmailEvent } from "@/emails/types";
 
 const EVENT_FIELDS =
-  "slug, title, subtitle, event_date, event_time, location_name, location_address, image_url";
+  "slug, title, subtitle, event_date, event_time, location_name, location_address, image_url, what_to_bring, show_what_to_bring";
 
 type EventRow = {
   slug: string;
@@ -18,6 +18,8 @@ type EventRow = {
   location_name: string;
   location_address: string | null;
   image_url: string | null;
+  what_to_bring: string | null;
+  show_what_to_bring: boolean | null;
 };
 
 function toEmailEvent(e: EventRow): EmailEvent {
@@ -30,6 +32,8 @@ function toEmailEvent(e: EventRow): EmailEvent {
     locationName: e.location_name,
     locationAddress: e.location_address,
     imageUrl: e.image_url,
+    whatToBring: e.what_to_bring,
+    showWhatToBring: e.show_what_to_bring,
   };
 }
 

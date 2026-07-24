@@ -314,6 +314,7 @@ export type Database = {
           price_cents: number
           price_tier2_cents: number | null
           recurrence_rule: string | null
+          show_what_to_bring: boolean
           slug: string
           status: string | null
           subtitle: string | null
@@ -323,6 +324,7 @@ export type Database = {
           tier1_capacity: number | null
           title: string
           updated_at: string | null
+          what_to_bring: string | null
         }
         Insert: {
           capacity: number
@@ -348,6 +350,7 @@ export type Database = {
           price_cents: number
           price_tier2_cents?: number | null
           recurrence_rule?: string | null
+          show_what_to_bring?: boolean
           slug: string
           status?: string | null
           subtitle?: string | null
@@ -357,6 +360,7 @@ export type Database = {
           tier1_capacity?: number | null
           title: string
           updated_at?: string | null
+          what_to_bring?: string | null
         }
         Update: {
           capacity?: number
@@ -382,6 +386,7 @@ export type Database = {
           price_cents?: number
           price_tier2_cents?: number | null
           recurrence_rule?: string | null
+          show_what_to_bring?: boolean
           slug?: string
           status?: string | null
           subtitle?: string | null
@@ -391,6 +396,7 @@ export type Database = {
           tier1_capacity?: number | null
           title?: string
           updated_at?: string | null
+          what_to_bring?: string | null
         }
         Relationships: []
       }

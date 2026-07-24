@@ -4,18 +4,13 @@ import {
   WhatsAppButton,
   SecondaryButton,
   EventDetailCard,
+  WhatToBring,
   Hr,
 } from "./components/ui";
 import * as t from "./theme";
 import type { EmailUser, EmailEvent, EmailBooking } from "./types";
 import { formatPriceFull } from "@/lib/utils/date";
 import { getNicoleWhatsAppLink } from "@/lib/whatsapp";
-
-const WHAT_TO_BRING = [
-  "Roupa confortável pra se movimentar",
-  "Uma garrafa de água",
-  "Disposição e boa energia 🌿",
-];
 
 export function BookingConfirmation({
   user,
@@ -54,14 +49,7 @@ export function BookingConfirmation({
         </WhatsAppButton>
       </Section>
 
-      <Hr style={t.hr} />
-
-      <Text style={t.cardTitle}>O que levar</Text>
-      {WHAT_TO_BRING.map((item) => (
-        <Text key={item} style={t.metaRow}>
-          • {item}
-        </Text>
-      ))}
+      <WhatToBring event={event} />
 
       <Hr style={t.hr} />
 

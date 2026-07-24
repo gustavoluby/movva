@@ -1,14 +1,13 @@
 import { Section, Text, Heading, Link } from "@react-email/components";
-import { Layout, WhatsAppButton, EventDetailCard, Hr } from "./components/ui";
+import {
+  Layout,
+  WhatsAppButton,
+  EventDetailCard,
+  WhatToBring,
+} from "./components/ui";
 import * as t from "./theme";
 import type { EmailUser, EmailEvent } from "./types";
 import { getNicoleWhatsAppLink } from "@/lib/whatsapp";
-
-const WHAT_TO_BRING = [
-  "Roupa confortável pra se movimentar",
-  "Uma garrafa de água",
-  "Disposição e boa energia 🌿",
-];
 
 export function BookingReminder24h({
   user,
@@ -42,14 +41,7 @@ export function BookingReminder24h({
         </Link>
       </Section>
 
-      <Hr style={t.hr} />
-
-      <Text style={t.cardTitle}>O que levar</Text>
-      {WHAT_TO_BRING.map((item) => (
-        <Text key={item} style={t.metaRow}>
-          • {item}
-        </Text>
-      ))}
+      <WhatToBring event={event} />
 
       <Section style={{ marginTop: "20px" }}>
         <WhatsAppButton href={whatsappHref}>
