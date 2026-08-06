@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/admin";
 import { fetchUserEmails } from "@/lib/admin-users";
 import { formatPrice } from "@/lib/utils/date";
+import { getClientWhatsAppLink } from "@/lib/whatsapp";
 import { RemoveSaleButton } from "./remove-sale-button";
 import { AddSaleForm } from "./add-sale-form";
 
@@ -57,6 +58,27 @@ function paymentLabel(method: string | null): string {
   return method ?? "—";
 }
 
+/** Célula de telefone: vira link do WhatsApp quando o número é válido. */
+function PhoneCell({ phone }: { phone: string | null }) {
+  const href = getClientWhatsAppLink(phone);
+  return (
+    <td>
+      {href ? (
+        <a
+          className="admin-conta-field-link"
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {phone}
+        </a>
+      ) : (
+        (phone ?? "—")
+      )}
+    </td>
+  );
+}
+
 function EventSalesBlock({ e }: { e: EventRow }) {
   return (
     <section className="admin-event-block">
@@ -88,7 +110,7 @@ function EventSalesBlock({ e }: { e: EventRow }) {
                 <tr key={`${e.id}-${b.userId}`}>
                   <td>{b.name}</td>
                   <td>{b.email}</td>
-                  <td>{b.phone}</td>
+                  <PhoneCell phone={b.phone} />
                   <td>{fmtDate(b.paidAt)}</td>
                   <td>{formatPrice(b.amountCents)}</td>
                   <td>
@@ -134,7 +156,7 @@ function EventSalesBlock({ e }: { e: EventRow }) {
                   <tr key={`${e.id}-pend-${p.userId}`}>
                     <td>{p.name}</td>
                     <td>{p.email}</td>
-                    <td>{p.phone}</td>
+                    <PhoneCell phone={p.phone} />
                     <td>{fmtDate(p.createdAt)}</td>
                   </tr>
                 ))}
@@ -394,7 +416,7 @@ export default async function AdminEventosPage({
                     <tr key={c.id}>
                       <td>{c.name}</td>
                       <td>{c.email}</td>
-                      <td>{c.phone}</td>
+                      <PhoneCell phone={c.phone} />
                       <td>{c.city ?? "—"}</td>
                       <td>{fmtDate(c.createdAt)}</td>
                     </tr>

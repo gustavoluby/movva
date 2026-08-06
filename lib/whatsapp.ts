@@ -44,6 +44,23 @@ export function getMoodpassWhatsAppLink({
   return getWhatsAppLink({ number, message: messages[context] });
 }
 
+/**
+ * Link do WhatsApp (wa.me) pro telefone de um cliente, com mensagem pronta.
+ * Normaliza o número (só dígitos, DDI 55 se nacional). Sem número → undefined.
+ */
+export function getClientWhatsAppLink(
+  phone: string | null | undefined,
+  message = "Oi! Aqui é da Moodpass 💜",
+): string | undefined {
+  if (!phone) return undefined;
+  let digits = onlyDigits(phone);
+  if (!digits) return undefined;
+  if (!digits.startsWith("55") && digits.length <= 11) {
+    digits = `55${digits}`;
+  }
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}
+
 // Link direto pra Nicole (usado nos emails que pedem o botão dela).
 export function getNicoleWhatsAppLink(message: string): string {
   const number = process.env.WHATSAPP_NUMBER_NICOLE || NICOLE_FALLBACK;

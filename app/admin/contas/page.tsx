@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/admin";
 import { fetchUserEmails } from "@/lib/admin-users";
+import { getClientWhatsAppLink } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 
@@ -72,21 +73,6 @@ function Field({
       )}
     </div>
   );
-}
-
-/** Converte um telefone BR em link do WhatsApp (wa.me com DDI 55). */
-function whatsappHref(phone: string | null): string | undefined {
-  if (!phone) return undefined;
-  let digits = phone.replace(/\D/g, "");
-  if (!digits) return undefined;
-  // Garante o código do país (55) para números nacionais.
-  if (!digits.startsWith("55") && digits.length <= 11) {
-    digits = `55${digits}`;
-  }
-  const msg = encodeURIComponent(
-    "Oi! Aqui é da Moodpass 💜",
-  );
-  return `https://wa.me/${digits}?text=${msg}`;
 }
 
 export default async function AdminContasPage() {
@@ -186,7 +172,7 @@ export default async function AdminContasPage() {
                     <Field
                       label="WhatsApp"
                       value={c.phone ?? "—"}
-                      href={whatsappHref(c.phone)}
+                      href={getClientWhatsAppLink(c.phone)}
                     />
                     <Field label="Aniversário" value={fmtDate(c.birthday)} />
                     <Field label="Cidade" value={c.city ?? "—"} />
