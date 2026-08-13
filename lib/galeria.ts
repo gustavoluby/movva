@@ -44,6 +44,76 @@ export type GaleriaAlbum = {
 
 export const GALERIA_ALBUNS: GaleriaAlbum[] = [
   {
+    slug: "entre-nos",
+    title: "Entre nós",
+    when: "6 de agosto",
+    place: "Oncè Studio · Batel",
+    venueKeywords: ["once", "oncè", "onces"],
+    items: [
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-01.webp",
+        alt: "Mulheres em volta da mesa, taças na mão, registrando o encontro",
+        ratio: "9 / 16",
+      },
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-02.webp",
+        alt: "Roda de conversa nas banquetas, em frente aos espelhos do studio",
+        ratio: "3 / 4",
+      },
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-03.webp",
+        alt: "Maquiagem sendo aplicada em frente ao espelho iluminado",
+        ratio: "3 / 4",
+      },
+      {
+        type: "video",
+        src: "/galeria/entre-nos.mp4",
+        poster: "/galeria/entre-nos-video-poster.webp",
+        alt: "Convidada falando na roda de conversa do Entre nós",
+        ratio: "9 / 16",
+      },
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-04.webp",
+        alt: "Prato de donuts rosa em primeiro plano, com o studio ao fundo",
+        ratio: "3 / 4",
+      },
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-05.webp",
+        alt: "Profissional explicando o ritual de beleza para uma convidada",
+        ratio: "3 / 4",
+      },
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-06.webp",
+        alt: "Grupo sentado acompanhando a conversa, taças na mesa",
+        ratio: "3 / 4",
+      },
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-07.webp",
+        alt: "Donuts rosa na bandeja de madeira, sobre a poltrona de bouclê",
+        ratio: "3 / 4",
+      },
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-08.webp",
+        alt: "Demonstração de skincare, a convidada de olhos fechados",
+        ratio: "3 / 4",
+      },
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-09.webp",
+        alt: "Mão de unhas vermelhas segurando um donut rosa",
+        ratio: "4 / 3",
+      },
+    ],
+  },
+  {
     slug: "wellness-day",
     title: "Wellness Day",
     when: "12 de julho",

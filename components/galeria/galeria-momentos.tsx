@@ -21,7 +21,11 @@ export function GaleriaMomentos({
 
   // Na landing é um gostinho, não um catálogo: sem nome/data/local do álbum e
   // sem link — só as fotos. Na home o cabeçalho fica, que ali é navegação.
-  const comCabecalhoDeAlbum = variant !== "lp";
+  // Exceção: com mais de um álbum na landing, o nome volta — é ele que separa
+  // um evento do outro (só o texto; o link continua sendo coisa da home).
+  const varios = GALERIA_ALBUNS.length > 1;
+  const comCabecalhoDeAlbum = variant !== "lp" || varios;
+  const comLink = variant !== "lp";
 
   return (
     <section className={`galeria galeria-${variant}`} aria-label={title}>
@@ -48,7 +52,7 @@ export function GaleriaMomentos({
 
         return (
           <div key={album.title} className="galeria-album">
-            {!comCabecalhoDeAlbum ? null : album.slug ? (
+            {!comCabecalhoDeAlbum ? null : album.slug && comLink ? (
               <Link
                 href={`/eventos/${album.slug}`}
                 className="galeria-album-head is-link"

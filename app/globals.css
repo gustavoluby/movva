@@ -4284,3 +4284,6 @@
   padding-right: 22px;
 }
 .galeria-lp .galeria-album { margin-top: 0; }
+/* Com mais de um álbum, o respiro é quem diz onde um evento acaba e o outro
+   começa (na landing o cabeçalho é só o nome, sem seta). */
+.galeria-lp .galeria-album + .galeria-album { margin-top: 18px; }
