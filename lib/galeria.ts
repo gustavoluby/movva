@@ -52,20 +52,14 @@ export const GALERIA_ALBUNS: GaleriaAlbum[] = [
     items: [
       {
         type: "photo",
-        src: "/galeria/entre-nos-01.webp",
-        alt: "Mulheres em volta da mesa, taças na mão, registrando o encontro",
-        ratio: "9 / 16",
-      },
-      {
-        type: "photo",
-        src: "/galeria/entre-nos-02.webp",
-        alt: "Roda de conversa nas banquetas, em frente aos espelhos do studio",
+        src: "/galeria/entre-nos-03.webp",
+        alt: "Maquiagem sendo aplicada em frente ao espelho iluminado",
         ratio: "3 / 4",
       },
       {
         type: "photo",
-        src: "/galeria/entre-nos-03.webp",
-        alt: "Maquiagem sendo aplicada em frente ao espelho iluminado",
+        src: "/galeria/entre-nos-04.webp",
+        alt: "Prato de donuts rosa em primeiro plano, com o studio ao fundo",
         ratio: "3 / 4",
       },
       {
@@ -77,8 +71,14 @@ export const GALERIA_ALBUNS: GaleriaAlbum[] = [
       },
       {
         type: "photo",
-        src: "/galeria/entre-nos-04.webp",
-        alt: "Prato de donuts rosa em primeiro plano, com o studio ao fundo",
+        src: "/galeria/entre-nos-01.webp",
+        alt: "Mulheres em volta da mesa, taças na mão, registrando o encontro",
+        ratio: "9 / 16",
+      },
+      {
+        type: "photo",
+        src: "/galeria/entre-nos-02.webp",
+        alt: "Roda de conversa nas banquetas, em frente aos espelhos do studio",
         ratio: "3 / 4",
       },
       {
