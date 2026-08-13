@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdmin } from "@/lib/admin";
+import { requireAdminPage } from "@/lib/roles";
 import { fetchUserEmails } from "@/lib/admin-users";
 import { getClientWhatsAppLink } from "@/lib/whatsapp";
+import { alternarOrganizadora } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +40,7 @@ type Conta = {
   bio: string | null;
   isActive: boolean;
   isVerified: boolean;
+  isOrganizer: boolean;
   totalExperiences: number;
   totalFriends: number;
   totalBadges: number;
@@ -76,12 +76,7 @@ function Field({
 }
 
 export default async function AdminContasPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/admin/contas");
-  if (!isAdmin(user.email)) redirect("/perfil");
+  await requireAdminPage("/admin/contas");
 
   const admin = createAdminClient();
 
@@ -91,7 +86,7 @@ export default async function AdminContasPage() {
   const { data: profiles } = await admin
     .from("profiles")
     .select(
-      "id, full_name, handle, phone, birthday, city, neighborhood, bio, is_active, is_verified, total_experiences, total_friends, total_badges, created_at",
+      "id, full_name, handle, phone, birthday, city, neighborhood, bio, is_active, is_verified, role, total_experiences, total_friends, total_badges, created_at",
     )
     .order("created_at", { ascending: false });
 
@@ -107,6 +102,7 @@ export default async function AdminContasPage() {
     bio: p.bio,
     isActive: p.is_active ?? true,
     isVerified: p.is_verified ?? false,
+    isOrganizer: p.role === "organizer",
     totalExperiences: p.total_experiences ?? 0,
     totalFriends: p.total_friends ?? 0,
     totalBadges: p.total_badges ?? 0,
@@ -158,6 +154,11 @@ export default async function AdminContasPage() {
                           Verificada
                         </span>
                       )}
+                      {c.isOrganizer && (
+                        <span className="admin-conta-badge organizer">
+                          Organizadora
+                        </span>
+                      )}
                       {!c.isActive && (
                         <span className="admin-conta-badge inactive">
                           Inativa
@@ -185,6 +186,25 @@ export default async function AdminContasPage() {
                     <Field label="Badges" value={String(c.totalBadges)} />
                     <Field label="Criada em" value={fmtDateTime(c.createdAt)} />
                   </div>
+
+                  {/* Acesso de organizadora: cria e edita as experiências dela
+                      e vê quem comprou — nada de contas, cupons ou estorno. */}
+                  <form action={alternarOrganizadora} className="admin-conta-role">
+                    <input type="hidden" name="id" value={c.id} />
+                    <input
+                      type="hidden"
+                      name="tornar"
+                      value={c.isOrganizer ? "0" : "1"}
+                    />
+                    <button
+                      type="submit"
+                      className={`admin-btn${c.isOrganizer ? " reject" : ""}`}
+                    >
+                      {c.isOrganizer
+                        ? "Tirar acesso de organizadora"
+                        : "Tornar organizadora"}
+                    </button>
+                  </form>
 
                   {c.bio && (
                     <p className="admin-conta-bio">

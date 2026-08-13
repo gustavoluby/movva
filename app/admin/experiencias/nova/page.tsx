@@ -1,18 +1,12 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/admin";
+import { listOrganizers, requireStaff } from "@/lib/roles";
 import { EventForm } from "../event-form";
 
 export const dynamic = "force-dynamic";
 
 export default async function NovaExperienciaPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/admin/experiencias/nova");
-  if (!isAdmin(user.email)) redirect("/perfil");
+  const viewer = await requireStaff("/admin/experiencias/nova");
+  const organizers = viewer.isAdmin ? await listOrganizers() : [];
 
   return (
     <div className="moodpass-shell">
@@ -38,12 +32,14 @@ export default async function NovaExperienciaPage() {
             </svg>
           </Link>
           <div>
-            <div className="greeting-label">admin</div>
+            <div className="greeting-label">
+              {viewer.isAdmin ? "admin" : "organizadora"}
+            </div>
             <div className="greeting-name">Nova experiência</div>
           </div>
         </header>
 
-        <EventForm />
+        <EventForm isAdmin={viewer.isAdmin} organizers={organizers} />
       </div>
     </div>
   );

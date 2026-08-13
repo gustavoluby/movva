@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdmin } from "@/lib/admin";
+import { canEditEvent, listOrganizers, requireStaff } from "@/lib/roles";
 import {
   EventForm,
   type ActivityRow,
@@ -12,7 +11,7 @@ import {
 export const dynamic = "force-dynamic";
 
 const EVENT_COLUMNS =
-  "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, duration, is_recurring, recurrence_rule, location_name, location_short, location_address, location_lat, location_lng, price_cents, price_tier2_cents, tier1_capacity, capacity, image_url, host_summary, host_photo_url, tag, tag_style, is_featured, status, what_to_bring, show_what_to_bring";
+  "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, duration, is_recurring, recurrence_rule, location_name, location_short, location_address, location_lat, location_lng, price_cents, price_tier2_cents, tier1_capacity, capacity, image_url, host_summary, host_photo_url, tag, tag_style, is_featured, status, what_to_bring, show_what_to_bring, owner_id, commission_type, commission_value, review_note";
 
 export default async function EditarExperienciaPage({
   params,
@@ -21,12 +20,7 @@ export default async function EditarExperienciaPage({
 }) {
   const { id } = await params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/admin/experiencias/${id}`);
-  if (!isAdmin(user.email)) redirect("/perfil");
+  const viewer = await requireStaff(`/admin/experiencias/${id}`);
 
   const admin = createAdminClient();
 
@@ -45,6 +39,10 @@ export default async function EditarExperienciaPage({
     ]);
 
   if (!event) notFound();
+  // Organizadora só abre o que é dela.
+  if (!canEditEvent(viewer, event)) redirect("/admin/experiencias");
+
+  const organizers = viewer.isAdmin ? await listOrganizers() : [];
 
   const activities: ActivityRow[] = (acts ?? []).map((a) => ({
     icon: a.icon,
@@ -93,12 +91,20 @@ export default async function EditarExperienciaPage({
             </svg>
           </Link>
           <div>
-            <div className="greeting-label">admin · editando</div>
+            <div className="greeting-label">
+              {viewer.isAdmin ? "admin" : "organizadora"} · editando
+            </div>
             <div className="greeting-name">{event.title}</div>
           </div>
         </header>
 
-        <EventForm event={event} activities={activities} hosts={hosts} />
+        <EventForm
+          event={event}
+          activities={activities}
+          hosts={hosts}
+          isAdmin={viewer.isAdmin}
+          organizers={organizers}
+        />
       </div>
     </div>
   );

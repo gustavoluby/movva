@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdmin } from "@/lib/admin";
+import { requireStaff } from "@/lib/roles";
 import { fetchUserEmails } from "@/lib/admin-users";
 import { formatPrice } from "@/lib/utils/date";
 import { getClientWhatsAppLink } from "@/lib/whatsapp";
@@ -48,7 +46,30 @@ type EventRow = {
   buyers: Buyer[];
   pending: PendingBuyer[];
   revenue: number;
+  /** Quanto sai pra organizadora (null = evento da casa, sem repasse). */
+  payout: { commission: number; net: number } | null;
 };
+
+/**
+ * Repasse pra organizadora: o dinheiro cai todo na conta do Moodpass, então o
+ * que a tela mostra é a conta do acerto — bruto menos a comissão combinada
+ * pra esse evento. A taxa do Mercado Pago não entra aqui (ela é debitada lá).
+ */
+function calcPayout(
+  revenue: number,
+  sales: number,
+  type: string | null,
+  value: number | null,
+): { commission: number; net: number } {
+  const v = value ?? 0;
+  const commission =
+    type === "percent"
+      ? Math.round((revenue * v) / 100)
+      : type === "fixed"
+        ? Math.round(v * 100) * sales
+        : 0;
+  return { commission, net: Math.max(0, revenue - commission) };
+}
 
 function paymentLabel(method: string | null): string {
   if (method === "pix") return "Pix";
@@ -79,7 +100,14 @@ function PhoneCell({ phone }: { phone: string | null }) {
   );
 }
 
-function EventSalesBlock({ e }: { e: EventRow }) {
+function EventSalesBlock({
+  e,
+  canManage,
+}: {
+  e: EventRow;
+  /** Estorno/remoção mexem no Mercado Pago — só admin. */
+  canManage: boolean;
+}) {
   return (
     <section className="admin-event-block">
       <div className="admin-event-head">
@@ -90,6 +118,18 @@ function EventSalesBlock({ e }: { e: EventRow }) {
           {e.pending.length > 0 ? ` · ${e.pending.length} pendente${e.pending.length === 1 ? "" : "s"}` : ""}
         </span>
       </div>
+
+      {e.payout && e.revenue > 0 && (
+        <p className="admin-payout">
+          Repasse à organizadora: <strong>{formatPrice(e.payout.net)}</strong>
+          {e.payout.commission > 0
+            ? ` (bruto ${formatPrice(e.revenue)} − comissão ${formatPrice(e.payout.commission)})`
+            : " (sem comissão combinada)"}
+          <span className="admin-payout-hint">
+            Antes da taxa do Mercado Pago, que é debitada na conta do Moodpass.
+          </span>
+        </p>
+      )}
 
       {e.buyers.length > 0 && (
         <div className="admin-table-wrap">
@@ -102,7 +142,7 @@ function EventSalesBlock({ e }: { e: EventRow }) {
                 <th>Pago em</th>
                 <th>Valor</th>
                 <th>Pagamento</th>
-                <th aria-label="Ações"></th>
+                {canManage && <th aria-label="Ações"></th>}
               </tr>
             </thead>
             <tbody>
@@ -121,13 +161,15 @@ function EventSalesBlock({ e }: { e: EventRow }) {
                       </span>
                     ) : null}
                   </td>
-                  <td className="admin-table-action">
-                    <RemoveSaleButton
-                      bookingId={b.bookingId}
-                      name={b.name}
-                      paymentId={b.paymentId}
-                    />
-                  </td>
+                  {canManage && (
+                    <td className="admin-table-action">
+                      <RemoveSaleButton
+                        bookingId={b.bookingId}
+                        name={b.name}
+                        paymentId={b.paymentId}
+                      />
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -175,19 +217,15 @@ export default async function AdminEventosPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab: tabRaw } = await searchParams;
-  const tab =
-    tabRaw === "contas"
+  const viewer = await requireStaff("/admin/eventos");
+  // Contas e venda manual mexem em dado de todo mundo — só admin.
+  const tab = !viewer.isAdmin
+    ? "vendas"
+    : tabRaw === "contas"
       ? "contas"
       : tabRaw === "adicionar"
         ? "adicionar"
         : "vendas";
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/admin/eventos");
-  if (!isAdmin(user.email)) redirect("/perfil");
 
   const admin = createAdminClient();
 
@@ -195,24 +233,37 @@ export default async function AdminEventosPage({
   const emailById = await fetchUserEmails(admin);
 
   // ---- Aba VENDAS ----
-  const { data: events } = await admin
+  // Organizadora só vê as vendas das experiências dela.
+  let eventsQuery = admin
     .from("events")
-    .select("id, title, status, price_cents, event_date")
+    .select(
+      "id, title, status, price_cents, event_date, owner_id, commission_type, commission_value",
+    )
     .order("event_date", { ascending: false });
+  if (!viewer.isAdmin) eventsQuery = eventsQuery.eq("owner_id", viewer.userId);
+  const { data: events } = await eventsQuery;
 
-  const { data: paidBookings } = await admin
+  const eventIds = (events ?? []).map((e) => e.id);
+  // Sem evento nenhum, `in()` com lista vazia devolveria tudo — corta antes.
+  const semEventos = !viewer.isAdmin && eventIds.length === 0;
+
+  let paidQuery = admin
     .from("bookings")
     .select(
       "id, event_id, user_id, amount_cents, paid_at, created_at, payment_method, payment_id",
     )
     .eq("payment_status", "paid");
+  if (!viewer.isAdmin) paidQuery = paidQuery.in("event_id", eventIds);
+  const { data: paidBookings } = semEventos ? { data: [] } : await paidQuery;
 
   // Reservas pendentes (checkout iniciado, não pago) — não seguram vaga, mas
   // ajudam a enxergar abandono de checkout.
-  const { data: pendingBookings } = await admin
+  let pendingQuery = admin
     .from("bookings")
     .select("event_id, user_id, created_at")
     .eq("payment_status", "pending");
+  if (!viewer.isAdmin) pendingQuery = pendingQuery.in("event_id", eventIds);
+  const { data: pendingBookings } = semEventos ? { data: [] } : await pendingQuery;
 
   // Perfis de quem comprou/iniciou (nome + WhatsApp) — busca uma vez pros dois.
   const buyerIds = [
@@ -273,7 +324,22 @@ export default async function AdminEventosPage({
       (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
     );
     const revenue = buyers.reduce((s, b) => s + (b.amountCents ?? 0), 0);
-    return { id: e.id, title: e.title, status: e.status, buyers, pending, revenue };
+    return {
+      id: e.id,
+      title: e.title,
+      status: e.status,
+      buyers,
+      pending,
+      revenue,
+      payout: e.owner_id
+        ? calcPayout(
+            revenue,
+            buyers.length,
+            e.commission_type,
+            e.commission_value,
+          )
+        : null,
+    };
   });
 
   // Ativos = publicados (à venda); inativos = rascunhos/cancelados/etc.
@@ -287,6 +353,8 @@ export default async function AdminEventosPage({
   );
 
   // ---- Aba CONTAS ----
+  const canManage = viewer.isAdmin;
+
   let contas: {
     id: string;
     name: string;
@@ -329,29 +397,36 @@ export default async function AdminEventosPage({
               <path d="M12 19l-7-7 7-7" />
             </svg>
           </Link>
-          <div className="greeting-name">Eventos</div>
+          <div>
+            {!viewer.isAdmin && (
+              <div className="greeting-label">organizadora · suas vendas</div>
+            )}
+            <div className="greeting-name">Eventos</div>
+          </div>
         </header>
 
-        <nav className="elas-tabs" style={{ position: "static" }}>
-          <Link
-            href="/admin/eventos?tab=vendas"
-            className={`elas-tab${tab === "vendas" ? " active" : ""}`}
-          >
-            Vendas
-          </Link>
-          <Link
-            href="/admin/eventos?tab=adicionar"
-            className={`elas-tab${tab === "adicionar" ? " active" : ""}`}
-          >
-            Adicionar
-          </Link>
-          <Link
-            href="/admin/eventos?tab=contas"
-            className={`elas-tab${tab === "contas" ? " active" : ""}`}
-          >
-            Contas
-          </Link>
-        </nav>
+        {viewer.isAdmin && (
+          <nav className="elas-tabs" style={{ position: "static" }}>
+            <Link
+              href="/admin/eventos?tab=vendas"
+              className={`elas-tab${tab === "vendas" ? " active" : ""}`}
+            >
+              Vendas
+            </Link>
+            <Link
+              href="/admin/eventos?tab=adicionar"
+              className={`elas-tab${tab === "adicionar" ? " active" : ""}`}
+            >
+              Adicionar
+            </Link>
+            <Link
+              href="/admin/eventos?tab=contas"
+              className={`elas-tab${tab === "contas" ? " active" : ""}`}
+            >
+              Contas
+            </Link>
+          </nav>
+        )}
 
         {tab === "adicionar" ? (
           <AddSaleForm
@@ -376,7 +451,9 @@ export default async function AdminEventosPage({
                 {ativos.length === 0 ? (
                   <p className="admin-summary">Nenhum evento ativo.</p>
                 ) : (
-                  ativos.map((e) => <EventSalesBlock key={e.id} e={e} />)
+                  ativos.map((e) => (
+                    <EventSalesBlock key={e.id} e={e} canManage={canManage} />
+                  ))
                 )}
               </div>
             </details>
@@ -389,7 +466,9 @@ export default async function AdminEventosPage({
                 {inativos.length === 0 ? (
                   <p className="admin-summary">Nenhum evento inativo.</p>
                 ) : (
-                  inativos.map((e) => <EventSalesBlock key={e.id} e={e} />)
+                  inativos.map((e) => (
+                    <EventSalesBlock key={e.id} e={e} canManage={canManage} />
+                  ))
                 )}
               </div>
             </details>

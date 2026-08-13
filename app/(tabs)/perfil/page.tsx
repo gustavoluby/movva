@@ -107,7 +107,7 @@ export default async function PerfilPage() {
   const [{ data: profile }, { count: checkins }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("full_name, instagram, avatar_url, created_at, total_experiences")
+      .select("full_name, instagram, avatar_url, created_at, total_experiences, role")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -156,6 +156,25 @@ export default async function PerfilPage() {
             ))}
           </div>
         </section>
+
+        {/* Organizadora parceira: só as experiências dela e as vendas delas. */}
+        {!isAdmin(user.email) && profile?.role === "organizer" && (
+          <section className="account-section">
+            <div className="account-label">Organizadora</div>
+            <div className="account-rows">
+              <Link href="/admin/experiencias" className="account-row">
+                <span className="account-row-icon">{ICON_CREATE}</span>
+                <span className="account-row-label">Minhas experiências</span>
+                {CHEVRON}
+              </Link>
+              <Link href="/admin/eventos" className="account-row">
+                <span className="account-row-icon">{ICON_SALES}</span>
+                <span className="account-row-label">Quem comprou</span>
+                {CHEVRON}
+              </Link>
+            </div>
+          </section>
+        )}
 
         {isAdmin(user.email) && (
           <section className="account-section">

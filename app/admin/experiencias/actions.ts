@@ -3,9 +3,8 @@
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdmin } from "@/lib/admin";
+import { canEditEvent, getViewer } from "@/lib/roles";
 import { SITE_CITY, SITE_REGION } from "@/lib/site";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
@@ -40,13 +39,8 @@ async function geocode(
 
 export type ExperienciaState = { error?: string };
 
-async function requireAdmin(): Promise<boolean> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return isAdmin(user?.email);
-}
+/** Status que a organizadora pode escolher sozinha (publicar é do admin). */
+const ORGANIZER_STATUSES = new Set(["draft", "pending_review"]);
 
 // "Yoga & Mia em Curitiba!" → "yoga-mia-em-curitiba"
 function slugify(raw: string): string {
@@ -119,10 +113,33 @@ export async function salvarExperiencia(
   _prev: ExperienciaState,
   formData: FormData,
 ): Promise<ExperienciaState> {
-  if (!(await requireAdmin())) return { error: "Sem permissão." };
+  const viewer = await getViewer();
+  if (!viewer || (!viewer.isAdmin && !viewer.isOrganizer))
+    return { error: "Sem permissão." };
 
   const id = String(formData.get("id") ?? "").trim() || null;
   const editing = !!id;
+
+  // Estado atual do evento: define quem pode mexer e o que a organizadora
+  // pode (ou não) trocar — destaque, comissão e publicação são do admin.
+  let existing: {
+    owner_id: string | null;
+    status: string | null;
+    is_featured: boolean | null;
+    commission_type: string | null;
+    commission_value: number | null;
+  } | null = null;
+  if (editing) {
+    const { data } = await createAdminClient()
+      .from("events")
+      .select("owner_id, status, is_featured, commission_type, commission_value")
+      .eq("id", id)
+      .maybeSingle();
+    if (!data) return { error: "Experiência não encontrada." };
+    existing = data;
+    if (!canEditEvent(viewer, data))
+      return { error: "Essa experiência é de outra organizadora." };
+  }
 
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return { error: "O título é obrigatório." };
@@ -204,6 +221,58 @@ export async function salvarExperiencia(
     hostPhotoUrl = up.url ?? hostPhotoUrl;
   }
 
+  // ---- O que cada papel pode decidir --------------------------------------
+  // Organizadora: escolhe entre rascunho e "enviar pra aprovação". O que já
+  // está publicado (ou cancelado/concluído) ela não mexe — quem move é o admin.
+  const requestedStatus = String(formData.get("status") ?? "draft");
+  let status: string;
+  if (viewer.isAdmin) {
+    status = requestedStatus;
+  } else if (editing && !ORGANIZER_STATUSES.has(existing?.status ?? "draft")) {
+    status = existing?.status ?? "draft";
+  } else {
+    status = ORGANIZER_STATUSES.has(requestedStatus) ? requestedStatus : "draft";
+  }
+
+  const now = new Date().toISOString();
+  // Carimba a ida pra fila só na transição — reenviar depois de editar renova
+  // a data, mas continuar em análise não.
+  const submittedAt: string | undefined =
+    status === "pending_review" && existing?.status !== "pending_review"
+      ? now
+      : undefined;
+  // Admin publicando direto também conta como revisão feita.
+  const reviewed: {
+    reviewed_at?: string;
+    reviewed_by?: string;
+    review_note?: string | null;
+  } =
+    viewer.isAdmin && status === "published" && existing?.status !== "published"
+      ? { reviewed_at: now, reviewed_by: viewer.userId, review_note: null }
+      : {};
+
+  // Dono do evento: o admin escolhe (vazio = evento da casa); a organizadora é
+  // sempre dona do que cria e não consegue passar pra frente.
+  const ownerId = viewer.isAdmin
+    ? optText(formData, "owner_id")
+    : editing
+      ? (existing?.owner_id ?? viewer.userId)
+      : viewer.userId;
+
+  // Comissão é combinada caso a caso — e só o admin define.
+  const commission = viewer.isAdmin
+    ? {
+        commission_type: (() => {
+          const t = String(formData.get("commission_type") ?? "none");
+          return t === "percent" || t === "fixed" ? t : "none";
+        })(),
+        commission_value: optNumber(formData, "commission_value"),
+      }
+    : {
+        commission_type: existing?.commission_type ?? "none",
+        commission_value: existing?.commission_value ?? null,
+      };
+
   const row = {
     slug,
     title,
@@ -232,8 +301,14 @@ export async function salvarExperiencia(
     tag_style: String(formData.get("tag_style") ?? "accent") === "primary"
       ? "primary"
       : "accent",
-    is_featured: formData.get("is_featured") === "on",
-    status: String(formData.get("status") ?? "draft"),
+    is_featured: viewer.isAdmin
+      ? formData.get("is_featured") === "on"
+      : (existing?.is_featured ?? false),
+    status,
+    owner_id: ownerId,
+    submitted_at: submittedAt,
+    ...reviewed,
+    ...commission,
     // "O que levar" no email: lista editável + toggle de exibição. Guardamos o
     // texto mesmo quando oculto, pra não perder ao religar depois.
     what_to_bring: optText(formData, "what_to_bring"),
@@ -337,19 +412,83 @@ export async function salvarExperiencia(
 }
 
 // Move a experiência entre status sem apagar (preserva reservas). Usado pra
-// arquivar/despublicar rápido a partir da lista.
+// arquivar/despublicar rápido pela lista — e, pela organizadora, pra mandar o
+// rascunho pra fila de aprovação (ou tirar de lá enquanto ninguém revisou).
 export async function mudarStatusExperiencia(formData: FormData): Promise<void> {
-  if (!(await requireAdmin())) return;
+  const viewer = await getViewer();
+  if (!viewer || (!viewer.isAdmin && !viewer.isOrganizer)) return;
+
   const id = String(formData.get("id") ?? "").trim();
   const status = String(formData.get("status") ?? "").trim();
   if (!id || !status) return;
 
   const admin = createAdminClient();
+  const { data: event } = await admin
+    .from("events")
+    .select("owner_id, status")
+    .eq("id", id)
+    .maybeSingle();
+  if (!event || !canEditEvent(viewer, event)) return;
+
+  if (!viewer.isAdmin) {
+    // Ela só transita entre rascunho e análise, e só a partir de um dos dois.
+    if (!ORGANIZER_STATUSES.has(status)) return;
+    if (!ORGANIZER_STATUSES.has(event.status ?? "draft")) return;
+  }
+
+  const now = new Date().toISOString();
   await admin
     .from("events")
-    .update({ status, updated_at: new Date().toISOString() })
+    .update({
+      status,
+      updated_at: now,
+      ...(status === "pending_review" && event.status !== "pending_review"
+        ? { submitted_at: now }
+        : {}),
+      ...(viewer.isAdmin && status === "published" && event.status !== "published"
+        ? { reviewed_at: now, reviewed_by: viewer.userId, review_note: null }
+        : {}),
+    })
     .eq("id", id);
 
   revalidatePath("/admin/experiencias");
   revalidatePath("/");
+}
+
+/**
+ * Fila de aprovação: o admin publica a experiência da organizadora ou devolve
+ * pra ajuste com um recado. Devolver vira rascunho — ela edita e reenvia.
+ */
+export async function revisarExperiencia(formData: FormData): Promise<void> {
+  const viewer = await getViewer();
+  if (!viewer?.isAdmin) return;
+
+  const id = String(formData.get("id") ?? "").trim();
+  const decisao = String(formData.get("decisao") ?? "").trim();
+  if (!id || (decisao !== "aprovar" && decisao !== "devolver")) return;
+
+  const note = String(formData.get("review_note") ?? "").trim() || null;
+  const now = new Date().toISOString();
+
+  const admin = createAdminClient();
+  const { data: event } = await admin
+    .from("events")
+    .select("slug")
+    .eq("id", id)
+    .maybeSingle();
+
+  await admin
+    .from("events")
+    .update({
+      status: decisao === "aprovar" ? "published" : "draft",
+      reviewed_at: now,
+      reviewed_by: viewer.userId,
+      review_note: decisao === "aprovar" ? null : note,
+      updated_at: now,
+    })
+    .eq("id", id);
+
+  revalidatePath("/admin/experiencias");
+  revalidatePath("/");
+  if (event?.slug) revalidatePath(`/eventos/${event.slug}`);
 }

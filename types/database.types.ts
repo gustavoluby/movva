@@ -294,6 +294,8 @@ export type Database = {
           capacity: number
           cat_tag: string | null
           category: string | null
+          commission_type: string
+          commission_value: number | null
           created_at: string | null
           description: string | null
           duration: string | null
@@ -311,12 +313,17 @@ export type Database = {
           location_lng: number | null
           location_name: string
           location_short: string | null
+          owner_id: string | null
           price_cents: number
           price_tier2_cents: number | null
           recurrence_rule: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           show_what_to_bring: boolean
           slug: string
           status: string | null
+          submitted_at: string | null
           subtitle: string | null
           tag: string | null
           tag_style: string | null
@@ -330,6 +337,8 @@ export type Database = {
           capacity: number
           cat_tag?: string | null
           category?: string | null
+          commission_type?: string
+          commission_value?: number | null
           created_at?: string | null
           description?: string | null
           duration?: string | null
@@ -347,12 +356,17 @@ export type Database = {
           location_lng?: number | null
           location_name: string
           location_short?: string | null
+          owner_id?: string | null
           price_cents: number
           price_tier2_cents?: number | null
           recurrence_rule?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           show_what_to_bring?: boolean
           slug: string
           status?: string | null
+          submitted_at?: string | null
           subtitle?: string | null
           tag?: string | null
           tag_style?: string | null
@@ -366,6 +380,8 @@ export type Database = {
           capacity?: number
           cat_tag?: string | null
           category?: string | null
+          commission_type?: string
+          commission_value?: number | null
           created_at?: string | null
           description?: string | null
           duration?: string | null
@@ -383,12 +399,17 @@ export type Database = {
           location_lng?: number | null
           location_name?: string
           location_short?: string | null
+          owner_id?: string | null
           price_cents?: number
           price_tier2_cents?: number | null
           recurrence_rule?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           show_what_to_bring?: boolean
           slug?: string
           status?: string | null
+          submitted_at?: string | null
           subtitle?: string | null
           tag?: string | null
           tag_style?: string | null
@@ -398,7 +419,22 @@ export type Database = {
           updated_at?: string | null
           what_to_bring?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feed_posts: {
         Row: {
@@ -1036,6 +1072,7 @@ export type Database = {
           is_verified: boolean | null
           neighborhood: string | null
           phone: string | null
+          role: string
           total_badges: number | null
           total_experiences: number | null
           total_friends: number | null
@@ -1055,6 +1092,7 @@ export type Database = {
           is_verified?: boolean | null
           neighborhood?: string | null
           phone?: string | null
+          role?: string
           total_badges?: number | null
           total_experiences?: number | null
           total_friends?: number | null
@@ -1074,6 +1112,7 @@ export type Database = {
           is_verified?: boolean | null
           neighborhood?: string | null
           phone?: string | null
+          role?: string
           total_badges?: number | null
           total_experiences?: number | null
           total_friends?: number | null

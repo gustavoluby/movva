@@ -56,7 +56,14 @@ export type EventFormData = {
   status?: string | null;
   what_to_bring?: string | null;
   show_what_to_bring?: boolean | null;
+  owner_id?: string | null;
+  commission_type?: string | null;
+  commission_value?: number | null;
+  review_note?: string | null;
 };
+
+/** Organizadoras cadastradas — o admin escolhe de quem é a experiência. */
+export type OrganizerOption = { id: string; name: string };
 
 export type ActivityRow = {
   icon?: string | null;
@@ -119,12 +126,22 @@ export function EventForm({
   event,
   activities: initialActivities,
   hosts: initialHosts,
+  isAdmin = false,
+  organizers = [],
 }: {
   event?: EventFormData;
   activities?: ActivityRow[];
   hosts?: HostRow[];
+  /** Admin decide publicação, destaque, dona e comissão. Organizadora, não. */
+  isAdmin?: boolean;
+  organizers?: OrganizerOption[];
 }) {
   const editing = !!event?.id;
+  // Depois de publicado (ou cancelado/concluído) a organizadora não mexe mais
+  // no status — quem move é o admin.
+  const statusAtual = event?.status ?? "draft";
+  const statusTravado =
+    !isAdmin && editing && statusAtual !== "draft" && statusAtual !== "pending_review";
   const [state, formAction] = useActionState<ExperienciaState, FormData>(
     salvarExperiencia,
     {},
@@ -234,16 +251,50 @@ export function EventForm({
             </span>
           </label>
 
-          <label className="coupon-field">
-            <span>Status</span>
-            <select name="status" defaultValue={event?.status ?? "draft"}>
-              <option value="draft">Rascunho (não aparece)</option>
-              <option value="published">Publicado (à venda)</option>
-              <option value="cancelled">Cancelado</option>
-              <option value="completed">Concluído</option>
-            </select>
-          </label>
+          {isAdmin ? (
+            <label className="coupon-field">
+              <span>Status</span>
+              <select name="status" defaultValue={statusAtual}>
+                <option value="draft">Rascunho (não aparece)</option>
+                <option value="pending_review">Em análise (na fila)</option>
+                <option value="published">Publicado (à venda)</option>
+                <option value="cancelled">Cancelado</option>
+                <option value="completed">Concluído</option>
+              </select>
+            </label>
+          ) : statusTravado ? (
+            <div className="coupon-field">
+              <span>Status</span>
+              <input type="hidden" name="status" value={statusAtual} />
+              <p className="exp-hint" style={{ margin: 0 }}>
+                {statusAtual === "published"
+                  ? "Publicada e à venda. Suas edições entram na hora — pra tirar do ar, fale com o Moodpass."
+                  : "Essa experiência está fora do ar. Fale com o Moodpass pra reabrir."}
+              </p>
+            </div>
+          ) : (
+            <label className="coupon-field">
+              <span>Status</span>
+              <select name="status" defaultValue={statusAtual}>
+                <option value="draft">Rascunho (só você vê)</option>
+                <option value="pending_review">
+                  Enviar pra aprovação do Moodpass
+                </option>
+              </select>
+              <span className="exp-hint">
+                O Moodpass revisa e publica. Você recebe a experiência de volta
+                aqui se faltar algum ajuste.
+              </span>
+            </label>
+          )}
         </div>
+
+        {/* Recado da revisão: aparece quando o admin devolveu pra ajuste. */}
+        {event?.review_note && (
+          <p className="exp-review-note">
+            <strong>Ajuste pedido pelo Moodpass:</strong> {event.review_note}
+          </p>
+        )}
       </section>
 
       {/* ---- Data e local ---- */}
@@ -436,16 +487,73 @@ export function EventForm({
             </select>
           </label>
 
-          <label className="coupon-field exp-check coupon-field-wide">
-            <input
-              type="checkbox"
-              name="is_featured"
-              defaultChecked={!!event?.is_featured}
-            />
-            <span>Destaque na home</span>
-          </label>
+          {isAdmin && (
+            <label className="coupon-field exp-check coupon-field-wide">
+              <input
+                type="checkbox"
+                name="is_featured"
+                defaultChecked={!!event?.is_featured}
+              />
+              <span>Destaque na home</span>
+            </label>
+          )}
         </div>
       </section>
+
+      {/* ---- Parceria (só admin) ---------------------------------------- */}
+      {isAdmin && (
+        <section className="admin-card">
+          <div className="admin-card-title">
+            Parceria
+            <InfoTip text="De quem é a experiência e quanto o Moodpass fica. O pagamento cai sempre na conta do Moodpass; a comissão só serve pra calcular o repasse pra organizadora." />
+          </div>
+          <div className="coupon-form-grid">
+            <label className="coupon-field">
+              <span>Dona da experiência</span>
+              <select name="owner_id" defaultValue={event?.owner_id ?? ""}>
+                <option value="">Moodpass (da casa)</option>
+                {organizers.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+              <span className="exp-hint">
+                A organizadora escolhida enxerga e edita essa experiência, e vê
+                quem comprou.
+              </span>
+            </label>
+
+            <label className="coupon-field">
+              <span>Comissão do Moodpass</span>
+              <select
+                name="commission_type"
+                defaultValue={event?.commission_type ?? "none"}
+              >
+                <option value="none">Sem comissão</option>
+                <option value="percent">% sobre a venda</option>
+                <option value="fixed">Valor fixo por ingresso (R$)</option>
+              </select>
+            </label>
+
+            <label className="coupon-field">
+              <span>Valor da comissão</span>
+              <input
+                name="commission_value"
+                type="number"
+                min="0"
+                step="any"
+                defaultValue={event?.commission_value ?? ""}
+                placeholder="10"
+              />
+              <span className="exp-hint">
+                % quando for percentual, reais quando for fixo. Combinada caso a
+                caso — deixe vazio se não vai cobrar.
+              </span>
+            </label>
+          </div>
+        </section>
+      )}
 
       {/* ---- O que tá incluso (atividades) ---- */}
       <section className="admin-card">
