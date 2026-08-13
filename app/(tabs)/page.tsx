@@ -8,6 +8,7 @@ import { CategoryChips } from "@/components/descobrir/category-chips";
 import { GaleriaMomentos } from "@/components/galeria/galeria-momentos";
 import { CATEGORY_DEFS, eventCategories } from "@/lib/categories";
 import { activePriceCents } from "@/lib/events/pricing";
+import { isPastEvent } from "@/lib/utils/date";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
   SITE_URL,
@@ -38,7 +39,7 @@ export default async function DescobrirPage({
   const { data: events, error } = await supabase
     .from("events")
     .select(
-      "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, location_name, location_short, price_cents, price_tier2_cents, tier1_capacity, capacity, going_count, image_url, thumb_url, tag, tag_style, is_featured",
+      "id, slug, title, subtitle, description, category, cat_tag, event_date, event_time, is_recurring, location_name, location_short, price_cents, price_tier2_cents, tier1_capacity, capacity, going_count, image_url, thumb_url, tag, tag_style, is_featured",
     )
     .eq("status", "published")
     .order("event_date", { ascending: true });
@@ -51,7 +52,9 @@ export default async function DescobrirPage({
     );
   }
 
-  const list = events ?? [];
+  // Experiência que já rolou sai da vitrine sozinha — sem depender de alguém
+  // lembrar de despublicar (recorrente não conta: a data é só a próxima leva).
+  const list = (events ?? []).filter((e) => !isPastEvent(e));
 
   // Só mostra o chip de uma categoria se houver evento publicado nela.
   const presentKeys = new Set(list.flatMap((e) => eventCategories(e.title)));

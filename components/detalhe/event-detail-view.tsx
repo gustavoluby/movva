@@ -5,7 +5,7 @@ import { ActivityIcon } from "@/components/detalhe/activity-icon";
 import { EventHeroActions } from "@/components/detalhe/event-hero-actions";
 import { ReservarCta } from "@/components/detalhe/reservar-cta";
 import { WhatsAppButton } from "@/components/whatsapp-button";
-import { formatEventDate, formatPrice } from "@/lib/utils/date";
+import { formatEventDate, formatPrice, isPastEvent } from "@/lib/utils/date";
 import { getEventAvailability } from "@/lib/events/availability";
 import {
   activePriceCents,
@@ -79,7 +79,10 @@ export async function EventDetailView({
   // Preço escalonado (lotes): o preço mostrado é o do lote ativo agora (função
   // das vendas pagas). Sem lote, é o preço único.
   const currentPriceCents = activePriceCents(event, availability.sold);
-  const tierActive = hasPriceTiers(event) && !availability.soldOut;
+  // Data passada: a página continua de pé (o álbum da galeria aponta pra cá),
+  // mas não vende mais.
+  const encerrado = isPastEvent(event);
+  const tierActive = hasPriceTiers(event) && !availability.soldOut && !encerrado;
   const spotsLeftTier1 = tier1SpotsLeft(event, availability.sold);
 
   // Ordena: anfitriãs primeiro, depois professora/palestrante.
@@ -235,9 +238,10 @@ export async function EventDetailView({
       "@type": "Offer",
       price: (currentPriceCents / 100).toFixed(2),
       priceCurrency: "BRL",
-      availability: availability.soldOut
-        ? "https://schema.org/SoldOut"
-        : "https://schema.org/InStock",
+      availability:
+        encerrado || availability.soldOut
+          ? "https://schema.org/SoldOut"
+          : "https://schema.org/InStock",
       url: reservarUrl,
     },
   };
@@ -380,11 +384,13 @@ export async function EventDetailView({
               <div>
                 <div className="meta-item-label">turma</div>
                 <div>
-                  {availability.soldOut
-                    ? "Vagas esgotadas"
+                  {encerrado
+                    ? "Essa já rolou"
+                    : availability.soldOut
+                      ? "Vagas esgotadas"
                     : availability.halfReached
-                      ? `${ocupadas} de ${availability.total} vagas`
-                      : `${availability.total} vagas`}
+                        ? `${ocupadas} de ${availability.total} vagas`
+                        : `${availability.total} vagas`}
                 </div>
               </div>
             </div>
@@ -492,7 +498,11 @@ export async function EventDetailView({
               </div>
             )}
         </div>
-        <ReservarCta slug={event.slug} soldOut={availability.soldOut} />
+        <ReservarCta
+          slug={event.slug}
+          soldOut={availability.soldOut}
+          closed={encerrado}
+        />
       </div>
     </>
   );

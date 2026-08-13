@@ -9,6 +9,7 @@ import { mpClient } from "@/lib/mercadopago";
 import { getEventAvailability } from "@/lib/events/availability";
 import { activePriceCents } from "@/lib/events/pricing";
 import { validateCoupon, type CouponValidation } from "@/lib/coupons/validate";
+import { isPastEvent } from "@/lib/utils/date";
 
 export type ReservaState = { error?: string } | null;
 
@@ -195,12 +196,17 @@ export async function reservarEPagar(
   const { data: event } = await supabase
     .from("events")
     .select(
-      "id, title, price_cents, price_tier2_cents, tier1_capacity, capacity",
+      "id, title, event_date, is_recurring, price_cents, price_tier2_cents, tier1_capacity, capacity",
     )
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();
   if (!event) return { error: "Evento não encontrado." };
+
+  // Trava de data (server-side): experiência que já rolou não cobra mais.
+  if (isPastEvent(event)) {
+    return { error: "Essa experiência já aconteceu." };
+  }
 
   const { data: existing } = await supabase
     .from("bookings")

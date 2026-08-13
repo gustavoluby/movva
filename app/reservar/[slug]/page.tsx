@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { formatEventDate, formatPrice } from "@/lib/utils/date";
+import { formatEventDate, formatPrice, isPastEvent } from "@/lib/utils/date";
 import { reconcilePayment } from "@/lib/payments/mercadopago-reconcile";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { getEventAvailability } from "@/lib/events/availability";
@@ -34,7 +34,7 @@ export default async function ReservarPage({
   const { data: event } = await supabase
     .from("events")
     .select(
-      "id, slug, title, subtitle, event_date, event_time, location_name, price_cents, price_tier2_cents, tier1_capacity, capacity, going_count, image_url",
+      "id, slug, title, subtitle, event_date, event_time, is_recurring, location_name, price_cents, price_tier2_cents, tier1_capacity, capacity, going_count, image_url",
     )
     .eq("slug", slug)
     .eq("status", "published")
@@ -82,6 +82,30 @@ export default async function ReservarPage({
   );
 
   const isPaid = booking?.payment_status === "paid";
+
+  // Já rolou: quem comprou continua vendo o ingresso; o resto não compra mais.
+  if (!isPaid && isPastEvent(event)) {
+    return (
+      <div className="moodpass-shell">
+        <main className="reservar-page">
+          <div className="reservar-icon" aria-hidden>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
+            </svg>
+          </div>
+          <h1 className="reservar-title">Esse encontro já rolou</h1>
+          <p className="reservar-subtitle">
+            Essa experiência já aconteceu. Dá uma olhada no que vem por aí —
+            tem coisa boa chegando.
+          </p>
+          {eventCard}
+          <Link href="/" className="reservar-back">
+            ← Ver as próximas
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
   // Esgotamento: quem ainda não pagou não consegue finalizar depois de lotar.
   const { soldOut, sold } = await getEventAvailability(event.id, event.capacity);

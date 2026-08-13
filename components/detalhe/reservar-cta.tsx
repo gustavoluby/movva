@@ -35,10 +35,21 @@ function CtaContent() {
 export function ReservarCta({
   slug,
   soldOut = false,
+  closed = false,
 }: {
   slug: string;
   soldOut?: boolean;
+  /** Data já passou: a experiência não vende mais. */
+  closed?: boolean;
 }) {
+  if (closed) {
+    return (
+      <button className="cta-btn" disabled aria-disabled>
+        Esse encontro já rolou
+      </button>
+    );
+  }
+
   if (soldOut) {
     return (
       <button className="cta-btn" disabled aria-disabled>

@@ -89,6 +89,28 @@ export function todayISO(): string {
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
+// "2026-08-13" — hoje em Curitiba. O servidor roda em UTC: entre 21h e meia-
+// noite daqui já é "amanhã" lá, e um evento que começa 19h seria dado como
+// passado no meio dele. Por isso o fuso entra explícito.
+const CURITIBA_DAY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Sao_Paulo",
+});
+export function todayCuritibaISO(): string {
+  return CURITIBA_DAY.format(new Date());
+}
+
+/**
+ * O evento já rolou? Serve pra sumir da lista e travar a venda — evento
+ * recorrente nunca "passa" (a data é só a referência da próxima leva).
+ */
+export function isPastEvent(e: {
+  event_date: string | null;
+  is_recurring?: boolean | null;
+}): boolean {
+  if (e.is_recurring) return false;
+  return !!e.event_date && e.event_date < todayCuritibaISO();
+}
+
 // "mar/26" — mês abreviado + ano de 2 dígitos, p/ "membro desde".
 export function memberSince(iso: string | null): string {
   if (!iso) return "";
