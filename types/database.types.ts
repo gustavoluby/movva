@@ -759,6 +759,66 @@ export type Database = {
           },
         ]
       }
+      organizer_applications: {
+        Row: {
+          about: string | null
+          admin_note: string | null
+          created_at: string | null
+          event_idea: string
+          id: string
+          instagram: string | null
+          phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          about?: string | null
+          admin_note?: string | null
+          created_at?: string | null
+          event_idea: string
+          id?: string
+          instagram?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          about?: string | null
+          admin_note?: string | null
+          created_at?: string | null
+          event_idea?: string
+          id?: string
+          instagram?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizer_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_comments: {
         Row: {
           created_at: string | null

@@ -4,8 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/admin";
 import { timeAgo } from "@/lib/utils/date";
+import { getClientWhatsAppLink } from "@/lib/whatsapp";
 import { aprovarPost, rejeitarPost } from "@/app/admin/posts/actions";
 import { aprovarIdeia, rejeitarIdeia } from "@/app/admin/ideias/actions";
+import {
+  aprovarCandidatura,
+  recusarCandidatura,
+} from "@/app/admin/organizadoras/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +20,12 @@ export default async function AprovarPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab: tabRaw } = await searchParams;
-  const tab = tabRaw === "ideias" ? "ideias" : "posts";
+  const tab =
+    tabRaw === "ideias"
+      ? "ideias"
+      : tabRaw === "organizadoras"
+        ? "organizadoras"
+        : "posts";
 
   const supabase = await createClient();
   const {
@@ -54,6 +64,21 @@ export default async function AprovarPage({
     for (const p of profs ?? []) nameMap.set(p.id, p.full_name);
   }
 
+  // Candidaturas a organizadora ("quero publicar uma experiência").
+  const { data: cands } = await admin
+    .from("organizer_applications")
+    .select("id, user_id, event_idea, about, instagram, phone, created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  const candList = cands ?? [];
+  if (candList.length > 0) {
+    const { data: profs } = await admin
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", candList.map((c) => c.user_id));
+    for (const p of profs ?? []) nameMap.set(p.id, p.full_name);
+  }
+
   return (
     <div className="moodpass-shell">
       <div className="scroll-area">
@@ -89,9 +114,92 @@ export default async function AprovarPage({
           >
             Ideias{ideaList.length > 0 ? ` (${ideaList.length})` : ""}
           </Link>
+          <Link
+            href="/admin/aprovar?tab=organizadoras"
+            className={`elas-tab${tab === "organizadoras" ? " active" : ""}`}
+          >
+            Organizadoras{candList.length > 0 ? ` (${candList.length})` : ""}
+          </Link>
         </nav>
 
-        {tab === "posts" ? (
+        {tab === "organizadoras" ? (
+          candList.length === 0 ? (
+            <div className="minhas-empty">
+              <p className="minhas-empty-text">
+                Nenhuma candidatura esperando ✦
+              </p>
+            </div>
+          ) : (
+            <div className="admin-list">
+              {candList.map((c) => {
+                const zap = getClientWhatsAppLink(c.phone);
+                return (
+                  <div key={c.id} className="admin-post">
+                    <div className="admin-post-body">
+                      <div className="admin-post-meta">
+                        <strong>{nameMap.get(c.user_id) ?? "—"}</strong>
+                        {c.instagram && <span> · {c.instagram}</span>}
+                        <span className="admin-post-time">
+                          {" "}
+                          · {timeAgo(c.created_at)}
+                        </span>
+                      </div>
+                      <p className="admin-post-text">{c.event_idea}</p>
+                      {c.about && (
+                        <p className="admin-post-text admin-post-about">
+                          {c.about}
+                        </p>
+                      )}
+                      {c.phone && (
+                        <p className="admin-post-text">
+                          {zap ? (
+                            <a
+                              className="admin-conta-field-link"
+                              href={zap}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {c.phone}
+                            </a>
+                          ) : (
+                            c.phone
+                          )}
+                        </p>
+                      )}
+                      <div className="admin-post-actions">
+                        <form action={aprovarCandidatura}>
+                          <input type="hidden" name="id" value={c.id} />
+                          <button type="submit" className="admin-btn approve">
+                            Aprovar como organizadora
+                          </button>
+                        </form>
+                      </div>
+                      {/* Recusa com recado: é o que ela lê no perfil pra
+                          ajustar e mandar de novo. */}
+                      <details className="exp-review-devolver">
+                        <summary className="admin-btn reject">Recusar</summary>
+                        <form
+                          action={recusarCandidatura}
+                          className="exp-review-form"
+                        >
+                          <input type="hidden" name="id" value={c.id} />
+                          <textarea
+                            name="admin_note"
+                            rows={2}
+                            placeholder="O que dizer pra ela (opcional)"
+                          />
+                          <button type="submit" className="admin-btn reject">
+                            Recusar candidatura
+                          </button>
+                        </form>
+                      </details>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )
+        ) : tab === "posts" ? (
           postList.length === 0 ? (
             <div className="minhas-empty">
               <p className="minhas-empty-text">

@@ -1663,6 +1663,63 @@
   justify-content: flex-end;
 }
 
+/* ============================================================
+   "Quero publicar uma experiência" — candidatura a organizadora
+   ============================================================ */
+.organizadora-page {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.organizadora-intro-title,
+.organizadora-status-title {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--primary);
+  margin: 0 0 6px;
+}
+.organizadora-intro-text,
+.organizadora-status-text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0;
+}
+/* Status da candidatura: em análise (padrão), recusada e já aprovada. */
+.organizadora-status {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  background: var(--surface-warm, rgba(0, 0, 0, 0.03));
+}
+.organizadora-status.is-back {
+  background: rgba(196, 132, 40, 0.1);
+  border-color: rgba(196, 132, 40, 0.3);
+}
+.organizadora-status.is-ok {
+  background: rgba(34, 160, 90, 0.1);
+  border-color: rgba(34, 160, 90, 0.28);
+}
+.organizadora-status .cta-btn {
+  margin-top: 14px;
+}
+.organizadora-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.organizadora-submit {
+  margin-top: 4px;
+}
+/* Segundo parágrafo do card da candidatura ("conta um pouco de você"). */
+.admin-post-about {
+  color: var(--text-muted);
+}
+
 /* ---- Fila de aprovação das experiências ---- */
 /* Recado da devolução: aparece pra organizadora na lista e na edição. */
 .exp-review-note {

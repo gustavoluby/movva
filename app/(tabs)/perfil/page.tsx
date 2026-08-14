@@ -104,18 +104,27 @@ export default async function PerfilPage() {
 
   if (!user) redirect("/login?next=/perfil");
 
-  const [{ data: profile }, { count: checkins }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("full_name, instagram, avatar_url, created_at, total_experiences, role")
-      .eq("id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("feed_posts")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("status", "approved"),
-  ]);
+  const [{ data: profile }, { count: checkins }, { data: candidatura }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select(
+          "full_name, instagram, avatar_url, created_at, total_experiences, role",
+        )
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("feed_posts")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "approved"),
+      // Candidatura a organizadora, pra saber o que dizer na linha do perfil.
+      supabase
+        .from("organizer_applications")
+        .select("status")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+    ]);
 
   const name = profile?.full_name ?? "Sua conta";
   const insta = profile?.instagram ?? null;
@@ -182,7 +191,7 @@ export default async function PerfilPage() {
             <div className="account-rows">
               <Link href="/admin/aprovar" className="account-row">
                 <span className="account-row-icon">{ICON_MOD}</span>
-                <span className="account-row-label">Aprovar posts e ideias</span>
+                <span className="account-row-label">Fila de aprovação</span>
                 {CHEVRON}
               </Link>
               <Link href="/admin/experiencias" className="account-row">
@@ -212,6 +221,20 @@ export default async function PerfilPage() {
         <section className="account-section">
           <div className="account-label">Sua conta</div>
           <div className="account-rows">
+            {/* Quem ainda não é organizadora pode se candidatar por aqui. */}
+            {!isAdmin(user.email) && profile?.role !== "organizer" && (
+              <Link href="/perfil/organizadora" className="account-row">
+                <span className="account-row-icon">{ICON_CREATE}</span>
+                <span className="account-row-label">
+                  {candidatura?.status === "pending"
+                    ? "Candidatura em análise"
+                    : candidatura?.status === "rejected"
+                      ? "Sua candidatura · ver resposta"
+                      : "Quero publicar uma experiência"}
+                </span>
+                {CHEVRON}
+              </Link>
+            )}
             <Link href="/perfil/dados" className="account-row">
               <span className="account-row-icon">{ICON_DATA}</span>
               <span className="account-row-label">Meus dados</span>
