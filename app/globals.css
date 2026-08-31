@@ -144,6 +144,9 @@
   }
   html {
     @apply font-sans;
+    /* Safari não "engorda" o texto sozinho ao girar o aparelho. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 }
 
@@ -4406,3 +4409,26 @@
 /* Com mais de um álbum, o respiro é quem diz onde um evento acaba e o outro
    começa (na landing o cabeçalho é só o nome, sem seta). */
 .galeria-lp .galeria-album + .galeria-album { margin-top: 18px; }
+
+/* ============================================================
+   Teclado no celular — sem zoom automático ao focar um campo
+   ============================================================
+   O Safari do iPhone (e o navegador de dentro do Instagram, que roda o mesmo
+   motor) dá zoom sozinho quando o campo focado tem fonte menor que 16px — e
+   depois não desfaz: a pessoa fica com a tela grande na mão e tem que pinçar
+   pra voltar. A correção é o campo ter 16px de verdade; travar o zoom no
+   viewport (user-scalable=no) também calaria o comportamento, mas tira de
+   quem precisa aproximar a tela, então fica de fora.
+
+   Só em telas de toque (pointer: coarse) — os formulários do admin no desktop
+   continuam com o tamanho desenhado. Os :not() encadeados existem pra somar
+   especificidade e vencer as regras por classe (.auth-input, .coupon-field
+   input etc.) sem precisar de !important; checkbox, radio e file ficam fora
+   porque não têm texto digitável. */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  textarea:not([disabled]):not([hidden]),
+  select:not([disabled]):not([hidden]) {
+    font-size: 16px;
+  }
+}
