@@ -7,6 +7,8 @@ import { WhatsAppButton } from "@/components/whatsapp-button";
 import { getEventAvailability } from "@/lib/events/availability";
 import { activePriceCents } from "@/lib/events/pricing";
 import { CheckoutForm } from "./checkout-form";
+import { MetaTrack } from "@/components/analytics/meta-events";
+import { brl } from "@/lib/analytics/meta-pixel";
 import { PendingPoller } from "./pending-poller";
 
 type Params = { slug: string };
@@ -180,7 +182,11 @@ export default async function ReservarPage({
             </div>
           )}
 
-          <CheckoutForm slug={event.slug} basePriceCents={basePriceCents} />
+          <CheckoutForm
+            slug={event.slug}
+            basePriceCents={basePriceCents}
+            eventTitle={event.title}
+          />
 
           <div style={{ marginTop: 14 }}>
             <WhatsAppButton
@@ -217,6 +223,24 @@ export default async function ReservarPage({
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
+
+        {/* Purchase: a compra só conta aqui, com a reserva já paga. A chave
+            `once` + o eventID (id da reserva) garantem uma conversão por
+            compra, mesmo se a pessoa recarregar ou voltar nessa tela. */}
+        <MetaTrack
+          event="Purchase"
+          eventId={booking?.id}
+          once={`purchase:${booking?.id}`}
+          params={{
+            content_ids: [event.slug],
+            content_type: "product",
+            content_name: event.title,
+            contents: [{ id: event.slug, quantity: 1 }],
+            num_items: 1,
+            value: brl(booking?.amount_cents ?? event.price_cents),
+            currency: "BRL",
+          }}
+        />
 
         <h1 className="reservar-title">Pagamento confirmado</h1>
         <p className="reservar-subtitle">Sua vaga tá garantida. Te vemos lá.</p>

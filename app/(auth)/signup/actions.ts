@@ -57,5 +57,9 @@ export async function signupAction(
   await sendWelcomeEmail({ email, fullName });
 
   // Email confirmation está OFF → sessão já criada no signUp, redireciona.
-  redirect(next);
+  // O `novo=1` é o recado pro Meta Pixel: o tracker no layout lê, dispara o
+  // CompleteRegistration e limpa o parâmetro da URL.
+  const destino = new URL(next, "http://local");
+  destino.searchParams.set("novo", "1");
+  redirect(`${destino.pathname}${destino.search}${destino.hash}`);
 }

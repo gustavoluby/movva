@@ -3,15 +3,19 @@
 import Link from "next/link";
 import { useActionState, useOptimistic, useState } from "react";
 import { toggleSave, type SaveState } from "@/app/eventos/[slug]/actions";
+import { trackMeta, type MetaParams } from "@/lib/analytics/meta-pixel";
 
 export function EventHeroActions({
   slug,
   loggedIn,
   initialSaved,
+  pixelParams,
 }: {
   slug: string;
   loggedIn: boolean;
   initialSaved: boolean;
+  /** Conteúdo da experiência pro AddToWishlist do Meta. */
+  pixelParams?: MetaParams;
 }) {
   const [state, formAction, pending] = useActionState<SaveState, FormData>(
     toggleSave,
@@ -88,6 +92,8 @@ export function EventHeroActions({
           action={(fd) => {
             // usa o estado real (não o otimista) como base do toggle
             fd.set("saved", state.saved ? "true" : "false");
+            // Só salvar conta como interesse; desfazer não vira evento.
+            if (!state.saved) trackMeta("AddToWishlist", pixelParams);
             setOptimisticSaved(!state.saved);
             return formAction(fd);
           }}

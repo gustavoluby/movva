@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLinkStatus } from "next/link";
+import { trackMeta, type MetaParams } from "@/lib/analytics/meta-pixel";
 
 // Conteúdo do botão que reage NA HORA do toque: useLinkStatus expõe o estado
 // pending do <Link> pai enquanto a próxima tela carrega, então trocamos o
@@ -36,11 +37,14 @@ export function ReservarCta({
   slug,
   soldOut = false,
   closed = false,
+  pixelParams,
 }: {
   slug: string;
   soldOut?: boolean;
   /** Data já passou: a experiência não vende mais. */
   closed?: boolean;
+  /** Conteúdo da experiência pro AddToCart do Meta. */
+  pixelParams?: MetaParams;
 }) {
   if (closed) {
     return (
@@ -59,7 +63,13 @@ export function ReservarCta({
   }
 
   return (
-    <Link href={`/reservar/${slug}`} prefetch className="cta-btn">
+    <Link
+      href={`/reservar/${slug}`}
+      prefetch
+      className="cta-btn"
+      // Intenção de compra: é o clique que leva pro checkout.
+      onClick={() => trackMeta("AddToCart", pixelParams)}
+    >
       <CtaContent />
     </Link>
   );

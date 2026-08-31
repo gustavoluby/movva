@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/admin";
 import { CandidaturaForm } from "./candidatura-form";
+import { MetaTrack } from "@/components/analytics/meta-events";
 
 export const dynamic = "force-dynamic";
 
@@ -80,9 +81,23 @@ export default async function OrganizadoraPage({
           ) : (
             <>
               {enviado && status === "pending" && (
-                <p className="exp-saved">
-                  Recebemos sua candidatura. A gente te chama no WhatsApp ✦
-                </p>
+                <>
+                  {/* Lead: candidatura de organizadora enviada. Uma por conta —
+                      reenviar a mesma candidatura não gera outro lead. */}
+                  <MetaTrack
+                    event="Lead"
+                    once={`lead-organizadora:${user.id}`}
+                    params={{
+                      content_name: "Quero publicar uma experiência",
+                      content_category: "organizadora",
+                      currency: "BRL",
+                      value: 0,
+                    }}
+                  />
+                  <p className="exp-saved">
+                    Recebemos sua candidatura. A gente te chama no WhatsApp ✦
+                  </p>
+                </>
               )}
 
               {status === "pending" ? (

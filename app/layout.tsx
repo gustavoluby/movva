@@ -4,6 +4,7 @@ import "./globals.css";
 import { SessionSync } from "@/components/auth/session-sync";
 import { JsonLd } from "@/components/seo/json-ld";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
 import {
   SITE_URL,
   SITE_NAME,
@@ -103,6 +104,7 @@ export default function RootLayout({
       >
         <JsonLd data={[organizationLd, websiteLd]} />
         <GoogleAnalytics />
+        <MetaPixel />
         <SessionSync />
         {children}
       </body>

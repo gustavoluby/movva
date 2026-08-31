@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { reservarEPagar, validarCupom, type ReservaState } from "./actions";
 import { formatPrice } from "@/lib/utils/date";
+import { trackMeta, experienceParams } from "@/lib/analytics/meta-pixel";
 
 type Applied = { code: string; discountCents: number; finalCents: number };
 
@@ -12,9 +13,11 @@ type Applied = { code: string; discountCents: number; finalCents: number };
 export function CheckoutForm({
   slug,
   basePriceCents,
+  eventTitle,
 }: {
   slug: string;
   basePriceCents: number;
+  eventTitle: string;
 }) {
   const [state, formAction, paying] = useActionState<ReservaState, FormData>(
     reservarEPagar,
@@ -37,6 +40,15 @@ export function CheckoutForm({
   const cpfRef = useRef<HTMLInputElement>(null);
 
   const finalCents = applied?.finalCents ?? basePriceCents;
+
+  // InitiateCheckout: a tela de pagamento apareceu. Vai com o preço de tabela
+  // (sem cupom) — o valor que vale mesmo é o do Purchase.
+  useEffect(() => {
+    trackMeta(
+      "InitiateCheckout",
+      experienceParams({ slug, title: eventTitle, priceCents: basePriceCents }),
+    );
+  }, [slug, eventTitle, basePriceCents]);
 
   function aplicar() {
     const c = code.trim();
@@ -184,9 +196,21 @@ export function CheckoutForm({
       <form
         action={formAction}
         onSubmit={(e) => {
-          // Sem CPF válido: bloqueia, avisa e foca o campo (em vez de só deixar
-          // o botão inerte, que confunde quem não vê por que "não acontece nada").
-          if (!cpfOk) {
+          if (cpfOk) {
+            // Vai sair daqui pro Checkout Pro do Mercado Pago: é o último
+            // passo do funil antes do pagamento em si.
+            trackMeta(
+              "AddPaymentInfo",
+              experienceParams({
+                slug,
+                title: eventTitle,
+                priceCents: finalCents,
+              }),
+            );
+          } else {
+            // Sem CPF válido: bloqueia, avisa e foca o campo (em vez de só
+            // deixar o botão inerte, que confunde quem não vê por que "não
+            // acontece nada").
             e.preventDefault();
             setCpfError("Informe um CPF válido pra concluir o pagamento.");
             cpfRef.current?.focus();

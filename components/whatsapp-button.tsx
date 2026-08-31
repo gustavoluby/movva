@@ -1,4 +1,5 @@
 import { getMoodpassWhatsAppLink, type WhatsAppContext } from "@/lib/whatsapp";
+import { MetaClick } from "@/components/analytics/meta-events";
 
 const WA_ICON = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -21,14 +22,24 @@ export function WhatsAppButton({
 }) {
   const href = getMoodpassWhatsAppLink({ context, eventTitle });
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={variant === "help" ? "wa-help" : "wa-btn"}
+    // Contact no Meta: puxar conversa no WhatsApp é o outro caminho de venda
+    // (fora o checkout), então vale como conversão.
+    <MetaClick
+      event="Contact"
+      params={{
+        content_name: eventTitle ?? "Moodpass",
+        content_category: context,
+      }}
     >
-      {WA_ICON}
-      {label}
-    </a>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={variant === "help" ? "wa-help" : "wa-btn"}
+      >
+        {WA_ICON}
+        {label}
+      </a>
+    </MetaClick>
   );
 }

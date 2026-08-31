@@ -16,6 +16,8 @@ import { getEventBySlug } from "@/lib/events/get-event";
 import { EventSocialProof } from "@/components/detalhe/event-social-proof";
 import { albumForVenue } from "@/lib/galeria";
 import { JsonLd } from "@/components/seo/json-ld";
+import { MetaTrack } from "@/components/analytics/meta-events";
+import { brl } from "@/lib/analytics/meta-pixel";
 import {
   SITE_NAME,
   SITE_URL,
@@ -270,9 +272,23 @@ export async function EventDetailView({
     ],
   };
 
+  // Parâmetros de catálogo da experiência: os mesmos ids/valores viajam daqui
+  // até o Purchase, então o Meta consegue ligar anúncio → visita → venda.
+  const pixelParams = {
+    content_ids: [event.slug],
+    content_type: "product",
+    content_name: event.title,
+    ...(event.category ? { content_category: event.category } : {}),
+    contents: [{ id: event.slug, quantity: 1 }],
+    num_items: 1,
+    value: brl(currentPriceCents),
+    currency: "BRL",
+  };
+
   return (
     <>
       <JsonLd data={[eventLd, faqLd, breadcrumbLd]} />
+      <MetaTrack event="ViewContent" params={pixelParams} />
       <div className="scroll-area with-cta">
         <div className="detail-hero">
           {event.image_url && (
@@ -291,6 +307,7 @@ export async function EventDetailView({
               slug={event.slug}
               loggedIn={!!user}
               initialSaved={saved}
+              pixelParams={pixelParams}
             />
           </div>
         </div>
@@ -502,6 +519,7 @@ export async function EventDetailView({
           slug={event.slug}
           soldOut={availability.soldOut}
           closed={encerrado}
+          pixelParams={pixelParams}
         />
       </div>
     </>
